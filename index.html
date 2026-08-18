@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tablero de Control — Cronograma Catastro 2026 (5 Fases)</title>
+  <title>Cronograma SITEC</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== Estilos (mismos que antes, sin cambios) ===== */
+    /* ===== Estilos (sin cambios) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -395,7 +395,7 @@
     <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
   </div>
 
-  <!-- Mensaje de error (se muestra solo si hay problema) -->
+  <!-- Mensaje de error -->
   <div id="error-message" class="error-message" style="display:none;"></div>
 
   <!-- PHASES ACCORDION -->
@@ -415,11 +415,15 @@
 </div>
 
 <script>
-  // ===== CONFIGURACIÓN DE SUPABASE (REEMPLAZA CON TUS DATOS) =====
+  // ============================================================
+  //  CONFIGURACIÓN DE SUPABASE (CAMBIA AQUÍ TUS CREDENCIALES)
+  // ============================================================
   const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co/rest/v1/';
   const SUPABASE_ANON_KEY = 'sb_secret_ioQCHH5FAwN0ivRKCnRVyw_znIr7zsw';
 
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Usar un nombre distinto para evitar colisión con la variable global "supabase"
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('✅ Cliente Supabase creado:', supabaseClient);
 
   // ===== DATOS DE ACTIVIDADES (ESTRUCTURA) =====
   const phasesData = [
@@ -593,21 +597,19 @@
     });
   }
 
-  // ===== SUPABASE OPERACIONES =====
+  // ===== SUPABASE OPERACIONES (usando supabaseClient) =====
   async function loadFromSupabase() {
     try {
       showSaveStatus('⏳ Cargando desde Supabase...', 'saving');
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('progreso_catastro')
         .select('*');
       if (error) throw error;
       
-      console.log('Datos obtenidos de Supabase:', data);
+      console.log('✅ Datos obtenidos de Supabase:', data);
       
-      // Inicializar con ceros
       initProgress();
 
-      // Sobrescribir con datos de Supabase
       if (data && data.length > 0) {
         data.forEach(row => {
           if (progress[row.id]) {
@@ -622,10 +624,9 @@
       }
       showError(null);
     } catch (err) {
-      console.error('Error al cargar desde Supabase:', err);
+      console.error('❌ Error al cargar desde Supabase:', err);
       showSaveStatus('❌ Error al cargar datos. Usando modo local.', 'error');
       showError('No se pudo conectar con Supabase. Los datos se guardan solo localmente.');
-      // Inicializar con ceros
       initProgress();
     }
     isLoading = false;
@@ -637,7 +638,7 @@
     const data = progress[activityId];
     if (!data) return;
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('progreso_catastro')
         .upsert({
           id: activityId,
@@ -649,9 +650,8 @@
       if (error) throw error;
       showSaveStatus('💾 Guardado en Supabase', 'success');
     } catch (err) {
-      console.error('Error guardando en Supabase:', err);
+      console.error('❌ Error guardando en Supabase:', err);
       showSaveStatus('❌ Error al guardar (modo local)', 'error');
-      // No mostramos error visible para no molestar, solo en consola
     }
   }
 
@@ -813,7 +813,7 @@
 
   // ===== RENDER (construcción del DOM) =====
   function render() {
-    console.log('Renderizando...');
+    console.log('🔄 Renderizando...');
     const container = document.getElementById('phases-container');
     container.innerHTML = '';
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
@@ -888,14 +888,12 @@
       phaseEl.appendChild(activitiesContainer);
       container.appendChild(phaseEl);
 
-      // Actualizar barra de fase inicial
       updatePhaseUI(pi);
     });
 
-    // Actualizar global y resumen
     updateGlobalUI();
     updateSummaryUI();
-    console.log('Renderizado completado.');
+    console.log('✅ Renderizado completado.');
   }
 
   // ===== MANEJADORES DE EVENTOS CON ACTUALIZACIÓN PARCIAL =====
@@ -994,7 +992,7 @@
 
   // ===== FUERZA DATOS LOCALES (para pruebas) =====
   function forceLocalData() {
-    console.log('Forzando datos locales (reiniciando progress con ceros)');
+    console.log('🔄 Forzando datos locales (reiniciando progress con ceros)');
     initProgress();
     render();
     applyFilters();
@@ -1004,11 +1002,9 @@
 
   // ===== INICIO =====
   document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM listo, iniciando...');
-    // Intentar cargar desde Supabase, si falla se usan datos locales
+    console.log('🚀 DOM listo, iniciando...');
     await loadFromSupabase();
 
-    // Event listeners para filtros
     document.getElementById('search-input').addEventListener('input', applyFilters);
     document.getElementById('status-filter').addEventListener('change', applyFilters);
     document.getElementById('period-filter').addEventListener('change', applyFilters);
