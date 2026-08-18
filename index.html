@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cronograma SITEC</title>
+  <title>Cronograma  SITEC</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -418,11 +418,19 @@
   // ============================================================
   //  CONFIGURACIÓN DE SUPABASE (CAMBIA AQUÍ TUS CREDENCIALES)
   // ============================================================
-  const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co/rest/v1/';
+  const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co';  // SIN "/rest/v1"
   const SUPABASE_ANON_KEY = 'sb_secret_ioQCHH5FAwN0ivRKCnRVyw_znIr7zsw';
 
-  // Usar un nombre distinto para evitar colisión con la variable global "supabase"
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // IMPORTANTE: Asegúrate de que la clave sea la "anon public" (no la "service_role")
+  // Puedes obtenerla en Supabase > Settings > API > Project API keys > anon public
+
+  console.log('🔐 Usando URL:', SUPABASE_URL);
+  console.log('🔑 Usando ANON_KEY (primeros 10 chars):', SUPABASE_ANON_KEY.substring(0, 10) + '...');
+
+  // Crear cliente con opciones para evitar duplicación de /rest/v1
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    db: { schema: 'public' }
+  });
   console.log('✅ Cliente Supabase creado:', supabaseClient);
 
   // ===== DATOS DE ACTIVIDADES (ESTRUCTURA) =====
