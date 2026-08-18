@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cronograma de Trabajo</title>
+  <title>plan de trabajo</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (sin cambios, solo añado algunos para el selector de usuario) ===== */
+    /* ===== ESTILOS (completos, igual que antes) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -70,7 +70,6 @@
     .save-status.saving { color: var(--accent-amber); }
     .save-status.error { color: var(--accent-rose); }
 
-    /* Selector de usuario */
     .user-selector {
       display: flex;
       align-items: center;
@@ -389,16 +388,13 @@
       <div class="header-icon">🗺️</div>
       <div>
         <h1>Cronograma Trabajo SITEC</h1>
-        <p class="header-subtitle">Fases | Julio — Diciembre 2026</p>
+        <p class="header-subtitle">5 Fases | Julio — Diciembre 2026</p>
       </div>
     </div>
     <div class="header-right">
-      <!-- Selector de usuario -->
       <div class="user-selector">
         <label>👤 Usuario:</label>
-        <select id="user-select" onchange="changeUser(this.value)">
-          <!-- Se llenará desde JS -->
-        </select>
+        <select id="user-select" onchange="changeUser(this.value)"></select>
         <span class="user-badge" id="user-badge">Lector</span>
       </div>
       <div class="save-status" id="save-status">
@@ -415,7 +411,6 @@
     </div>
   </div>
 
-  <!-- Mensaje de solo lectura -->
   <div class="readonly-notice" id="readonly-notice">
     👁️ Estás en modo <strong>solo lectura</strong>. No puedes modificar avances, responsables ni observaciones.
   </div>
@@ -481,7 +476,6 @@
     <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
   </div>
 
-  <!-- Mensaje de error -->
   <div id="error-message" class="error-message" style="display:none;"></div>
 
   <!-- PHASES ACCORDION -->
@@ -510,7 +504,100 @@
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   console.log('✅ Cliente Supabase creado:', supabaseClient);
 
-  // ===== LISTA DE USUARIOS (extraída de responsables) =====
+  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA COMPLETA) =====
+  // Este array debe definirse ANTES de cualquier función que lo use (initProgress, render, etc.)
+  const phasesData = [
+    { 
+      name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
+      description: "Adquisición y procesamiento de imágenes Sentinel-2 para detectar cambios de cobertura del suelo mediante índices espectrales (NDBI), generando el Índice de Transformación Urbana (ITU) que servirá de base para todo el proyecto.",
+      activities: [
+        {id:"1.1", desc:"Adquisición imágenes Sentinel-2 (2019-2025) 9 macrodistritos de La Paz", periods:["Jul S1-S2","Jul S3-S4"]},
+        {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
+        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
+        {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
+        {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
+        {id:"1.6", desc:"Validación cruzada transformación detectada vs. datos SIT V2 y SIT V3", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"1.7", desc:"Identificación y clasificación de zonas críticas con alta transformación urbana", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
+        {id:"1.8", desc:"Entrega del Índice de Transformación Urbana (ITU) municipal con mapas y estadísticas", periods:["Oct S13-S14"]}
+      ]
+    },
+    { 
+      name: "FASE 2: PRIORIZACIÓN — Cruce Tributario-Territorial",
+      description: "Cruce espacial de los datos de transformación urbana (ITU) con la recaudación tributaria de la ATM para identificar OTBs con crecimiento físico no reflejado en recaudación, generando el ranking de zonas priorizadas para intervención.",
+      activities: [
+        {id:"2.1", desc:"Solicitud y recopilación datos recaudación IMPBI por macrodistrito, distrito y OTB (2020-2025)", periods:["Jul S3-S4","Ago S5-S6","Ago S7-S8"]},
+        {id:"2.2", desc:"Cruce espacial ITU con datos tributarios: mapa de transformación vs. recaudación por OTB", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"2.3", desc:"Identificación zonas con crecimiento físico y recaudación estancada o decreciente", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.4", desc:"Detección comportamientos atípicos tributarios (baja recaudación / alta transformación)", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.5", desc:"Generación mapas de comportamiento tributario territorial por OTB", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"2.6", desc:"Construcción matriz correlación crecimiento físico vs. recaudación por macrodistrito", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"2.7", desc:"Definición criterios priorización: transformación, recaudación, riesgo, densidad poblacional", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"2.8", desc:"Aplicación modelo multicriterio por macrodistrito y ranking de OTBs priorizadas", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.9", desc:"Delimitación polígonos de vuelo UAV por zona priorizada con coordenadas UTM", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"2.10", desc:"Validación técnica polígonos de vuelo con Dirección de Catastro y entrega mapa priorizado", periods:["Oct S11-S12","Oct S13-S14"]}
+      ]
+    },
+    { 
+      name: "FASE 3: DRON — Fotogrametría UAV y Modelos 3D",
+      description: "Planificación, ejecución de vuelos fotogramétricos con drones sobre las OTBs priorizadas, y procesamiento de imágenes para generar ortofotos de alta resolución (<10cm), nubes de puntos densas, MDT/DSM y modelos 3D.",
+      activities: [
+        {id:"3.1", desc:"Evaluación capacidad técnica interna vs. contratación externa de servicios fotogramétricos", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"3.2", desc:"Elaboración términos de referencia y contratación servicio fotogramétrico UAV", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"3.3", desc:"Planificación rutas de vuelo (altitud, solapamiento frontal/lateral, GSD objetivo)", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"3.4", desc:"Gestión permisos de vuelo DGAC y coordinación subalcaldías/OTBs para acceso a zonas", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"3.5", desc:"Despliegue equipos drones (ala fija y multirotor) en macrodistritos priorizados", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
+        {id:"3.6", desc:"Vuelos fotogramétricos zonas urbanas de alta densidad (dron ala fija)", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
+        {id:"3.7", desc:"Vuelos fotogramétricos zonas de difícil acceso (dron multirotor)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
+        {id:"3.8", desc:"Control de calidad en campo de imágenes capturadas y re-vuelos por nubosidad/fallas", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.9", desc:"Procesamiento fotogramétrico imágenes en Pix4D/Metashape (orientación, densificación)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.10", desc:"Generación ortomosaicos < 10 cm/píxel con control geométrico GNSS", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.11", desc:"Generación nubes de puntos densas, MDT y DSM de zonas priorizadas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"3.12", desc:"Entrega ortomosaicos, nubes de puntos, MDT/DSM validados y georreferenciados", periods:["Dic S25-S26"]}
+      ]
+    },
+    { 
+      name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral",
+      description: "Digitalización vectorial de todos los cambios detectados en construcciones sobre ortofotos 3D, actualización de fichas técnicas prediales, identificación de nuevos predios sin registro y empadronamiento de nuevos contribuyentes.",
+      activities: [
+        {id:"4.1", desc:"Capacitación técnicos en digitalización vectorial sobre ortomosaicos 3D", periods:["Nov S17-S18","Nov S19-S20"]},
+        {id:"4.2", desc:"Digitalización lotes, manzanas y límites prediales sobre ortofotos (meta: 40 lotes/operador/día)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.3", desc:"Digitalización elementos constructivos: muros, edificaciones, anexos y alturas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.4", desc:"Clasificación materiales de construcción, tipología de vías y usos de suelo", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.5", desc:"Control de calidad digitalización (1 día de control por lote digitalizado)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.6", desc:"Estructuración y contraste de datos vectoriales contra SIT V2/V3 existente", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"4.7", desc:"Clasificación predios: Sin catastro / Desactualizado / Actualizado / Nuevo", periods:["Dic S21-S22","Dic S23-S24"]},
+        {id:"4.8", desc:"Actualización fichas técnicas prediales con datos fotogramétricos y nuevas construcciones", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"4.9", desc:"Identificación predios sin registro catastral y generación fichas técnicas nuevos predios", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.10", desc:"Empadronamiento nuevos contribuyentes ATM y emisión primeras boletas IMPBI", periods:["Dic S25-S26"]},
+        {id:"4.11", desc:"Corrección valores base imponible SIT con datos actualizados de construcciones", periods:["Dic S25-S26"]},
+        {id:"4.12", desc:"Entrega capas vectoriales prediales actualizadas, nuevos contribuyentes empadronados y fichas técnicas", periods:["Dic S25-S26"]}
+      ]
+    },
+    { 
+      name: "FASE 5: INTEGRACIÓN — Modelo de Datos Multidimensional y SIT",
+      description: "Diseño e implementación del nuevo modelo de datos multidimensional (cubo OLAP geoespacial), integración con SIT V2/V3, publicación de servicios WMS/WFS, y establecimiento del protocolo operativo Catastro-ATM para transferencia de datos.",
+      activities: [
+        {id:"5.1", desc:"Levantamiento requerimientos catastral, tributario, fotogramétrico y funcionales SIT", periods:["Ago S5-S6","Ago S7-S8"]},
+        {id:"5.2", desc:"Análisis arquitectura actual SIT V2 y SIT V3 y mapeo de integraciones necesarias", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"5.3", desc:"Diseño esquema base datos multidimensional: entidades predios, construcciones, mejoras, contribuyentes", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
+        {id:"5.4", desc:"Diseño integración PostgreSQL/PostGIS con SIT V2/V3 existente y especificaciones WMS/WFS", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"5.5", desc:"Diseño interfaz de usuario para consulta de capas geoespaciales y comparativa visual antes/después", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"5.6", desc:"Especificaciones integración módulo SIG con trámites en línea SIT V3", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"5.7", desc:"Entrega diseño modelo datos multidimensional y módulo SIG institucional", periods:["Oct S13-S14"]},
+        {id:"5.8", desc:"Instalación y configuración servidor PostgreSQL/PostGIS en infraestructura municipal", periods:["Nov S17-S18","Nov S19-S20"]},
+        {id:"5.9", desc:"Creación esquemas espaciales y carga datos fotogramétricos (ortomosaicos, nubes, MDE)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"5.10", desc:"Carga datos catastrales actualizados (fichas, planimetrías, permisos) y tributarios (recaudación, deuda)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.11", desc:"Desarrollo consultas cruzadas espaciales (cubo OLAP geoespacial) para análisis territorial", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"5.12", desc:"Configuración servicios WMS/WFS y publicación capas geoespaciales normalizadas en SIT V2/V3", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.13", desc:"Pruebas de integridad, rendimiento del sistema y validación funcional con usuarios", periods:["Dic S25-S26"]},
+        {id:"5.14", desc:"Protocolo transferencia datos Catastro-ATM y cruce predios actualizados con padrón contribuyentes", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
+        {id:"5.15", desc:"Generación notificaciones actualización valores a contribuyentes con predios modificados", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.16", desc:"Entrega modelo datos multidimensional operativo, módulos SIG publicados y protocolo Catastro-ATM", periods:["Dic S25-S26"]}
+      ]
+    }
+  ];
+
+  // ===== LISTA DE USUARIOS =====
   const usuarios = [
     { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
     { nombre: "Gustavo", rol: "Soporte Sistemas" },
@@ -608,20 +695,18 @@
       notice.style.display = 'none';
       badge.textContent = '✏️ Editor';
       badge.className = 'user-badge';
-      // Habilitar botones
       document.getElementById('btn-reset').disabled = false;
       document.getElementById('btn-export').disabled = false;
     } else {
       notice.style.display = 'block';
       badge.textContent = '👁️ Lector';
       badge.className = 'user-badge readonly';
-      // Deshabilitar botones de acción
       document.getElementById('btn-reset').disabled = true;
-      document.getElementById('btn-export').disabled = false; // exportar siempre disponible
+      document.getElementById('btn-export').disabled = false;
     }
   }
 
-  // ===== INICIALIZAR PROGRESS CON CEROS =====
+  // ===== INICIALIZAR PROGRESS =====
   function initProgress() {
     const allIds = [];
     phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
@@ -632,7 +717,7 @@
     });
   }
 
-  // ===== SUPABASE OPERACIONES =====
+  // ===== SUPABASE =====
   async function loadFromSupabase() {
     try {
       showSaveStatus('⏳ Cargando desde Supabase...', 'saving');
@@ -692,7 +777,7 @@
   }
 
   function debouncedSave(activityId) {
-    if (!isAuthorized(currentUser)) return; // No guardar si no está autorizado
+    if (!isAuthorized(currentUser)) return;
     showSaveStatus('⏳ Guardando...', 'saving');
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(() => {
@@ -700,7 +785,7 @@
     }, 800);
   }
 
-  // ===== FUNCIONES DE ACTUALIZACIÓN UI (PARCIALES) =====
+  // ===== ACTUALIZACIONES UI =====
   function updateActivityUI(actId) {
     const data = progress[actId];
     if (!data) return;
@@ -859,7 +944,7 @@
     });
   }
 
-  // ===== RENDER (construcción del DOM) =====
+  // ===== RENDER =====
   function render() {
     console.log('🔄 Renderizando...');
     const container = document.getElementById('phases-container');
@@ -950,7 +1035,7 @@
     console.log('✅ Renderizado completado.');
   }
 
-  // ===== MANEJADORES DE EVENTOS (con verificación de permisos) =====
+  // ===== MANEJADORES =====
   function handleSliderChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
     const val = clampValue(value);
@@ -999,22 +1084,20 @@
   function changeUser(userName) {
     currentUser = userName;
     localStorage.setItem('catastro_user', userName);
-    // Actualizar el select visualmente
     document.getElementById('user-select').value = userName;
-    // Re-renderizar para aplicar permisos
     render();
     applyFilters();
     updateReadonlyNotice();
     console.log(`👤 Usuario cambiado a: ${userName} (${isAuthorized(userName) ? 'EDITOR' : 'LECTOR'})`);
   }
 
-  // ===== TOGGLE FASE =====
+  // ===== TOGGLE =====
   function togglePhase(pi) {
     const el = document.getElementById(`phase-${pi}`);
     if (el) el.classList.toggle('collapsed');
   }
 
-  // ===== RESET (solo autorizados) =====
+  // ===== RESET =====
   function resetAll() {
     if (!isAuthorized(currentUser)) {
       alert('No tienes permisos para reiniciar los avances.');
@@ -1034,7 +1117,7 @@
     showSaveStatus('🔄 Avances reiniciados', 'success');
   }
 
-  // ===== EXPORT (disponible para todos) =====
+  // ===== EXPORT =====
   function exportData() {
     const data = {
       fecha_exportacion: new Date().toISOString(),
@@ -1075,30 +1158,16 @@
     showError('Modo local activado. Los cambios no se guardarán en Supabase.');
   }
 
-  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA) =====
-  // (Se mantiene igual, omito por brevedad, pero debe estar completo en tu implementación)
-  // Asegúrate de tener phasesData definido con todas las actividades.
-  // (En el código completo que entregué abajo sí está incluido).
-  // Aquí lo pongo abreviado para que el mensaje no sea excesivamente largo, pero en el entregable final va completo.
-  // ...
-
-  // ================================================
-  //  AQUÍ DEBES INCLUIR EL ARRAY phasesData COMPLETO
-  //  (lo dejé afuera por longitud, pero en el HTML final va todo)
-  // ================================================
-
   // ===== INICIO =====
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 DOM listo, iniciando...');
 
-    // Cargar usuario desde localStorage o tomar el primero
     let savedUser = localStorage.getItem('catastro_user');
     if (!savedUser || !usuarios.some(u => u.nombre === savedUser)) {
       savedUser = usuarios[0].nombre;
     }
     currentUser = savedUser;
 
-    // Llenar selector de usuarios
     const select = document.getElementById('user-select');
     select.innerHTML = buildUserOptions(currentUser);
     select.value = currentUser;
@@ -1112,7 +1181,7 @@
     updateReadonlyNotice();
   });
 
-  // Exponer funciones globales para onclick
+  // Exponer funciones globales
   window.togglePhase = togglePhase;
   window.resetAll = resetAll;
   window.exportData = exportData;
