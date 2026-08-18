@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== Estilos (igual que antes, con ligeros ajustes) ===== */
+    /* ===== Estilos (mismos que antes, sin cambios) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -109,6 +109,8 @@
     .btn-reset:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); }
     .btn-export { background: linear-gradient(135deg, var(--accent-emerald), #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
     .btn-export:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+    .btn-local { background: linear-gradient(135deg, var(--accent-amber), #d97706); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .btn-local:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
 
     .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
     .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
@@ -276,6 +278,17 @@
     .dashboard-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 8px; }
     .dashboard-footer p { margin: 4px 0; }
 
+    .error-message {
+      background: rgba(244,63,94,0.15);
+      border: 1px solid var(--accent-rose);
+      color: var(--accent-rose);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      text-align: center;
+      font-weight: 500;
+    }
+
     @media (max-width: 1200px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
       .activity-control { min-width: auto; width: 100%; justify-content: flex-start; }
@@ -308,7 +321,7 @@
     </div>
     <div class="header-right">
       <div class="save-status" id="save-status">
-        <span>💾</span> <span id="save-text">Conectando a Supabase...</span>
+        <span>💾</span> <span id="save-text">Inicializando...</span>
       </div>
       <div class="global-progress">
         <span class="global-label">Avance Global</span>
@@ -379,7 +392,11 @@
     </div>
     <button class="btn-export" onclick="exportData()">📥 Exportar Datos</button>
     <button class="btn-reset" onclick="resetAll()">🔄 Reiniciar Avances</button>
+    <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
   </div>
+
+  <!-- Mensaje de error (se muestra solo si hay problema) -->
+  <div id="error-message" class="error-message" style="display:none;"></div>
 
   <!-- PHASES ACCORDION -->
   <div class="phases-container" id="phases-container"></div>
@@ -398,8 +415,7 @@
 </div>
 
 <script>
-  // ===== CONFIGURACIÓN DE SUPABASE =====
-  // 🔴 REEMPLAZA ESTOS VALORES CON LOS TUYOS (desde la consola de Supabase)
+  // ===== CONFIGURACIÓN DE SUPABASE (REEMPLAZA CON TUS DATOS) =====
   const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co/rest/v1/';
   const SUPABASE_ANON_KEY = 'sb_secret_ioQCHH5FAwN0ivRKCnRVyw_znIr7zsw';
 
@@ -514,7 +530,6 @@
   ];
 
   // ===== ESTADO =====
-  // progress[actId] = { porcentaje, responsable, observaciones }
   let progress = {};
   let saveTimeout = null;
   let isLoading = true;
@@ -548,38 +563,70 @@
     return html;
   }
 
+  function showSaveStatus(text, type) {
+    const el = document.getElementById('save-status');
+    const txt = document.getElementById('save-text');
+    txt.textContent = text;
+    el.className = 'save-status';
+    if (type === 'saving') el.classList.add('saving');
+    if (type === 'error') el.classList.add('error');
+  }
+
+  function showError(message) {
+    const el = document.getElementById('error-message');
+    if (message) {
+      el.style.display = 'block';
+      el.textContent = '⚠️ ' + message;
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  // ===== INICIALIZAR PROGRESS CON CEROS =====
+  function initProgress() {
+    const allIds = [];
+    phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
+    allIds.forEach(id => {
+      if (!progress[id]) {
+        progress[id] = { porcentaje: 0, responsable: '', observaciones: '' };
+      }
+    });
+  }
+
   // ===== SUPABASE OPERACIONES =====
   async function loadFromSupabase() {
     try {
+      showSaveStatus('⏳ Cargando desde Supabase...', 'saving');
       const { data, error } = await supabase
         .from('progreso_catastro')
         .select('*');
       if (error) throw error;
       
-      // Inicializar progress con todos los IDs
-      const allIds = [];
-      phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
-      allIds.forEach(id => {
-        progress[id] = { porcentaje: 0, responsable: '', observaciones: '' };
-      });
+      console.log('Datos obtenidos de Supabase:', data);
+      
+      // Inicializar con ceros
+      initProgress();
 
       // Sobrescribir con datos de Supabase
-      data.forEach(row => {
-        if (progress[row.id]) {
-          progress[row.id].porcentaje = row.porcentaje || 0;
-          progress[row.id].responsable = row.responsable || '';
-          progress[row.id].observaciones = row.observaciones || '';
-        }
-      });
-
-      showSaveStatus('✅ Datos cargados desde Supabase', 'success');
+      if (data && data.length > 0) {
+        data.forEach(row => {
+          if (progress[row.id]) {
+            progress[row.id].porcentaje = row.porcentaje || 0;
+            progress[row.id].responsable = row.responsable || '';
+            progress[row.id].observaciones = row.observaciones || '';
+          }
+        });
+        showSaveStatus('✅ Datos cargados desde Supabase', 'success');
+      } else {
+        showSaveStatus('ℹ️ Sin datos previos. Iniciando desde cero.', 'success');
+      }
+      showError(null);
     } catch (err) {
       console.error('Error al cargar desde Supabase:', err);
-      showSaveStatus('❌ Error al cargar datos', 'error');
+      showSaveStatus('❌ Error al cargar datos. Usando modo local.', 'error');
+      showError('No se pudo conectar con Supabase. Los datos se guardan solo localmente.');
       // Inicializar con ceros
-      phasesData.forEach(p => p.activities.forEach(a => {
-        progress[a.id] = { porcentaje: 0, responsable: '', observaciones: '' };
-      }));
+      initProgress();
     }
     isLoading = false;
     render();
@@ -603,7 +650,8 @@
       showSaveStatus('💾 Guardado en Supabase', 'success');
     } catch (err) {
       console.error('Error guardando en Supabase:', err);
-      showSaveStatus('❌ Error al guardar', 'error');
+      showSaveStatus('❌ Error al guardar (modo local)', 'error');
+      // No mostramos error visible para no molestar, solo en consola
     }
   }
 
@@ -615,15 +663,6 @@
     }, 800);
   }
 
-  function showSaveStatus(text, type) {
-    const el = document.getElementById('save-status');
-    const txt = document.getElementById('save-text');
-    txt.textContent = text;
-    el.className = 'save-status';
-    if (type === 'saving') el.classList.add('saving');
-    if (type === 'error') el.classList.add('error');
-  }
-
   // ===== FUNCIONES DE ACTUALIZACIÓN UI (PARCIALES) =====
   function updateActivityUI(actId) {
     const data = progress[actId];
@@ -632,44 +671,31 @@
     const status = getStatus(pct);
     const color = getColorForPct(pct);
 
-    // Slider
     const slider = document.getElementById(`slider-${actId}`);
     if (slider) {
       slider.value = pct;
       slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%)`;
     }
-    // Input numérico
     const numInput = document.getElementById(`num-${actId}`);
-    if (numInput) {
-      numInput.value = pct;
-    }
-    // Estado
+    if (numInput) numInput.value = pct;
     const statusEl = document.getElementById(`status-${actId}`);
     if (statusEl) {
       statusEl.className = `activity-status ${status.cls}`;
       statusEl.textContent = status.text;
     }
-    // Select responsable
     const select = document.getElementById(`resp-${actId}`);
-    if (select) {
-      // mantener el valor seleccionado sin recrear el select
-      select.value = data.responsable || '';
-    }
-    // Textarea observaciones
+    if (select) select.value = data.responsable || '';
     const textarea = document.getElementById(`obs-${actId}`);
-    if (textarea) {
-      textarea.value = data.observaciones || '';
-    }
+    if (textarea) textarea.value = data.observaciones || '';
   }
 
   function updatePhaseUI(phaseIndex) {
     const phase = phasesData[phaseIndex];
-    const activities = phase.activities;
     let sum = 0;
-    activities.forEach(a => {
+    phase.activities.forEach(a => {
       sum += (progress[a.id]?.porcentaje || 0);
     });
-    const avg = activities.length > 0 ? Math.round(sum / activities.length) : 0;
+    const avg = phase.activities.length > 0 ? Math.round(sum / phase.activities.length) : 0;
     const color = getColorForPct(avg);
 
     const fill = document.getElementById(`phase-fill-${phaseIndex}`);
@@ -712,7 +738,6 @@
 
   function updateSummaryUI() {
     const grid = document.getElementById('summary-grid');
-    // Reconstruir solo los anillos (no es costoso porque son pocos)
     grid.innerHTML = '';
     phasesData.forEach((phase, pi) => {
       const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
@@ -750,14 +775,12 @@
     const statusFilter = document.getElementById('status-filter').value;
     const periodFilter = document.getElementById('period-filter').value;
 
-    // Recorrer todas las filas de actividades
     const allRows = document.querySelectorAll('.activity-row');
     allRows.forEach(row => {
       const actId = row.dataset.activityId;
       const data = progress[actId];
       if (!data) return;
       const pct = data.porcentaje;
-      // Obtener descripción y períodos desde el DOM
       const descEl = row.querySelector('.activity-desc');
       const desc = descEl ? descEl.textContent.toLowerCase() : '';
       const periods = [];
@@ -777,7 +800,6 @@
       }
     });
 
-    // Mostrar/ocultar fases según si tienen al menos una fila visible
     const phaseCards = document.querySelectorAll('.phase-card');
     phaseCards.forEach(card => {
       const rows = card.querySelectorAll('.activity-row');
@@ -789,10 +811,12 @@
     });
   }
 
-  // ===== RENDER INICIAL (construcción del DOM) =====
+  // ===== RENDER (construcción del DOM) =====
   function render() {
+    console.log('Renderizando...');
     const container = document.getElementById('phases-container');
     container.innerHTML = '';
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
 
     phasesData.forEach((phase, pi) => {
       const phaseColor = colors[pi % colors.length];
@@ -800,7 +824,6 @@
       phaseEl.className = 'phase-card';
       phaseEl.id = `phase-${pi}`;
 
-      // Header
       let headerHTML = `
         <div class="phase-header" onclick="togglePhase(${pi})">
           <div class="phase-title-group">
@@ -820,7 +843,6 @@
       `;
       phaseEl.innerHTML = headerHTML;
 
-      // Activities container
       const activitiesContainer = document.createElement('div');
       activitiesContainer.className = 'phase-activities';
 
@@ -873,6 +895,7 @@
     // Actualizar global y resumen
     updateGlobalUI();
     updateSummaryUI();
+    console.log('Renderizado completado.');
   }
 
   // ===== MANEJADORES DE EVENTOS CON ACTUALIZACIÓN PARCIAL =====
@@ -880,7 +903,6 @@
     const val = clampValue(value);
     progress[actId].porcentaje = val;
     updateActivityUI(actId);
-    // Actualizar barra de fase correspondiente
     const phaseIndex = findPhaseIndex(actId);
     if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
     updateGlobalUI();
@@ -901,7 +923,6 @@
 
   function handleResponsableChange(actId, value) {
     progress[actId].responsable = value;
-    // No necesita actualizar UI porque el select ya cambió
     debouncedSave(actId);
   }
 
@@ -921,7 +942,7 @@
   // ===== TOGGLE FASE =====
   function togglePhase(pi) {
     const el = document.getElementById(`phase-${pi}`);
-    el.classList.toggle('collapsed');
+    if (el) el.classList.toggle('collapsed');
   }
 
   // ===== RESET =====
@@ -930,12 +951,10 @@
     Object.keys(progress).forEach(id => {
       progress[id].porcentaje = 0;
     });
-    // Actualizar UI
     Object.keys(progress).forEach(id => updateActivityUI(id));
     phasesData.forEach((_, i) => updatePhaseUI(i));
     updateGlobalUI();
     updateSummaryUI();
-    // Guardar todos en Supabase (upsert)
     Object.keys(progress).forEach(id => {
       saveActivityToSupabase(id);
     });
@@ -973,23 +992,33 @@
     showSaveStatus('📥 Datos exportados correctamente', 'success');
   }
 
-  // ===== INICIO =====
-  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
+  // ===== FUERZA DATOS LOCALES (para pruebas) =====
+  function forceLocalData() {
+    console.log('Forzando datos locales (reiniciando progress con ceros)');
+    initProgress();
+    render();
+    applyFilters();
+    showSaveStatus('🔄 Datos locales forzados (ceros)', 'success');
+    showError('Modo local activado. Los cambios no se guardarán en Supabase.');
+  }
 
+  // ===== INICIO =====
   document.addEventListener('DOMContentLoaded', async () => {
-    // Cargar datos desde Supabase
+    console.log('DOM listo, iniciando...');
+    // Intentar cargar desde Supabase, si falla se usan datos locales
     await loadFromSupabase();
 
-    // Event listeners para filtros (sin re-render)
+    // Event listeners para filtros
     document.getElementById('search-input').addEventListener('input', applyFilters);
     document.getElementById('status-filter').addEventListener('change', applyFilters);
     document.getElementById('period-filter').addEventListener('change', applyFilters);
   });
 
-  // Hacer funciones globales para los onclick
+  // Exponer funciones globales para onclick
   window.togglePhase = togglePhase;
   window.resetAll = resetAll;
   window.exportData = exportData;
+  window.forceLocalData = forceLocalData;
   window.handleSliderChange = handleSliderChange;
   window.handleNumberChange = handleNumberChange;
   window.handleResponsableChange = handleResponsableChange;
