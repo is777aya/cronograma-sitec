@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tablero de Control — Cronograma Catastro 2026 (5 Fases)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ===== Estilos (igual que antes, con ligeros ajustes) ===== */
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --bg-card-hover: #27354f;
+      --border-color: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-violet: #8b5cf6;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    #dashboard-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-lg);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-icon { font-size: 40px; }
+    .dashboard-header h1 { font-size: 24px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+    .header-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+    .header-right { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .global-progress { display: flex; align-items: center; gap: 12px; }
+    .global-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .global-bar-container { width: 200px; height: 12px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
+    .global-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-violet)); border-radius: 6px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .global-percent { font-size: 18px; font-weight: 700; color: var(--accent-cyan); min-width: 50px; text-align: right; }
+    .date-badge { background: var(--accent-blue); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; }
+    .save-status { font-size: 12px; color: var(--accent-emerald); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .save-status.saving { color: var(--accent-amber); }
+    .save-status.error { color: var(--accent-rose); }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; transition: all 0.3s ease; box-shadow: var(--shadow); }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--accent-blue); }
+    .kpi-icon { font-size: 28px; margin-bottom: 8px; }
+    .kpi-value { font-size: 32px; font-weight: 800; color: var(--text-primary); }
+    .kpi-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+    .kpi-completed .kpi-value { color: var(--accent-emerald); }
+    .kpi-progress .kpi-value { color: var(--accent-amber); }
+    .kpi-pending .kpi-value { color: var(--accent-rose); }
+    .kpi-phases .kpi-value { color: var(--accent-violet); }
+
+    .filter-bar {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+    .filter-group label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-group input, .filter-group select {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .filter-group input:focus, .filter-group select:focus { border-color: var(--accent-blue); }
+    .btn-reset { background: linear-gradient(135deg, var(--accent-rose), #e11d48); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .btn-reset:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); }
+    .btn-export { background: linear-gradient(135deg, var(--accent-emerald), #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .btn-export:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+
+    .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+    .phase-card:hover { border-color: var(--accent-blue); }
+    .phase-card.collapsed .phase-activities { display: none; }
+    .phase-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      cursor: pointer;
+      background: linear-gradient(90deg, rgba(59,130,246,0.08), transparent);
+      transition: background 0.3s;
+    }
+    .phase-header:hover { background: linear-gradient(90deg, rgba(59,130,246,0.15), transparent); }
+    .phase-title-group { display: flex; align-items: center; gap: 12px; }
+    .phase-number { background: var(--accent-blue); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .phase-name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+    .phase-meta { display: flex; align-items: center; gap: 16px; }
+    .phase-progress-bar { width: 120px; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
+    .phase-progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .phase-progress-text { font-size: 13px; font-weight: 700; min-width: 40px; text-align: right; }
+    .phase-toggle { font-size: 18px; color: var(--text-secondary); transition: transform 0.3s; }
+    .phase-card.collapsed .phase-toggle { transform: rotate(-90deg); }
+    .phase-description {
+      padding: 0 20px 12px 52px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-bottom: 1px solid rgba(51,65,85,0.3);
+    }
+    .phase-card.collapsed .phase-description { display: none; }
+
+    .phase-activities { border-top: 1px solid var(--border-color); }
+    .activity-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px 12px 52px;
+      border-bottom: 1px solid rgba(51,65,85,0.5);
+      transition: background 0.2s;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-row:hover { background: var(--bg-card-hover); }
+    .activity-row.hidden { display: none; }
+    .activity-id { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--accent-cyan); font-weight: 600; min-width: 40px; }
+    .activity-desc { flex: 2; font-size: 13px; color: var(--text-secondary); padding-right: 16px; line-height: 1.5; min-width: 200px; }
+    .activity-periods { display: flex; gap: 4px; margin-right: 16px; flex-wrap: wrap; max-width: 200px; }
+    .period-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--accent-blue); font-weight: 500; white-space: nowrap; }
+
+    .activity-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 auto;
+      min-width: 280px;
+      flex-wrap: wrap;
+    }
+    .slider-container { position: relative; width: 120px; }
+    .slider-container input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg-primary);
+      outline: none;
+      cursor: pointer;
+    }
+    .slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    .slider-container input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .slider-container input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      cursor: pointer;
+      border: 2px solid white;
+    }
+    .num-input {
+      width: 56px;
+      height: 32px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .num-input::-webkit-outer-spin-button,
+    .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .num-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .num-input:hover { border-color: var(--accent-cyan); }
+    .activity-percent-sym { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-left: -4px; }
+    .activity-status {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 90px;
+      text-align: center;
+    }
+    .status-pending { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+    .status-progress { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+    .status-completed { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
+
+    .activity-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1 1 100%;
+      padding-left: 52px;
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .activity-meta select,
+    .activity-meta textarea {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 6px 10px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    .activity-meta select:focus,
+    .activity-meta textarea:focus { border-color: var(--accent-blue); }
+    .activity-meta select { min-width: 180px; }
+    .activity-meta textarea { flex: 1; min-width: 150px; resize: vertical; height: 36px; }
+
+    .summary-section { margin-bottom: 24px; }
+    .summary-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .summary-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; transition: all 0.3s; }
+    .summary-item:hover { border-color: var(--accent-blue); transform: translateX(4px); }
+    .summary-ring { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+    .summary-ring svg { transform: rotate(-90deg); }
+    .summary-ring-bg { fill: none; stroke: var(--bg-primary); stroke-width: 4; }
+    .summary-ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+    .summary-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; }
+    .summary-info { flex: 1; }
+    .summary-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .summary-detail { font-size: 11px; color: var(--text-muted); }
+
+    .dashboard-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 8px; }
+    .dashboard-footer p { margin: 4px 0; }
+
+    @media (max-width: 1200px) {
+      .kpi-row { grid-template-columns: repeat(3, 1fr); }
+      .activity-control { min-width: auto; width: 100%; justify-content: flex-start; }
+      .activity-meta { padding-left: 20px; }
+    }
+    @media (max-width: 768px) {
+      .dashboard-header { flex-direction: column; gap: 16px; text-align: center; }
+      .header-right { flex-direction: column; gap: 12px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .phase-header { flex-wrap: wrap; gap: 8px; }
+      .activity-row { padding-left: 20px; }
+      .activity-periods { max-width: none; width: 100%; }
+      .activity-control { width: 100%; justify-content: flex-start; padding-left: 0; }
+      .phase-description { padding-left: 20px; }
+      .activity-meta { padding-left: 0; flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+<div id="dashboard-container">
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <div class="header-icon">🗺️</div>
+      <div>
+        <h1>Tablero de Control — Cronograma Catastro 2026</h1>
+        <p class="header-subtitle">5 Fases Estratégicas | Julio — Diciembre 2026</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="save-status" id="save-status">
+        <span>💾</span> <span id="save-text">Conectando a Supabase...</span>
+      </div>
+      <div class="global-progress">
+        <span class="global-label">Avance Global</span>
+        <div class="global-bar-container">
+          <div class="global-bar" id="global-bar"></div>
+        </div>
+        <span class="global-percent" id="global-percent">0%</span>
+      </div>
+      <div class="date-badge">📅 Ago 2026</div>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi-card kpi-total">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-value" id="kpi-total">58</div>
+      <div class="kpi-label">Actividades Totales</div>
+    </div>
+    <div class="kpi-card kpi-completed">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-value" id="kpi-completed">0</div>
+      <div class="kpi-label">Completadas</div>
+    </div>
+    <div class="kpi-card kpi-progress">
+      <div class="kpi-icon">🔄</div>
+      <div class="kpi-value" id="kpi-progress">0</div>
+      <div class="kpi-label">En Progreso</div>
+    </div>
+    <div class="kpi-card kpi-pending">
+      <div class="kpi-icon">⏳</div>
+      <div class="kpi-value" id="kpi-pending">58</div>
+      <div class="kpi-label">Pendientes</div>
+    </div>
+    <div class="kpi-card kpi-phases">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-value" id="kpi-phases">5</div>
+      <div class="kpi-label">Fases Estratégicas</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>🔍 Buscar actividad:</label>
+      <input type="text" id="search-input" placeholder="Escribe para filtrar..." />
+    </div>
+    <div class="filter-group">
+      <label>📊 Filtrar por estado:</label>
+      <select id="status-filter">
+        <option value="all">Todas</option>
+        <option value="completed">Completadas (100%)</option>
+        <option value="progress">En progreso (1-99%)</option>
+        <option value="pending">Pendientes (0%)</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>🏷️ Período:</label>
+      <select id="period-filter">
+        <option value="all">Todos</option>
+        <option value="Jul">Julio 2026</option>
+        <option value="Ago">Agosto 2026</option>
+        <option value="Sep">Septiembre 2026</option>
+        <option value="Oct">Octubre 2026</option>
+        <option value="Nov">Noviembre 2026</option>
+        <option value="Dic">Diciembre 2026</option>
+      </select>
+    </div>
+    <button class="btn-export" onclick="exportData()">📥 Exportar Datos</button>
+    <button class="btn-reset" onclick="resetAll()">🔄 Reiniciar Avances</button>
+  </div>
+
+  <!-- PHASES ACCORDION -->
+  <div class="phases-container" id="phases-container"></div>
+
+  <!-- SUMMARY SECTION -->
+  <div class="summary-section">
+    <h2>📈 Resumen por Fase</h2>
+    <div class="summary-grid" id="summary-grid"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="dashboard-footer">
+    <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
+    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Dirección de Catastro y SIT</p>
+  </div>
+</div>
+
+<script>
+  // ===== CONFIGURACIÓN DE SUPABASE =====
+  // 🔴 REEMPLAZA ESTOS VALORES CON LOS TUYOS (desde la consola de Supabase)
+  const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co/rest/v1/';
+  const SUPABASE_ANON_KEY = 'sb_secret_ioQCHH5FAwN0ivRKCnRVyw_znIr7zsw';
+
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA) =====
+  const phasesData = [
+    { 
+      name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
+      description: "Adquisición y procesamiento de imágenes Sentinel-2 para detectar cambios de cobertura del suelo mediante índices espectrales (NDBI), generando el Índice de Transformación Urbana (ITU) que servirá de base para todo el proyecto.",
+      activities: [
+        {id:"1.1", desc:"Adquisición imágenes Sentinel-2 (2019-2025) 9 macrodistritos de La Paz", periods:["Jul S1-S2","Jul S3-S4"]},
+        {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
+        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
+        {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
+        {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
+        {id:"1.6", desc:"Validación cruzada transformación detectada vs. datos SIT V2 y SIT V3", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"1.7", desc:"Identificación y clasificación de zonas críticas con alta transformación urbana", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
+        {id:"1.8", desc:"Entrega del Índice de Transformación Urbana (ITU) municipal con mapas y estadísticas", periods:["Oct S13-S14"]}
+      ]
+    },
+    { 
+      name: "FASE 2: PRIORIZACIÓN — Cruce Tributario-Territorial",
+      description: "Cruce espacial de los datos de transformación urbana (ITU) con la recaudación tributaria de la ATM para identificar OTBs con crecimiento físico no reflejado en recaudación, generando el ranking de zonas priorizadas para intervención.",
+      activities: [
+        {id:"2.1", desc:"Solicitud y recopilación datos recaudación IMPBI por macrodistrito, distrito y OTB (2020-2025)", periods:["Jul S3-S4","Ago S5-S6","Ago S7-S8"]},
+        {id:"2.2", desc:"Cruce espacial ITU con datos tributarios: mapa de transformación vs. recaudación por OTB", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"2.3", desc:"Identificación zonas con crecimiento físico y recaudación estancada o decreciente", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.4", desc:"Detección comportamientos atípicos tributarios (baja recaudación / alta transformación)", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.5", desc:"Generación mapas de comportamiento tributario territorial por OTB", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"2.6", desc:"Construcción matriz correlación crecimiento físico vs. recaudación por macrodistrito", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"2.7", desc:"Definición criterios priorización: transformación, recaudación, riesgo, densidad poblacional", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"2.8", desc:"Aplicación modelo multicriterio por macrodistrito y ranking de OTBs priorizadas", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.9", desc:"Delimitación polígonos de vuelo UAV por zona priorizada con coordenadas UTM", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"2.10", desc:"Validación técnica polígonos de vuelo con Dirección de Catastro y entrega mapa priorizado", periods:["Oct S11-S12","Oct S13-S14"]}
+      ]
+    },
+    { 
+      name: "FASE 3: DRON — Fotogrametría UAV y Modelos 3D",
+      description: "Planificación, ejecución de vuelos fotogramétricos con drones sobre las OTBs priorizadas, y procesamiento de imágenes para generar ortofotos de alta resolución (<10cm), nubes de puntos densas, MDT/DSM y modelos 3D.",
+      activities: [
+        {id:"3.1", desc:"Evaluación capacidad técnica interna vs. contratación externa de servicios fotogramétricos", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"3.2", desc:"Elaboración términos de referencia y contratación servicio fotogramétrico UAV", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"3.3", desc:"Planificación rutas de vuelo (altitud, solapamiento frontal/lateral, GSD objetivo)", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"3.4", desc:"Gestión permisos de vuelo DGAC y coordinación subalcaldías/OTBs para acceso a zonas", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"3.5", desc:"Despliegue equipos drones (ala fija y multirotor) en macrodistritos priorizados", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
+        {id:"3.6", desc:"Vuelos fotogramétricos zonas urbanas de alta densidad (dron ala fija)", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
+        {id:"3.7", desc:"Vuelos fotogramétricos zonas de difícil acceso (dron multirotor)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
+        {id:"3.8", desc:"Control de calidad en campo de imágenes capturadas y re-vuelos por nubosidad/fallas", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.9", desc:"Procesamiento fotogramétrico imágenes en Pix4D/Metashape (orientación, densificación)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.10", desc:"Generación ortomosaicos < 10 cm/píxel con control geométrico GNSS", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.11", desc:"Generación nubes de puntos densas, MDT y DSM de zonas priorizadas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"3.12", desc:"Entrega ortomosaicos, nubes de puntos, MDT/DSM validados y georreferenciados", periods:["Dic S25-S26"]}
+      ]
+    },
+    { 
+      name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral",
+      description: "Digitalización vectorial de todos los cambios detectados en construcciones sobre ortofotos 3D, actualización de fichas técnicas prediales, identificación de nuevos predios sin registro y empadronamiento de nuevos contribuyentes.",
+      activities: [
+        {id:"4.1", desc:"Capacitación técnicos en digitalización vectorial sobre ortomosaicos 3D", periods:["Nov S17-S18","Nov S19-S20"]},
+        {id:"4.2", desc:"Digitalización lotes, manzanas y límites prediales sobre ortofotos (meta: 40 lotes/operador/día)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.3", desc:"Digitalización elementos constructivos: muros, edificaciones, anexos y alturas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.4", desc:"Clasificación materiales de construcción, tipología de vías y usos de suelo", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.5", desc:"Control de calidad digitalización (1 día de control por lote digitalizado)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.6", desc:"Estructuración y contraste de datos vectoriales contra SIT V2/V3 existente", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"4.7", desc:"Clasificación predios: Sin catastro / Desactualizado / Actualizado / Nuevo", periods:["Dic S21-S22","Dic S23-S24"]},
+        {id:"4.8", desc:"Actualización fichas técnicas prediales con datos fotogramétricos y nuevas construcciones", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"4.9", desc:"Identificación predios sin registro catastral y generación fichas técnicas nuevos predios", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.10", desc:"Empadronamiento nuevos contribuyentes ATM y emisión primeras boletas IMPBI", periods:["Dic S25-S26"]},
+        {id:"4.11", desc:"Corrección valores base imponible SIT con datos actualizados de construcciones", periods:["Dic S25-S26"]},
+        {id:"4.12", desc:"Entrega capas vectoriales prediales actualizadas, nuevos contribuyentes empadronados y fichas técnicas", periods:["Dic S25-S26"]}
+      ]
+    },
+    { 
+      name: "FASE 5: INTEGRACIÓN — Modelo de Datos Multidimensional y SIT",
+      description: "Diseño e implementación del nuevo modelo de datos multidimensional (cubo OLAP geoespacial), integración con SIT V2/V3, publicación de servicios WMS/WFS, y establecimiento del protocolo operativo Catastro-ATM para transferencia de datos.",
+      activities: [
+        {id:"5.1", desc:"Levantamiento requerimientos catastral, tributario, fotogramétrico y funcionales SIT", periods:["Ago S5-S6","Ago S7-S8"]},
+        {id:"5.2", desc:"Análisis arquitectura actual SIT V2 y SIT V3 y mapeo de integraciones necesarias", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"5.3", desc:"Diseño esquema base datos multidimensional: entidades predios, construcciones, mejoras, contribuyentes", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
+        {id:"5.4", desc:"Diseño integración PostgreSQL/PostGIS con SIT V2/V3 existente y especificaciones WMS/WFS", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"5.5", desc:"Diseño interfaz de usuario para consulta de capas geoespaciales y comparativa visual antes/después", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"5.6", desc:"Especificaciones integración módulo SIG con trámites en línea SIT V3", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"5.7", desc:"Entrega diseño modelo datos multidimensional y módulo SIG institucional", periods:["Oct S13-S14"]},
+        {id:"5.8", desc:"Instalación y configuración servidor PostgreSQL/PostGIS en infraestructura municipal", periods:["Nov S17-S18","Nov S19-S20"]},
+        {id:"5.9", desc:"Creación esquemas espaciales y carga datos fotogramétricos (ortomosaicos, nubes, MDE)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"5.10", desc:"Carga datos catastrales actualizados (fichas, planimetrías, permisos) y tributarios (recaudación, deuda)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.11", desc:"Desarrollo consultas cruzadas espaciales (cubo OLAP geoespacial) para análisis territorial", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"5.12", desc:"Configuración servicios WMS/WFS y publicación capas geoespaciales normalizadas en SIT V2/V3", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.13", desc:"Pruebas de integridad, rendimiento del sistema y validación funcional con usuarios", periods:["Dic S25-S26"]},
+        {id:"5.14", desc:"Protocolo transferencia datos Catastro-ATM y cruce predios actualizados con padrón contribuyentes", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
+        {id:"5.15", desc:"Generación notificaciones actualización valores a contribuyentes con predios modificados", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.16", desc:"Entrega modelo datos multidimensional operativo, módulos SIG publicados y protocolo Catastro-ATM", periods:["Dic S25-S26"]}
+      ]
+    }
+  ];
+
+  // ===== LISTA DE RESPONSABLES (EQUIPO) =====
+  const responsables = [
+    { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
+    { nombre: "Gustavo", rol: "Soporte Sistemas" },
+    { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
+    { nombre: "Omar Espinoza Vargas", rol: "Geógrafo" },
+    { nombre: "Daniel Condori Contreras", rol: "Geógrafo" },
+    { nombre: "Diana Aliaga Paton", rol: "Geógrafa" },
+    { nombre: "Albania Rojas", rol: "Supervisor Arquitecto" },
+    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecta" },
+    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecta" },
+    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecta" },
+    { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
+    { nombre: "Victor Siñani", rol: "Supervisor UVA" }
+  ];
+
+  // ===== ESTADO =====
+  // progress[actId] = { porcentaje, responsable, observaciones }
+  let progress = {};
+  let saveTimeout = null;
+  let isLoading = true;
+
+  // ===== FUNCIONES AUXILIARES =====
+  function clampValue(val) {
+    let v = parseInt(val);
+    if (isNaN(v)) return 0;
+    return Math.min(100, Math.max(0, v));
+  }
+
+  function getStatus(pct) {
+    if (pct === 0) return { cls: 'status-pending', text: 'Pendiente' };
+    if (pct === 100) return { cls: 'status-completed', text: 'Completada' };
+    return { cls: 'status-progress', text: 'En progreso' };
+  }
+
+  function getColorForPct(pct) {
+    if (pct === 0) return '#f43f5e';
+    if (pct === 100) return '#10b981';
+    return '#f59e0b';
+  }
+
+  function buildResponsableOptions(selected) {
+    let html = '<option value="">-- Sin asignar --</option>';
+    responsables.forEach(r => {
+      const label = `${r.nombre} (${r.rol})`;
+      const sel = (selected === r.nombre) ? 'selected' : '';
+      html += `<option value="${r.nombre}" ${sel}>${label}</option>`;
+    });
+    return html;
+  }
+
+  // ===== SUPABASE OPERACIONES =====
+  async function loadFromSupabase() {
+    try {
+      const { data, error } = await supabase
+        .from('progreso_catastro')
+        .select('*');
+      if (error) throw error;
+      
+      // Inicializar progress con todos los IDs
+      const allIds = [];
+      phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
+      allIds.forEach(id => {
+        progress[id] = { porcentaje: 0, responsable: '', observaciones: '' };
+      });
+
+      // Sobrescribir con datos de Supabase
+      data.forEach(row => {
+        if (progress[row.id]) {
+          progress[row.id].porcentaje = row.porcentaje || 0;
+          progress[row.id].responsable = row.responsable || '';
+          progress[row.id].observaciones = row.observaciones || '';
+        }
+      });
+
+      showSaveStatus('✅ Datos cargados desde Supabase', 'success');
+    } catch (err) {
+      console.error('Error al cargar desde Supabase:', err);
+      showSaveStatus('❌ Error al cargar datos', 'error');
+      // Inicializar con ceros
+      phasesData.forEach(p => p.activities.forEach(a => {
+        progress[a.id] = { porcentaje: 0, responsable: '', observaciones: '' };
+      }));
+    }
+    isLoading = false;
+    render();
+    applyFilters();
+  }
+
+  async function saveActivityToSupabase(activityId) {
+    const data = progress[activityId];
+    if (!data) return;
+    try {
+      const { error } = await supabase
+        .from('progreso_catastro')
+        .upsert({
+          id: activityId,
+          porcentaje: data.porcentaje,
+          responsable: data.responsable,
+          observaciones: data.observaciones,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      if (error) throw error;
+      showSaveStatus('💾 Guardado en Supabase', 'success');
+    } catch (err) {
+      console.error('Error guardando en Supabase:', err);
+      showSaveStatus('❌ Error al guardar', 'error');
+    }
+  }
+
+  function debouncedSave(activityId) {
+    showSaveStatus('⏳ Guardando...', 'saving');
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      saveActivityToSupabase(activityId);
+    }, 800);
+  }
+
+  function showSaveStatus(text, type) {
+    const el = document.getElementById('save-status');
+    const txt = document.getElementById('save-text');
+    txt.textContent = text;
+    el.className = 'save-status';
+    if (type === 'saving') el.classList.add('saving');
+    if (type === 'error') el.classList.add('error');
+  }
+
+  // ===== FUNCIONES DE ACTUALIZACIÓN UI (PARCIALES) =====
+  function updateActivityUI(actId) {
+    const data = progress[actId];
+    if (!data) return;
+    const pct = data.porcentaje;
+    const status = getStatus(pct);
+    const color = getColorForPct(pct);
+
+    // Slider
+    const slider = document.getElementById(`slider-${actId}`);
+    if (slider) {
+      slider.value = pct;
+      slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%)`;
+    }
+    // Input numérico
+    const numInput = document.getElementById(`num-${actId}`);
+    if (numInput) {
+      numInput.value = pct;
+    }
+    // Estado
+    const statusEl = document.getElementById(`status-${actId}`);
+    if (statusEl) {
+      statusEl.className = `activity-status ${status.cls}`;
+      statusEl.textContent = status.text;
+    }
+    // Select responsable
+    const select = document.getElementById(`resp-${actId}`);
+    if (select) {
+      // mantener el valor seleccionado sin recrear el select
+      select.value = data.responsable || '';
+    }
+    // Textarea observaciones
+    const textarea = document.getElementById(`obs-${actId}`);
+    if (textarea) {
+      textarea.value = data.observaciones || '';
+    }
+  }
+
+  function updatePhaseUI(phaseIndex) {
+    const phase = phasesData[phaseIndex];
+    const activities = phase.activities;
+    let sum = 0;
+    activities.forEach(a => {
+      sum += (progress[a.id]?.porcentaje || 0);
+    });
+    const avg = activities.length > 0 ? Math.round(sum / activities.length) : 0;
+    const color = getColorForPct(avg);
+
+    const fill = document.getElementById(`phase-fill-${phaseIndex}`);
+    if (fill) {
+      fill.style.width = avg + '%';
+      fill.style.background = color;
+    }
+    const text = document.getElementById(`phase-text-${phaseIndex}`);
+    if (text) {
+      text.textContent = avg + '%';
+      text.style.color = color;
+    }
+  }
+
+  function updateGlobalUI() {
+    let total = 0, completed = 0, progressCount = 0, pending = 0;
+    let sum = 0, count = 0;
+    Object.keys(progress).forEach(id => {
+      const p = progress[id].porcentaje;
+      total++;
+      sum += p;
+      if (p === 100) completed++;
+      else if (p > 0) progressCount++;
+      else pending++;
+    });
+    count = total;
+    const globalPct = count > 0 ? Math.round(sum / count) : 0;
+
+    document.getElementById('kpi-total').textContent = total;
+    document.getElementById('kpi-completed').textContent = completed;
+    document.getElementById('kpi-progress').textContent = progressCount;
+    document.getElementById('kpi-pending').textContent = pending;
+
+    const bar = document.getElementById('global-bar');
+    bar.style.width = globalPct + '%';
+    const percent = document.getElementById('global-percent');
+    percent.textContent = globalPct + '%';
+    percent.style.color = getColorForPct(globalPct);
+  }
+
+  function updateSummaryUI() {
+    const grid = document.getElementById('summary-grid');
+    // Reconstruir solo los anillos (no es costoso porque son pocos)
+    grid.innerHTML = '';
+    phasesData.forEach((phase, pi) => {
+      const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
+      const avg = Math.round(phaseSum / phase.activities.length);
+      const color = getColorForPct(avg);
+      const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
+      const total = phase.activities.length;
+      const radius = 20;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (avg / 100) * circumference;
+
+      const item = document.createElement('div');
+      item.className = 'summary-item';
+      item.innerHTML = `
+        <div class="summary-ring">
+          <svg width="48" height="48" viewBox="0 0 48 48">
+            <circle class="summary-ring-bg" cx="24" cy="24" r="${radius}"/>
+            <circle class="summary-ring-fill" cx="24" cy="24" r="${radius}"
+              stroke="${color}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+          </svg>
+          <span class="summary-ring-text" style="color:${color}">${avg}%</span>
+        </div>
+        <div class="summary-info">
+          <div class="summary-name">${phase.name}</div>
+          <div class="summary-detail">${completed}/${total} actividades completadas</div>
+        </div>
+      `;
+      grid.appendChild(item);
+    });
+  }
+
+  // ===== FILTROS (sin re-render) =====
+  function applyFilters() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const statusFilter = document.getElementById('status-filter').value;
+    const periodFilter = document.getElementById('period-filter').value;
+
+    // Recorrer todas las filas de actividades
+    const allRows = document.querySelectorAll('.activity-row');
+    allRows.forEach(row => {
+      const actId = row.dataset.activityId;
+      const data = progress[actId];
+      if (!data) return;
+      const pct = data.porcentaje;
+      // Obtener descripción y períodos desde el DOM
+      const descEl = row.querySelector('.activity-desc');
+      const desc = descEl ? descEl.textContent.toLowerCase() : '';
+      const periods = [];
+      row.querySelectorAll('.period-tag').forEach(tag => periods.push(tag.textContent));
+
+      const matchesSearch = !search || actId.includes(search) || desc.includes(search);
+      const matchesStatus = statusFilter === 'all' ||
+        (statusFilter === 'completed' && pct === 100) ||
+        (statusFilter === 'progress' && pct > 0 && pct < 100) ||
+        (statusFilter === 'pending' && pct === 0);
+      const matchesPeriod = periodFilter === 'all' || periods.some(p => p.startsWith(periodFilter));
+
+      if (matchesSearch && matchesStatus && matchesPeriod) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+
+    // Mostrar/ocultar fases según si tienen al menos una fila visible
+    const phaseCards = document.querySelectorAll('.phase-card');
+    phaseCards.forEach(card => {
+      const rows = card.querySelectorAll('.activity-row');
+      let visible = false;
+      rows.forEach(r => {
+        if (!r.classList.contains('hidden')) visible = true;
+      });
+      card.style.display = visible ? '' : 'none';
+    });
+  }
+
+  // ===== RENDER INICIAL (construcción del DOM) =====
+  function render() {
+    const container = document.getElementById('phases-container');
+    container.innerHTML = '';
+
+    phasesData.forEach((phase, pi) => {
+      const phaseColor = colors[pi % colors.length];
+      const phaseEl = document.createElement('div');
+      phaseEl.className = 'phase-card';
+      phaseEl.id = `phase-${pi}`;
+
+      // Header
+      let headerHTML = `
+        <div class="phase-header" onclick="togglePhase(${pi})">
+          <div class="phase-title-group">
+            <div class="phase-number" style="background:${phaseColor}">${pi+1}</div>
+            <span class="phase-name">${phase.name}</span>
+          </div>
+          <div class="phase-meta">
+            <span style="font-size:12px;color:var(--text-muted)">${phase.activities.length} act.</span>
+            <div class="phase-progress-bar">
+              <div class="phase-progress-fill" id="phase-fill-${pi}" style="width:0%;background:${phaseColor}"></div>
+            </div>
+            <span class="phase-progress-text" id="phase-text-${pi}" style="color:${phaseColor}">0%</span>
+            <span class="phase-toggle">▼</span>
+          </div>
+        </div>
+        <div class="phase-description">${phase.description}</div>
+      `;
+      phaseEl.innerHTML = headerHTML;
+
+      // Activities container
+      const activitiesContainer = document.createElement('div');
+      activitiesContainer.className = 'phase-activities';
+
+      phase.activities.forEach((act) => {
+        const actId = act.id;
+        const data = progress[actId] || { porcentaje: 0, responsable: '', observaciones: '' };
+        const pct = data.porcentaje;
+        const status = getStatus(pct);
+        const color = getColorForPct(pct);
+
+        const row = document.createElement('div');
+        row.className = 'activity-row';
+        row.dataset.activityId = actId;
+
+        const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
+
+        row.innerHTML = `
+          <span class="activity-id">${actId}</span>
+          <span class="activity-desc">${act.desc}</span>
+          <div class="activity-periods">${periodsHtml}</div>
+          <div class="activity-control">
+            <div class="slider-container">
+              <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}"
+                oninput="handleSliderChange('${actId}', this.value)"
+                style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);">
+            </div>
+            <input type="number" min="0" max="100" value="${pct}" id="num-${actId}"
+              class="num-input" oninput="handleNumberChange('${actId}', this.value)"
+              onblur="this.value = clampValue(this.value)" />
+            <span class="activity-percent-sym">%</span>
+            <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
+          </div>
+          <div class="activity-meta">
+            <select id="resp-${actId}" onchange="handleResponsableChange('${actId}', this.value)">
+              ${buildResponsableOptions(data.responsable)}
+            </select>
+            <textarea id="obs-${actId}" placeholder="Observaciones..." onchange="handleObservacionChange('${actId}', this.value)">${data.observaciones || ''}</textarea>
+          </div>
+        `;
+        activitiesContainer.appendChild(row);
+      });
+
+      phaseEl.appendChild(activitiesContainer);
+      container.appendChild(phaseEl);
+
+      // Actualizar barra de fase inicial
+      updatePhaseUI(pi);
+    });
+
+    // Actualizar global y resumen
+    updateGlobalUI();
+    updateSummaryUI();
+  }
+
+  // ===== MANEJADORES DE EVENTOS CON ACTUALIZACIÓN PARCIAL =====
+  function handleSliderChange(actId, value) {
+    const val = clampValue(value);
+    progress[actId].porcentaje = val;
+    updateActivityUI(actId);
+    // Actualizar barra de fase correspondiente
+    const phaseIndex = findPhaseIndex(actId);
+    if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
+    updateGlobalUI();
+    updateSummaryUI();
+    debouncedSave(actId);
+  }
+
+  function handleNumberChange(actId, value) {
+    const val = clampValue(value);
+    progress[actId].porcentaje = val;
+    updateActivityUI(actId);
+    const phaseIndex = findPhaseIndex(actId);
+    if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
+    updateGlobalUI();
+    updateSummaryUI();
+    debouncedSave(actId);
+  }
+
+  function handleResponsableChange(actId, value) {
+    progress[actId].responsable = value;
+    // No necesita actualizar UI porque el select ya cambió
+    debouncedSave(actId);
+  }
+
+  function handleObservacionChange(actId, value) {
+    progress[actId].observaciones = value;
+    debouncedSave(actId);
+  }
+
+  function findPhaseIndex(actId) {
+    for (let i = 0; i < phasesData.length; i++) {
+      const found = phasesData[i].activities.some(a => a.id === actId);
+      if (found) return i;
+    }
+    return -1;
+  }
+
+  // ===== TOGGLE FASE =====
+  function togglePhase(pi) {
+    const el = document.getElementById(`phase-${pi}`);
+    el.classList.toggle('collapsed');
+  }
+
+  // ===== RESET =====
+  function resetAll() {
+    if (!confirm('¿Estás seguro de que deseas reiniciar TODOS los avances a 0%? Esta acción no se puede deshacer.')) return;
+    Object.keys(progress).forEach(id => {
+      progress[id].porcentaje = 0;
+    });
+    // Actualizar UI
+    Object.keys(progress).forEach(id => updateActivityUI(id));
+    phasesData.forEach((_, i) => updatePhaseUI(i));
+    updateGlobalUI();
+    updateSummaryUI();
+    // Guardar todos en Supabase (upsert)
+    Object.keys(progress).forEach(id => {
+      saveActivityToSupabase(id);
+    });
+    showSaveStatus('🔄 Avances reiniciados', 'success');
+  }
+
+  // ===== EXPORT =====
+  function exportData() {
+    const data = {
+      fecha_exportacion: new Date().toISOString(),
+      proyecto: "Cronograma Catastro 2026 - 5 Fases",
+      avances: progress,
+      resumen: {}
+    };
+    phasesData.forEach((phase) => {
+      const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
+      const avg = Math.round(phaseSum / phase.activities.length);
+      const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
+      data.resumen[phase.name] = {
+        avance_promedio: avg + '%',
+        completadas: completed,
+        total: phase.activities.length
+      };
+    });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `catastro2026_5fases_avances_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showSaveStatus('📥 Datos exportados correctamente', 'success');
+  }
+
+  // ===== INICIO =====
+  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Cargar datos desde Supabase
+    await loadFromSupabase();
+
+    // Event listeners para filtros (sin re-render)
+    document.getElementById('search-input').addEventListener('input', applyFilters);
+    document.getElementById('status-filter').addEventListener('change', applyFilters);
+    document.getElementById('period-filter').addEventListener('change', applyFilters);
+  });
+
+  // Hacer funciones globales para los onclick
+  window.togglePhase = togglePhase;
+  window.resetAll = resetAll;
+  window.exportData = exportData;
+  window.handleSliderChange = handleSliderChange;
+  window.handleNumberChange = handleNumberChange;
+  window.handleResponsableChange = handleResponsableChange;
+  window.handleObservacionChange = handleObservacionChange;
+  window.clampValue = clampValue;
+</script>
+</body>
+</html>
