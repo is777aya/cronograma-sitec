@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plan_trabajo</title>
+  <title>plan de trabajo</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (con nuevos estilos para el calendario) ===== */
+    /* ===== ESTILOS (con mejoras para asignación de técnicos) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -312,7 +312,26 @@
       letter-spacing: 0.3px;
       min-width: 100px;
     }
-    .meta-row select,
+    .meta-row select {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 6px 10px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+      flex: 1;
+      min-width: 180px;
+      height: auto;
+      min-height: 60px;
+    }
+    .meta-row select:focus { border-color: var(--accent-blue); }
+    .meta-row select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     .meta-row textarea {
       background: var(--bg-primary);
       border: 1px solid var(--border-color);
@@ -325,15 +344,69 @@
       font-family: inherit;
       flex: 1;
       min-width: 150px;
+      resize: vertical;
+      height: 36px;
     }
-    .meta-row select:focus,
     .meta-row textarea:focus { border-color: var(--accent-blue); }
-    .meta-row select { min-width: 180px; }
-    .meta-row select[multiple] { height: auto; min-height: 60px; }
-    .meta-row textarea { resize: vertical; height: 36px; }
-    .meta-row select:disabled,
     .meta-row textarea:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .asignacion-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      flex: 1;
+    }
+    .asignacion-group .badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      flex: 1;
+    }
+    .asignacion-group .badge-tecnico {
+      background: var(--accent-blue);
+      color: white;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .asignacion-group .btn-asignar {
+      background: var(--accent-emerald);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .asignacion-group .btn-asignar:hover:not(:disabled) { background: #059669; }
+    .asignacion-group .btn-asignar:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .asignacion-group .btn-quitar-todos {
+      background: var(--accent-rose);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .asignacion-group .btn-quitar-todos:hover:not(:disabled) { background: #e11d48; }
+    .asignacion-group .btn-quitar-todos:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
@@ -518,6 +591,7 @@
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
       .activity-control { min-width: auto; width: 100%; justify-content: flex-start; }
       .meta-row { flex-direction: column; align-items: stretch; }
+      .asignacion-group { flex-direction: column; align-items: stretch; }
       .calendario-grid { max-width: 100%; }
     }
     @media (max-width: 768px) {
@@ -543,7 +617,7 @@
     <div class="header-left">
       <div class="header-icon">🗺️</div>
       <div>
-        <h1>Cronograma SITEC</h1>
+        <h1>Cronograma Trabajo SITEC</h1>
         <p class="header-subtitle">5 Fases | Julio — Diciembre 2026</p>
       </div>
     </div>
@@ -648,7 +722,7 @@
   <!-- FOOTER -->
   <div class="dashboard-footer">
     <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
-    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
+    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Dirección de Catastro y SIT</p>
   </div>
 </div>
 
@@ -667,13 +741,13 @@
     { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
     { nombre: "Gustavo", rol: "Soporte Sistemas" },
     { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
-    { nombre: "Omar Espinoza Vargas", rol: "Tópografo" },
-    { nombre: "Daniel Condori Contreras", rol: "Tópografo" },
-    { nombre: "Diana Aliaga Paton", rol: "Tópografo" },
+    { nombre: "Omar Espinoza Vargas", rol: "Geógrafo" },
+    { nombre: "Daniel Condori Contreras", rol: "Geógrafo" },
+    { nombre: "Diana Aliaga Paton", rol: "Geógrafa" },
     
-    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecto" },
-    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecto" },
-    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecto" },
+    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecta" },
+    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecta" },
+    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecta" },
     { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
     { nombre: "Victor Siñani", rol: "Supervisor UVA" }
   ];
@@ -850,7 +924,7 @@
           porcentaje: 0,
           responsables: [],
           observaciones: '',
-          bitacora: [] // array de {fecha, nota}
+          bitacora: []
         };
       }
     });
@@ -931,7 +1005,7 @@
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startDayOfWeek = firstDay.getDay(); // 0=domingo
+    const startDayOfWeek = firstDay.getDay();
     const today = new Date();
     const isToday = (d) => {
       return d.getFullYear() === today.getFullYear() &&
@@ -947,7 +1021,6 @@
     });
 
     let days = [];
-    // días vacíos antes del primer día
     for (let i = 0; i < startDayOfWeek; i++) {
       days.push({ day: null, vacio: true });
     }
@@ -990,10 +1063,9 @@
         html += `<div class="dia vacio"></div>`;
       } else {
         const claseHoy = d.esHoy ? ' hoy' : '';
-        const tieneNota = d.nota ? ' has-nota' : '';
         const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
         html += `
-          <div class="dia${claseHoy}${tieneNota}" onclick="abrirDia('${actId}', '${d.fecha}', '${d.nota || ''}')">
+          <div class="dia${claseHoy}" onclick="abrirDia('${actId}', '${d.fecha}', '${d.nota || ''}')">
             <span>${d.day}</span>
             ${d.nota ? '<span class="punto"></span>' : ''}
             ${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}
@@ -1003,7 +1075,6 @@
     });
     html += `</div>`;
 
-    // Modal para editar nota del día
     html += `
       <div class="calendario-dia-modal" id="modal-${actId}">
         <textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea>
@@ -1017,17 +1088,17 @@
     container.innerHTML = html;
   }
 
-  let calendarioState = {}; // por actividad: { year, month, diaSeleccionado }
+  let calendarioState = {};
 
   function cambiarMes(actId, delta) {
     if (!calendarioState[actId]) {
-      calendarioState[actId] = { year: 2026, month: 6 }; // julio = 6
+      calendarioState[actId] = { year: 2026, month: 6 };
     }
     let state = calendarioState[actId];
     state.month += delta;
     if (state.month < 6) state.month = 6;
     if (state.month > 11) state.month = 11;
-    state.year = 2026; // fijo
+    state.year = 2026;
     renderCalendario(actId, state.year, state.month);
   }
 
@@ -1055,7 +1126,6 @@
     const nota = textarea.value.trim();
     if (!nota) return;
 
-    // Buscar si ya existe nota para esa fecha
     const bitacora = progress[actId].bitacora;
     const idx = bitacora.findIndex(e => e.fecha === fecha);
     if (idx !== -1) {
@@ -1063,11 +1133,9 @@
     } else {
       bitacora.push({ fecha, nota });
     }
-    // Ordenar por fecha
     bitacora.sort((a, b) => a.fecha.localeCompare(b.fecha));
     progress[actId].bitacora = bitacora;
     cerrarModal(actId);
-    // Actualizar calendario
     const state = calendarioState[actId];
     renderCalendario(actId, state.year, state.month);
     debouncedSave(actId);
@@ -1088,6 +1156,53 @@
       renderCalendario(actId, state.year, state.month);
       debouncedSave(actId);
     }
+  }
+
+  // ===== ASIGNACIÓN DE TÉCNICOS (MEJORADA) =====
+  function asignarTecnicos(actId) {
+    if (!isAuthorized(currentUser)) return;
+    const select = document.getElementById(`resp-${actId}`);
+    if (!select) return;
+    const selected = [];
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].selected) {
+        selected.push(select.options[i].value);
+      }
+    }
+    progress[actId].responsables = selected;
+    // Actualizar badges y select
+    actualizarBadges(actId);
+    debouncedSave(actId);
+    showSaveStatus(`✅ ${selected.length} técnicos asignados`, 'success');
+  }
+
+  function quitarTodosTecnicos(actId) {
+    if (!isAuthorized(currentUser)) return;
+    if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
+    progress[actId].responsables = [];
+    actualizarBadges(actId);
+    // Deseleccionar opciones en el select
+    const select = document.getElementById(`resp-${actId}`);
+    if (select) {
+      for (let i = 0; i < select.options.length; i++) {
+        select.options[i].selected = false;
+      }
+    }
+    debouncedSave(actId);
+    showSaveStatus('🔄 Todos los técnicos removidos', 'success');
+  }
+
+  function actualizarBadges(actId) {
+    const container = document.getElementById(`badges-${actId}`);
+    if (!container) return;
+    const responsables = progress[actId]?.responsables || [];
+    if (responsables.length === 0) {
+      container.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
+      return;
+    }
+    container.innerHTML = responsables.map(n => 
+      `<span class="badge-tecnico">${n}</span>`
+    ).join('');
   }
 
   // ===== ACTUALIZACIONES UI =====
@@ -1115,6 +1230,7 @@
       statusEl.className = `activity-status ${status.cls}`;
       statusEl.textContent = status.text;
     }
+    // Actualizar select y badges
     const select = document.getElementById(`resp-${actId}`);
     if (select) {
       const opts = select.options;
@@ -1123,12 +1239,18 @@
       }
       select.disabled = !editable;
     }
+    actualizarBadges(actId);
+    // Botones de asignación
+    const btnAsignar = document.getElementById(`btn-asignar-${actId}`);
+    if (btnAsignar) btnAsignar.disabled = !editable;
+    const btnQuitar = document.getElementById(`btn-quitar-${actId}`);
+    if (btnQuitar) btnQuitar.disabled = !editable;
+
     const textarea = document.getElementById(`obs-${actId}`);
     if (textarea) {
       textarea.value = data.observaciones || '';
       textarea.disabled = !editable;
     }
-    // Refrescar calendario (si existe)
     if (calendarioState[actId]) {
       renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
     }
@@ -1305,8 +1427,12 @@
 
         const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
 
-        // Construir la fila
-        let html = `
+        // Badges de responsables actuales
+        const badgesHtml = data.responsables && data.responsables.length > 0
+          ? data.responsables.map(n => `<span class="badge-tecnico">${n}</span>`).join('')
+          : '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
+
+        row.innerHTML = `
           <div class="activity-main">
             <span class="activity-id">${actId}</span>
             <span class="activity-desc">${act.desc}</span>
@@ -1329,10 +1455,25 @@
 
           <div class="activity-meta">
             <div class="meta-row">
-              <label>👥 Responsables:</label>
-              <select id="resp-${actId}" multiple onchange="handleResponsablesChange('${actId}')" ${!editable ? 'disabled' : ''}>
+              <label>👥 Técnicos asignados:</label>
+              <div class="asignacion-group">
+                <div class="badges-container" id="badges-${actId}">
+                  ${badgesHtml}
+                </div>
+                <button class="btn-asignar" id="btn-asignar-${actId}" onclick="asignarTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>
+                  ✏️ Asignar seleccionados
+                </button>
+                <button class="btn-quitar-todos" id="btn-quitar-${actId}" onclick="quitarTodosTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>
+                  🗑️ Quitar todos
+                </button>
+              </div>
+            </div>
+            <div class="meta-row">
+              <label>📋 Seleccionar técnicos:</label>
+              <select id="resp-${actId}" multiple ${!editable ? 'disabled' : ''}>
                 ${buildResponsableOptions(data.responsables)}
               </select>
+              <span style="font-size:11px;color:var(--text-muted);">(Mantén Ctrl para seleccionar varios)</span>
             </div>
             <div class="meta-row">
               <label>📝 Observaciones:</label>
@@ -1345,7 +1486,6 @@
             <div id="calendario-${actId}"></div>
           </div>
         `;
-        row.innerHTML = html;
         activitiesContainer.appendChild(row);
       });
 
@@ -1353,17 +1493,19 @@
       container.appendChild(phaseEl);
     });
 
-    // Inicializar calendarios después de renderizar
-    phasesData.forEach((phase, pi) => {
+    // Inicializar calendarios
+    phasesData.forEach((phase) => {
       phase.activities.forEach(act => {
         const actId = act.id;
         if (!calendarioState[actId]) {
-          calendarioState[actId] = { year: 2026, month: 6 }; // julio
+          calendarioState[actId] = { year: 2026, month: 6 };
         }
         renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
-        updatePhaseUI(pi);
       });
     });
+
+    // Actualizar fases
+    phasesData.forEach((_, i) => updatePhaseUI(i));
 
     updateGlobalUI();
     updateSummaryUI();
@@ -1393,19 +1535,6 @@
     if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
     updateGlobalUI();
     updateSummaryUI();
-    debouncedSave(actId);
-  }
-
-  function handleResponsablesChange(actId) {
-    if (!isAuthorized(currentUser)) return;
-    const select = document.getElementById(`resp-${actId}`);
-    const selected = [];
-    for (let i = 0; i < select.options.length; i++) {
-      if (select.options[i].selected) {
-        selected.push(select.options[i].value);
-      }
-    }
-    progress[actId].responsables = selected;
     debouncedSave(actId);
   }
 
@@ -1529,8 +1658,9 @@
   window.forceLocalData = forceLocalData;
   window.handleSliderChange = handleSliderChange;
   window.handleNumberChange = handleNumberChange;
-  window.handleResponsablesChange = handleResponsablesChange;
   window.handleObservacionChange = handleObservacionChange;
+  window.asignarTecnicos = asignarTecnicos;
+  window.quitarTodosTecnicos = quitarTodosTecnicos;
   window.changeUser = changeUser;
   window.clampValue = clampValue;
   window.cambiarMes = cambiarMes;
