@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plan de trabajo</title>
+  <title>plan_trabajo</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (igual que antes, con algunos ajustes para múltiple select y bitácora) ===== */
+    /* ===== ESTILOS (con nuevos estilos para el calendario) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -188,19 +188,24 @@
     .phase-activities { border-top: 1px solid var(--border-color); }
     .activity-row {
       display: flex;
-      align-items: center;
+      flex-direction: column;
       padding: 12px 20px 12px 52px;
       border-bottom: 1px solid rgba(51,65,85,0.5);
       transition: background 0.2s;
-      flex-wrap: wrap;
       gap: 8px;
     }
     .activity-row:last-child { border-bottom: none; }
     .activity-row:hover { background: var(--bg-card-hover); }
     .activity-row.hidden { display: none; }
+
+    .activity-main {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
     .activity-id { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--accent-cyan); font-weight: 600; min-width: 40px; }
     .activity-desc { flex: 2; font-size: 13px; color: var(--text-secondary); padding-right: 16px; line-height: 1.5; min-width: 200px; }
-
     .activity-periods { display: flex; gap: 4px; margin-right: 16px; flex-wrap: wrap; max-width: 200px; }
     .period-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--accent-blue); font-weight: 500; white-space: nowrap; }
 
@@ -332,7 +337,8 @@
       cursor: not-allowed;
     }
 
-    .bitacora-section {
+    /* ===== CALENDARIO ===== */
+    .calendario-section {
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -340,70 +346,133 @@
       padding-left: 52px;
       padding-bottom: 8px;
     }
-    .bitacora-section label {
+    .calendario-section label {
       font-size: 12px;
       color: var(--text-secondary);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
-    .bitacora-input-group {
+    .calendario-nav {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
     }
-    .bitacora-input-group textarea {
-      flex: 1;
-      min-width: 200px;
+    .calendario-nav button {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .calendario-nav button:hover:not(:disabled) { background: var(--bg-card-hover); }
+    .calendario-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .calendario-nav span {
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 120px;
+      text-align: center;
+    }
+    .calendario-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      max-width: 480px;
+    }
+    .calendario-grid .dia-nombre {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 600;
+      padding: 4px 0;
+    }
+    .calendario-grid .dia {
+      background: var(--bg-primary);
+      padding: 6px 2px;
+      text-align: center;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+      min-height: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .calendario-grid .dia:hover:not(.dia-vacio) { background: var(--bg-card-hover); }
+    .calendario-grid .dia.vacio { background: transparent; cursor: default; }
+    .calendario-grid .dia.hoy { border: 1px solid var(--accent-cyan); }
+    .calendario-grid .dia .punto {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      margin-top: 2px;
+    }
+    .calendario-grid .dia .nota-preview {
+      font-size: 9px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      padding: 0 2px;
+    }
+    .calendario-dia-modal {
+      margin-top: 8px;
       background: var(--bg-primary);
       border: 1px solid var(--border-color);
       border-radius: 6px;
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .calendario-dia-modal.visible { display: flex; }
+    .calendario-dia-modal textarea {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
       color: var(--text-primary);
-      padding: 6px 10px;
+      padding: 6px;
       font-size: 13px;
-      outline: none;
       resize: vertical;
       height: 60px;
       font-family: inherit;
     }
-    .bitacora-input-group textarea:focus { border-color: var(--accent-blue); }
-    .bitacora-input-group button {
+    .calendario-dia-modal textarea:focus { border-color: var(--accent-blue); }
+    .calendario-dia-modal .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .calendario-dia-modal .modal-actions button {
       background: var(--accent-blue);
       color: white;
       border: none;
-      padding: 6px 16px;
-      border-radius: 6px;
+      padding: 4px 16px;
+      border-radius: 4px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s;
-      white-space: nowrap;
     }
-    .bitacora-input-group button:hover { background: #2563eb; }
-    .bitacora-input-group button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .calendario-dia-modal .modal-actions button:hover:not(:disabled) { background: #2563eb; }
+    .calendario-dia-modal .modal-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .calendario-dia-modal .modal-actions button.btn-eliminar {
+      background: var(--accent-rose);
     }
-
-    .bitacora-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 150px;
-      overflow-y: auto;
-      padding: 4px 0;
-    }
-    .bitacora-item {
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: var(--bg-secondary);
-      padding: 4px 10px;
-      border-radius: 4px;
-      border-left: 3px solid var(--accent-cyan);
-    }
-    .bitacora-item strong {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
+    .calendario-dia-modal .modal-actions button.btn-eliminar:hover:not(:disabled) { background: #e11d48; }
 
     .summary-section { margin-bottom: 24px; }
     .summary-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
@@ -449,7 +518,7 @@
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
       .activity-control { min-width: auto; width: 100%; justify-content: flex-start; }
       .meta-row { flex-direction: column; align-items: stretch; }
-      .bitacora-input-group { flex-direction: column; }
+      .calendario-grid { max-width: 100%; }
     }
     @media (max-width: 768px) {
       .dashboard-header { flex-direction: column; gap: 16px; text-align: center; }
@@ -462,7 +531,7 @@
       .activity-control { width: 100%; justify-content: flex-start; padding-left: 0; }
       .phase-description { padding-left: 20px; }
       .activity-meta { padding-left: 0; }
-      .bitacora-section { padding-left: 0; }
+      .calendario-section { padding-left: 0; }
       .user-selector { flex-wrap: wrap; }
     }
   </style>
@@ -475,7 +544,7 @@
       <div class="header-icon">🗺️</div>
       <div>
         <h1>Cronograma SITEC</h1>
-        <p class="header-subtitle">Fases | Julio — Diciembre 2026</p>
+        <p class="header-subtitle">5 Fases | Julio — Diciembre 2026</p>
       </div>
     </div>
     <div class="header-right">
@@ -579,7 +648,7 @@
   <!-- FOOTER -->
   <div class="dashboard-footer">
     <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
-    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Dirección de Catastro y SIT</p>
+    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
 
@@ -598,12 +667,13 @@
     { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
     { nombre: "Gustavo", rol: "Soporte Sistemas" },
     { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
-    { nombre: "Omar Espinoza Vargas", rol: "Topógrafo" },
-    { nombre: "Daniel Condori Contreras", rol: "Topógrafo" },
-    { nombre: "Diana Aliaga Paton", rol: "Topógrafo" },
-    { nombre: "Albania Ruelas Bustillos", rol: "Supervisor Arquitecta" },
-    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecta" },
-    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecta" },
+    { nombre: "Omar Espinoza Vargas", rol: "Tópografo" },
+    { nombre: "Daniel Condori Contreras", rol: "Tópografo" },
+    { nombre: "Diana Aliaga Paton", rol: "Tópografo" },
+    
+    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecto" },
+    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecto" },
+    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecto" },
     { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
     { nombre: "Victor Siñani", rol: "Supervisor UVA" }
   ];
@@ -623,7 +693,7 @@
       activities: [
         {id:"1.1", desc:"Adquisición imágenes Sentinel-2 (2019-2025) 9 macrodistritos de La Paz", periods:["Jul S1-S2","Jul S3-S4"]},
         {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
-        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro)", periods:["Jul S3-S4","Ago S5-S6"]},
+        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
         {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
         {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
         {id:"1.6", desc:"Validación cruzada transformación detectada vs. datos SIT V2 y SIT V3", periods:["Ago S7-S8","Sep S9-S10"]},
@@ -723,7 +793,6 @@
   }
 
   function buildResponsableOptions(selectedArray) {
-    // selectedArray es un array de nombres
     const nombres = usuarios.map(u => u.nombre);
     let html = '';
     nombres.forEach(n => {
@@ -857,32 +926,168 @@
     }, 800);
   }
 
-  // ===== BITÁCORA =====
-  function addBitacoraEntry(actId) {
+  // ===== CALENDARIO =====
+  function getMonthData(actId, year, month) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay(); // 0=domingo
+    const today = new Date();
+    const isToday = (d) => {
+      return d.getFullYear() === today.getFullYear() &&
+             d.getMonth() === today.getMonth() &&
+             d.getDate() === today.getDate();
+    };
+    const entries = progress[actId]?.bitacora || [];
+    const notesByDate = {};
+    entries.forEach(e => {
+      const d = new Date(e.fecha);
+      const key = d.toISOString().slice(0,10);
+      notesByDate[key] = e.nota;
+    });
+
+    let days = [];
+    // días vacíos antes del primer día
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push({ day: null, vacio: true });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const key = dateObj.toISOString().slice(0,10);
+      const nota = notesByDate[key] || null;
+      days.push({
+        day: d,
+        vacio: false,
+        nota: nota,
+        esHoy: isToday(dateObj),
+        fecha: key
+      });
+    }
+    return { days, year, month };
+  }
+
+  function renderCalendario(actId, year, month) {
+    const container = document.getElementById(`calendario-${actId}`);
+    if (!container) return;
+    const data = getMonthData(actId, year, month);
+    const nombreMes = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
+    const editable = isAuthorized(currentUser);
+
+    let html = `
+      <div class="calendario-nav">
+        <button onclick="cambiarMes('${actId}', -1)" ${month <= 6 ? 'disabled' : ''}>◀</button>
+        <span>${nombreMes}</span>
+        <button onclick="cambiarMes('${actId}', 1)" ${month >= 11 ? 'disabled' : ''}>▶</button>
+      </div>
+      <div class="calendario-grid">
+    `;
+    const diasSemana = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+    diasSemana.forEach(n => {
+      html += `<div class="dia-nombre">${n}</div>`;
+    });
+    data.days.forEach(d => {
+      if (d.vacio) {
+        html += `<div class="dia vacio"></div>`;
+      } else {
+        const claseHoy = d.esHoy ? ' hoy' : '';
+        const tieneNota = d.nota ? ' has-nota' : '';
+        const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
+        html += `
+          <div class="dia${claseHoy}${tieneNota}" onclick="abrirDia('${actId}', '${d.fecha}', '${d.nota || ''}')">
+            <span>${d.day}</span>
+            ${d.nota ? '<span class="punto"></span>' : ''}
+            ${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}
+          </div>
+        `;
+      }
+    });
+    html += `</div>`;
+
+    // Modal para editar nota del día
+    html += `
+      <div class="calendario-dia-modal" id="modal-${actId}">
+        <textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea>
+        <div class="modal-actions">
+          <button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button>
+          <button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button>
+          <button onclick="cerrarModal('${actId}')">✖ Cerrar</button>
+        </div>
+      </div>
+    `;
+    container.innerHTML = html;
+  }
+
+  let calendarioState = {}; // por actividad: { year, month, diaSeleccionado }
+
+  function cambiarMes(actId, delta) {
+    if (!calendarioState[actId]) {
+      calendarioState[actId] = { year: 2026, month: 6 }; // julio = 6
+    }
+    let state = calendarioState[actId];
+    state.month += delta;
+    if (state.month < 6) state.month = 6;
+    if (state.month > 11) state.month = 11;
+    state.year = 2026; // fijo
+    renderCalendario(actId, state.year, state.month);
+  }
+
+  function abrirDia(actId, fecha, notaActual) {
+    if (!calendarioState[actId]) {
+      calendarioState[actId] = { year: 2026, month: 6 };
+    }
+    calendarioState[actId].diaSeleccionado = fecha;
+    const modal = document.getElementById(`modal-${actId}`);
+    const textarea = document.getElementById(`modal-text-${actId}`);
+    if (textarea) textarea.value = notaActual || '';
+    if (modal) modal.classList.add('visible');
+  }
+
+  function cerrarModal(actId) {
+    const modal = document.getElementById(`modal-${actId}`);
+    if (modal) modal.classList.remove('visible');
+  }
+
+  function guardarNotaDia(actId) {
     if (!isAuthorized(currentUser)) return;
-    const textarea = document.getElementById(`bitacora-input-${actId}`);
+    const fecha = calendarioState[actId]?.diaSeleccionado;
+    if (!fecha) return;
+    const textarea = document.getElementById(`modal-text-${actId}`);
     const nota = textarea.value.trim();
     if (!nota) return;
-    const entry = {
-      fecha: new Date().toISOString(),
-      nota: nota
-    };
-    progress[actId].bitacora.push(entry);
-    textarea.value = '';
-    // Actualizar UI de bitácora
-    renderBitacora(actId);
+
+    // Buscar si ya existe nota para esa fecha
+    const bitacora = progress[actId].bitacora;
+    const idx = bitacora.findIndex(e => e.fecha === fecha);
+    if (idx !== -1) {
+      bitacora[idx].nota = nota;
+    } else {
+      bitacora.push({ fecha, nota });
+    }
+    // Ordenar por fecha
+    bitacora.sort((a, b) => a.fecha.localeCompare(b.fecha));
+    progress[actId].bitacora = bitacora;
+    cerrarModal(actId);
+    // Actualizar calendario
+    const state = calendarioState[actId];
+    renderCalendario(actId, state.year, state.month);
     debouncedSave(actId);
   }
 
-  function renderBitacora(actId) {
-    const container = document.getElementById(`bitacora-list-${actId}`);
-    if (!container) return;
-    const entries = progress[actId]?.bitacora || [];
-    container.innerHTML = entries.map(e => `
-      <div class="bitacora-item">
-        <strong>${new Date(e.fecha).toLocaleString()}</strong> - ${e.nota}
-      </div>
-    `).join('');
+  function eliminarNotaDia(actId) {
+    if (!isAuthorized(currentUser)) return;
+    const fecha = calendarioState[actId]?.diaSeleccionado;
+    if (!fecha) return;
+    if (!confirm(`¿Eliminar la novedad del día ${fecha}?`)) return;
+    const bitacora = progress[actId].bitacora;
+    const idx = bitacora.findIndex(e => e.fecha === fecha);
+    if (idx !== -1) {
+      bitacora.splice(idx, 1);
+      progress[actId].bitacora = bitacora;
+      cerrarModal(actId);
+      const state = calendarioState[actId];
+      renderCalendario(actId, state.year, state.month);
+      debouncedSave(actId);
+    }
   }
 
   // ===== ACTUALIZACIONES UI =====
@@ -912,7 +1117,6 @@
     }
     const select = document.getElementById(`resp-${actId}`);
     if (select) {
-      // Actualizar opciones seleccionadas
       const opts = select.options;
       for (let i = 0; i < opts.length; i++) {
         opts[i].selected = data.responsables.includes(opts[i].value);
@@ -924,12 +1128,10 @@
       textarea.value = data.observaciones || '';
       textarea.disabled = !editable;
     }
-    // Bitácora
-    renderBitacora(actId);
-    const inputBit = document.getElementById(`bitacora-input-${actId}`);
-    if (inputBit) inputBit.disabled = !editable;
-    const btnBit = document.getElementById(`bitacora-btn-${actId}`);
-    if (btnBit) btnBit.disabled = !editable;
+    // Refrescar calendario (si existe)
+    if (calendarioState[actId]) {
+      renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
+    }
   }
 
   function updatePhaseUI(phaseIndex) {
@@ -1103,23 +1305,26 @@
 
         const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
 
-        row.innerHTML = `
-          <span class="activity-id">${actId}</span>
-          <span class="activity-desc">${act.desc}</span>
-          <div class="activity-periods">${periodsHtml}</div>
-          <div class="activity-control">
-            <div class="slider-container">
-              <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}"
-                oninput="handleSliderChange('${actId}', this.value)"
-                style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);"
-                ${!editable ? 'disabled' : ''}>
+        // Construir la fila
+        let html = `
+          <div class="activity-main">
+            <span class="activity-id">${actId}</span>
+            <span class="activity-desc">${act.desc}</span>
+            <div class="activity-periods">${periodsHtml}</div>
+            <div class="activity-control">
+              <div class="slider-container">
+                <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}"
+                  oninput="handleSliderChange('${actId}', this.value)"
+                  style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);"
+                  ${!editable ? 'disabled' : ''}>
+              </div>
+              <input type="number" min="0" max="100" value="${pct}" id="num-${actId}"
+                class="num-input" oninput="handleNumberChange('${actId}', this.value)"
+                onblur="this.value = clampValue(this.value)"
+                ${!editable ? 'disabled' : ''} />
+              <span class="activity-percent-sym">%</span>
+              <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
             </div>
-            <input type="number" min="0" max="100" value="${pct}" id="num-${actId}"
-              class="num-input" oninput="handleNumberChange('${actId}', this.value)"
-              onblur="this.value = clampValue(this.value)"
-              ${!editable ? 'disabled' : ''} />
-            <span class="activity-percent-sym">%</span>
-            <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
           </div>
 
           <div class="activity-meta">
@@ -1135,28 +1340,29 @@
             </div>
           </div>
 
-          <div class="bitacora-section">
-            <label>📋 Bitácora (novedades diarias):</label>
-            <div class="bitacora-input-group">
-              <textarea id="bitacora-input-${actId}" placeholder="Escribe una novedad..." ${!editable ? 'disabled' : ''}></textarea>
-              <button id="bitacora-btn-${actId}" onclick="addBitacoraEntry('${actId}')" ${!editable ? 'disabled' : ''}>➕ Agregar</button>
-            </div>
-            <div class="bitacora-list" id="bitacora-list-${actId}">
-              ${data.bitacora.map(e => `
-                <div class="bitacora-item">
-                  <strong>${new Date(e.fecha).toLocaleString()}</strong> - ${e.nota}
-                </div>
-              `).join('')}
-            </div>
+          <div class="calendario-section">
+            <label>📅 Bitácora (julio - diciembre 2026)</label>
+            <div id="calendario-${actId}"></div>
           </div>
         `;
+        row.innerHTML = html;
         activitiesContainer.appendChild(row);
       });
 
       phaseEl.appendChild(activitiesContainer);
       container.appendChild(phaseEl);
+    });
 
-      updatePhaseUI(pi);
+    // Inicializar calendarios después de renderizar
+    phasesData.forEach((phase, pi) => {
+      phase.activities.forEach(act => {
+        const actId = act.id;
+        if (!calendarioState[actId]) {
+          calendarioState[actId] = { year: 2026, month: 6 }; // julio
+        }
+        renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
+        updatePhaseUI(pi);
+      });
     });
 
     updateGlobalUI();
@@ -1325,9 +1531,13 @@
   window.handleNumberChange = handleNumberChange;
   window.handleResponsablesChange = handleResponsablesChange;
   window.handleObservacionChange = handleObservacionChange;
-  window.addBitacoraEntry = addBitacoraEntry;
   window.changeUser = changeUser;
   window.clampValue = clampValue;
+  window.cambiarMes = cambiarMes;
+  window.abrirDia = abrirDia;
+  window.cerrarModal = cerrarModal;
+  window.guardarNotaDia = guardarNotaDia;
+  window.eliminarNotaDia = eliminarNotaDia;
 </script>
 </body>
 </html>
