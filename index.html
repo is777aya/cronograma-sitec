@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (con mejoras para asignación de técnicos) ===== */
+    /* ===== ESTILOS (sin cambios relevantes, solo ajusto el calendario) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -410,7 +410,7 @@
       cursor: not-allowed;
     }
 
-    /* ===== CALENDARIO ===== */
+    /* ===== CALENDARIO (SIN RESTRICCIONES DE FECHAS) ===== */
     .calendario-section {
       display: flex;
       flex-direction: column;
@@ -612,7 +612,7 @@
 </head>
 <body>
 <div id="dashboard-container">
-  <!-- HEADER -->
+  <!-- HEADER (sin cambios) -->
   <div class="dashboard-header">
     <div class="header-left">
       <div class="header-icon">🗺️</div>
@@ -722,7 +722,7 @@
   <!-- FOOTER -->
   <div class="dashboard-footer">
     <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
-    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Dirección de Catastro y SIT</p>
+    <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
 
@@ -741,13 +741,13 @@
     { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
     { nombre: "Gustavo", rol: "Soporte Sistemas" },
     { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
-    { nombre: "Omar Espinoza Vargas", rol: "Geógrafo" },
-    { nombre: "Daniel Condori Contreras", rol: "Geógrafo" },
-    { nombre: "Diana Aliaga Paton", rol: "Geógrafa" },
+    { nombre: "Omar Espinoza Vargas", rol: "Topógrafo" },
+    { nombre: "Daniel Condori Contreras", rol: "Topógrafo" },
+    { nombre: "Diana Aliaga Paton", rol: "Topógrafo" },
     
-    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecta" },
-    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecta" },
-    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecta" },
+    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecto" },
+    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecto" },
+    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecto" },
     { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
     { nombre: "Victor Siñani", rol: "Supervisor UVA" }
   ];
@@ -924,7 +924,7 @@
           porcentaje: 0,
           responsables: [],
           observaciones: '',
-          bitacora: []
+          bitacora: [] // array de {fecha, nota}
         };
       }
     });
@@ -1000,7 +1000,7 @@
     }, 800);
   }
 
-  // ===== CALENDARIO =====
+  // ===== CALENDARIO (SIN RESTRICCIONES DE FECHAS) =====
   function getMonthData(actId, year, month) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -1048,9 +1048,9 @@
 
     let html = `
       <div class="calendario-nav">
-        <button onclick="cambiarMes('${actId}', -1)" ${month <= 6 ? 'disabled' : ''}>◀</button>
+        <button onclick="cambiarMes('${actId}', -1)">◀</button>
         <span>${nombreMes}</span>
-        <button onclick="cambiarMes('${actId}', 1)" ${month >= 11 ? 'disabled' : ''}>▶</button>
+        <button onclick="cambiarMes('${actId}', 1)">▶</button>
       </div>
       <div class="calendario-grid">
     `;
@@ -1092,19 +1092,27 @@
 
   function cambiarMes(actId, delta) {
     if (!calendarioState[actId]) {
-      calendarioState[actId] = { year: 2026, month: 6 };
+      // Inicializar con el mes actual
+      const now = new Date();
+      calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
     }
     let state = calendarioState[actId];
     state.month += delta;
-    if (state.month < 6) state.month = 6;
-    if (state.month > 11) state.month = 11;
-    state.year = 2026;
+    // Sin restricciones de mes/año
+    if (state.month < 0) {
+      state.month = 11;
+      state.year--;
+    } else if (state.month > 11) {
+      state.month = 0;
+      state.year++;
+    }
     renderCalendario(actId, state.year, state.month);
   }
 
   function abrirDia(actId, fecha, notaActual) {
     if (!calendarioState[actId]) {
-      calendarioState[actId] = { year: 2026, month: 6 };
+      const now = new Date();
+      calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
     }
     calendarioState[actId].diaSeleccionado = fecha;
     const modal = document.getElementById(`modal-${actId}`);
@@ -1158,7 +1166,7 @@
     }
   }
 
-  // ===== ASIGNACIÓN DE TÉCNICOS (MEJORADA) =====
+  // ===== ASIGNACIÓN DE TÉCNICOS =====
   function asignarTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
     const select = document.getElementById(`resp-${actId}`);
@@ -1170,7 +1178,6 @@
       }
     }
     progress[actId].responsables = selected;
-    // Actualizar badges y select
     actualizarBadges(actId);
     debouncedSave(actId);
     showSaveStatus(`✅ ${selected.length} técnicos asignados`, 'success');
@@ -1181,7 +1188,6 @@
     if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
     progress[actId].responsables = [];
     actualizarBadges(actId);
-    // Deseleccionar opciones en el select
     const select = document.getElementById(`resp-${actId}`);
     if (select) {
       for (let i = 0; i < select.options.length; i++) {
@@ -1230,7 +1236,6 @@
       statusEl.className = `activity-status ${status.cls}`;
       statusEl.textContent = status.text;
     }
-    // Actualizar select y badges
     const select = document.getElementById(`resp-${actId}`);
     if (select) {
       const opts = select.options;
@@ -1240,7 +1245,6 @@
       select.disabled = !editable;
     }
     actualizarBadges(actId);
-    // Botones de asignación
     const btnAsignar = document.getElementById(`btn-asignar-${actId}`);
     if (btnAsignar) btnAsignar.disabled = !editable;
     const btnQuitar = document.getElementById(`btn-quitar-${actId}`);
@@ -1427,7 +1431,6 @@
 
         const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
 
-        // Badges de responsables actuales
         const badgesHtml = data.responsables && data.responsables.length > 0
           ? data.responsables.map(n => `<span class="badge-tecnico">${n}</span>`).join('')
           : '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
@@ -1477,12 +1480,12 @@
             </div>
             <div class="meta-row">
               <label>📝 Tareas:</label>
-              <textarea id="obs-${actId}" placeholder="Tareas especificas..." onchange="handleObservacionChange('${actId}', this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
+              <textarea id="obs-${actId}" placeholder="Tareas Especificas..." onchange="handleObservacionChange('${actId}', this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
             </div>
           </div>
 
           <div class="calendario-section">
-            <label>📅 Bitácora (julio - diciembre 2026)</label>
+            <label>📅 Bitácora (registro de novedades diarias)</label>
             <div id="calendario-${actId}"></div>
           </div>
         `;
@@ -1493,20 +1496,19 @@
       container.appendChild(phaseEl);
     });
 
-    // Inicializar calendarios
+    // Inicializar calendarios con mes actual
     phasesData.forEach((phase) => {
       phase.activities.forEach(act => {
         const actId = act.id;
         if (!calendarioState[actId]) {
-          calendarioState[actId] = { year: 2026, month: 6 };
+          const now = new Date();
+          calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
         }
         renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
       });
     });
 
-    // Actualizar fases
     phasesData.forEach((_, i) => updatePhaseUI(i));
-
     updateGlobalUI();
     updateSummaryUI();
     updateReadonlyNotice();
