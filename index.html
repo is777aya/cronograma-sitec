@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (completos, igual que antes) ===== */
+    /* ===== ESTILOS (igual que antes, con algunos ajustes para múltiple select y bitácora) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -107,9 +107,7 @@
       font-weight: 600;
       white-space: nowrap;
     }
-    .user-badge.readonly {
-      background: var(--accent-amber);
-    }
+    .user-badge.readonly { background: var(--accent-amber); }
 
     .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
     .kpi-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; transition: all 0.3s ease; box-shadow: var(--shadow); }
@@ -202,6 +200,7 @@
     .activity-row.hidden { display: none; }
     .activity-id { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--accent-cyan); font-weight: 600; min-width: 40px; }
     .activity-desc { flex: 2; font-size: 13px; color: var(--text-secondary); padding-right: 16px; line-height: 1.5; min-width: 200px; }
+
     .activity-periods { display: flex; gap: 4px; margin-right: 16px; flex-wrap: wrap; max-width: 200px; }
     .period-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--accent-blue); font-weight: 500; white-space: nowrap; }
 
@@ -288,15 +287,28 @@
 
     .activity-meta {
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      gap: 8px;
       flex: 1 1 100%;
       padding-left: 52px;
       padding-bottom: 8px;
-      flex-wrap: wrap;
     }
-    .activity-meta select,
-    .activity-meta textarea {
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .meta-row label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      min-width: 100px;
+    }
+    .meta-row select,
+    .meta-row textarea {
       background: var(--bg-primary);
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -306,18 +318,91 @@
       outline: none;
       transition: border-color 0.2s;
       font-family: inherit;
+      flex: 1;
+      min-width: 150px;
     }
-    .activity-meta select:focus,
-    .activity-meta textarea:focus { border-color: var(--accent-blue); }
-    .activity-meta select { min-width: 180px; }
-    .activity-meta select:disabled {
+    .meta-row select:focus,
+    .meta-row textarea:focus { border-color: var(--accent-blue); }
+    .meta-row select { min-width: 180px; }
+    .meta-row select[multiple] { height: auto; min-height: 60px; }
+    .meta-row textarea { resize: vertical; height: 36px; }
+    .meta-row select:disabled,
+    .meta-row textarea:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-    .activity-meta textarea { flex: 1; min-width: 150px; resize: vertical; height: 36px; }
-    .activity-meta textarea:disabled {
-      opacity: 0.6;
+
+    .bitacora-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1 1 100%;
+      padding-left: 52px;
+      padding-bottom: 8px;
+    }
+    .bitacora-section label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .bitacora-input-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .bitacora-input-group textarea {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 6px 10px;
+      font-size: 13px;
+      outline: none;
+      resize: vertical;
+      height: 60px;
+      font-family: inherit;
+    }
+    .bitacora-input-group textarea:focus { border-color: var(--accent-blue); }
+    .bitacora-input-group button {
+      background: var(--accent-blue);
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .bitacora-input-group button:hover { background: #2563eb; }
+    .bitacora-input-group button:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    .bitacora-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .bitacora-item {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border-left: 3px solid var(--accent-cyan);
+    }
+    .bitacora-item strong {
+      color: var(--text-primary);
+      font-weight: 600;
     }
 
     .summary-section { margin-bottom: 24px; }
@@ -363,7 +448,8 @@
     @media (max-width: 1200px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
       .activity-control { min-width: auto; width: 100%; justify-content: flex-start; }
-      .activity-meta { padding-left: 20px; }
+      .meta-row { flex-direction: column; align-items: stretch; }
+      .bitacora-input-group { flex-direction: column; }
     }
     @media (max-width: 768px) {
       .dashboard-header { flex-direction: column; gap: 16px; text-align: center; }
@@ -375,7 +461,8 @@
       .activity-periods { max-width: none; width: 100%; }
       .activity-control { width: 100%; justify-content: flex-start; padding-left: 0; }
       .phase-description { padding-left: 20px; }
-      .activity-meta { padding-left: 0; flex-direction: column; align-items: stretch; }
+      .activity-meta { padding-left: 0; }
+      .bitacora-section { padding-left: 0; }
       .user-selector { flex-wrap: wrap; }
     }
   </style>
@@ -387,8 +474,8 @@
     <div class="header-left">
       <div class="header-icon">🗺️</div>
       <div>
-        <h1>Cronograma Trabajo SITEC</h1>
-        <p class="header-subtitle">5 Fases | Julio — Diciembre 2026</p>
+        <h1>Cronograma SITEC</h1>
+        <p class="header-subtitle">Fases | Julio — Diciembre 2026</p>
       </div>
     </div>
     <div class="header-right">
@@ -411,6 +498,7 @@
     </div>
   </div>
 
+  <!-- Mensaje de solo lectura -->
   <div class="readonly-notice" id="readonly-notice">
     👁️ Estás en modo <strong>solo lectura</strong>. No puedes modificar avances, responsables ni observaciones.
   </div>
@@ -419,7 +507,7 @@
   <div class="kpi-row" id="kpi-row">
     <div class="kpi-card kpi-total">
       <div class="kpi-icon">📋</div>
-      <div class="kpi-value" id="kpi-total">58</div>
+      <div class="kpi-value" id="kpi-total">0</div>
       <div class="kpi-label">Actividades Totales</div>
     </div>
     <div class="kpi-card kpi-completed">
@@ -434,7 +522,7 @@
     </div>
     <div class="kpi-card kpi-pending">
       <div class="kpi-icon">⏳</div>
-      <div class="kpi-value" id="kpi-pending">58</div>
+      <div class="kpi-value" id="kpi-pending">0</div>
       <div class="kpi-label">Pendientes</div>
     </div>
     <div class="kpi-card kpi-phases">
@@ -476,6 +564,7 @@
     <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
   </div>
 
+  <!-- Mensaje de error -->
   <div id="error-message" class="error-message" style="display:none;"></div>
 
   <!-- PHASES ACCORDION -->
@@ -504,8 +593,29 @@
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   console.log('✅ Cliente Supabase creado:', supabaseClient);
 
-  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA COMPLETA) =====
-  // Este array debe definirse ANTES de cualquier función que lo use (initProgress, render, etc.)
+  // ===== USUARIOS =====
+  const usuarios = [
+    { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
+    { nombre: "Gustavo", rol: "Soporte Sistemas" },
+    { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
+    { nombre: "Omar Espinoza Vargas", rol: "Topógrafo" },
+    { nombre: "Daniel Condori Contreras", rol: "Topógrafo" },
+    { nombre: "Diana Aliaga Paton", rol: "Topógrafo" },
+    { nombre: "Albania Ruelas Bustillos", rol: "Supervisor Arquitecta" },
+    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecta" },
+    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecta" },
+    { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
+    { nombre: "Victor Siñani", rol: "Supervisor UVA" }
+  ];
+
+  const USUARIOS_AUTORIZADOS = [
+    "Israel Roly Gutierrez Ulo",
+    "Romulo Marca",
+    "Albania Ruelas Bustillos",
+    "Victor Siñani"
+  ];
+
+  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA FINAL ACTUALIZADA) =====
   const phasesData = [
     { 
       name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
@@ -513,7 +623,7 @@
       activities: [
         {id:"1.1", desc:"Adquisición imágenes Sentinel-2 (2019-2025) 9 macrodistritos de La Paz", periods:["Jul S1-S2","Jul S3-S4"]},
         {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
-        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
+        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro)", periods:["Jul S3-S4","Ago S5-S6"]},
         {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
         {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
         {id:"1.6", desc:"Validación cruzada transformación detectada vs. datos SIT V2 y SIT V3", periods:["Ago S7-S8","Sep S9-S10"]},
@@ -522,103 +632,56 @@
       ]
     },
     { 
-      name: "FASE 2: PRIORIZACIÓN — Cruce Tributario-Territorial",
-      description: "Cruce espacial de los datos de transformación urbana (ITU) con la recaudación tributaria de la ATM para identificar OTBs con crecimiento físico no reflejado en recaudación, generando el ranking de zonas priorizadas para intervención.",
+      name: "FASE 2: PRIORIZACIÓN — Cruce Tributario-Territorial (NUEVAS TAREAS)",
+      description: "Integración y estandarización de información catastral y tributaria para generar indicadores de crecimiento físico y comportamiento tributario por OTB.",
       activities: [
-        {id:"2.1", desc:"Solicitud y recopilación datos recaudación IMPBI por macrodistrito, distrito y OTB (2020-2025)", periods:["Jul S3-S4","Ago S5-S6","Ago S7-S8"]},
-        {id:"2.2", desc:"Cruce espacial ITU con datos tributarios: mapa de transformación vs. recaudación por OTB", periods:["Ago S7-S8","Sep S9-S10"]},
-        {id:"2.3", desc:"Identificación zonas con crecimiento físico y recaudación estancada o decreciente", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"2.4", desc:"Detección comportamientos atípicos tributarios (baja recaudación / alta transformación)", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"2.5", desc:"Generación mapas de comportamiento tributario territorial por OTB", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"2.6", desc:"Construcción matriz correlación crecimiento físico vs. recaudación por macrodistrito", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"2.7", desc:"Definición criterios priorización: transformación, recaudación, riesgo, densidad poblacional", periods:["Ago S7-S8","Sep S9-S10"]},
-        {id:"2.8", desc:"Aplicación modelo multicriterio por macrodistrito y ranking de OTBs priorizadas", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"2.9", desc:"Delimitación polígonos de vuelo UAV por zona priorizada con coordenadas UTM", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"2.10", desc:"Validación técnica polígonos de vuelo con Dirección de Catastro y entrega mapa priorizado", periods:["Oct S11-S12","Oct S13-S14"]}
+        {id:"2.1", desc:"Integración y estandarización de información catastral y tributaria para generar indicadores de crecimiento físico y comportamiento tributario por OTB", periods:["Jul S3-S4","Ago S5-S6"]},
+        {id:"2.2", desc:"Consolidar la base de datos Catastro-ATM del Macro Distrito Sur mediante la validación de la metodología y resultados preliminares, la proyección de ingresos tributarios 2027 por OTB", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
+        {id:"2.3", desc:"Estructuración y extracción de datos del SIT mediante consultas SQL, generando 1.585.228 registros catastrales en cuatro conjuntos de datos interoperables para su análisis e integración institucional por parte de la Secretaria de Ciudad Inteligente", periods:["Ago S7-S8","Sep S9-S10"]},
+        {id:"2.4", desc:"Construcción, presentación y validación del código CHIP para la integración de las bases de datos CATASTRO-ATM", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"2.5", desc:"Integración Catastro–ATM mediante la vinculación de 152.655 registros, consolidación de una tabla única migrada al SIT e incorporación del código CHIP para consulta institucional", periods:["Oct S11-S12","Oct S13-S14"]}
       ]
     },
     { 
-      name: "FASE 3: DRON — Fotogrametría UAV y Modelos 3D",
+      name: "FASE 3: DRON — Fotogrametría UAV y Modelos 3D (REVISADA)",
       description: "Planificación, ejecución de vuelos fotogramétricos con drones sobre las OTBs priorizadas, y procesamiento de imágenes para generar ortofotos de alta resolución (<10cm), nubes de puntos densas, MDT/DSM y modelos 3D.",
       activities: [
-        {id:"3.1", desc:"Evaluación capacidad técnica interna vs. contratación externa de servicios fotogramétricos", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"3.2", desc:"Elaboración términos de referencia y contratación servicio fotogramétrico UAV", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"3.3", desc:"Planificación rutas de vuelo (altitud, solapamiento frontal/lateral, GSD objetivo)", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"3.4", desc:"Gestión permisos de vuelo DGAC y coordinación subalcaldías/OTBs para acceso a zonas", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"3.5", desc:"Despliegue equipos drones (ala fija y multirotor) en macrodistritos priorizados", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
-        {id:"3.6", desc:"Vuelos fotogramétricos zonas urbanas de alta densidad (dron ala fija)", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
-        {id:"3.7", desc:"Vuelos fotogramétricos zonas de difícil acceso (dron multirotor)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
-        {id:"3.8", desc:"Control de calidad en campo de imágenes capturadas y re-vuelos por nubosidad/fallas", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
-        {id:"3.9", desc:"Procesamiento fotogramétrico imágenes en Pix4D/Metashape (orientación, densificación)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
-        {id:"3.10", desc:"Generación ortomosaicos < 10 cm/píxel con control geométrico GNSS", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
-        {id:"3.11", desc:"Generación nubes de puntos densas, MDT y DSM de zonas priorizadas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"3.12", desc:"Entrega ortomosaicos, nubes de puntos, MDT/DSM validados y georreferenciados", periods:["Dic S25-S26"]}
+        {id:"3.1", desc:"Evaluación capacidad técnica interna de los equipos fotogramétricos del GAMLP", periods:["Sep S9-S10","Oct S11-S12"]},
+        {id:"3.2", desc:"Planificación rutas de vuelo (altitud, solapamiento frontal/lateral, GSD objetivo)", periods:["Oct S11-S12","Oct S13-S14"]},
+        {id:"3.3", desc:"Vuelos fotogramétricos zonas urbanas de alta densidad (dron ala fija)", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
+        {id:"3.4", desc:"Vuelos fotogramétricos zonas de difícil acceso (dron multirotor)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
+        {id:"3.5", desc:"Control de calidad en campo de imágenes capturadas y re-vuelos por nubosidad/fallas", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.6", desc:"Procesamiento fotogramétrico imágenes en Pix4D/Metashape (orientación, densificación)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.7", desc:"Generación ortomosaicos < 10 cm/píxel con control geométrico GNSS", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
+        {id:"3.8", desc:"Generación nubes de puntos densas, MDT y DSM de zonas priorizadas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"3.9", desc:"Entrega ortomosaicos, nubes de puntos, MDT/DSM validados y georreferenciados", periods:["Dic S25-S26"]}
       ]
     },
     { 
-      name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral",
-      description: "Digitalización vectorial de todos los cambios detectados en construcciones sobre ortofotos 3D, actualización de fichas técnicas prediales, identificación de nuevos predios sin registro y empadronamiento de nuevos contribuyentes.",
+      name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral (REVISADA)",
+      description: "Digitalización vectorial de todos los cambios detectados en construcciones sobre ortofotos 3D, actualización de fichas técnicas prediales, identificación de nuevos predios sin registro y empadronamiento de nuevos contribuyentes. Se trabajará sobre 1341 predios del macrodistrito Sur, con una meta de 40 lotes/operador/día.",
       activities: [
-        {id:"4.1", desc:"Capacitación técnicos en digitalización vectorial sobre ortomosaicos 3D", periods:["Nov S17-S18","Nov S19-S20"]},
-        {id:"4.2", desc:"Digitalización lotes, manzanas y límites prediales sobre ortofotos (meta: 40 lotes/operador/día)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.3", desc:"Digitalización elementos constructivos: muros, edificaciones, anexos y alturas", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.4", desc:"Clasificación materiales de construcción, tipología de vías y usos de suelo", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.5", desc:"Control de calidad digitalización (1 día de control por lote digitalizado)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.6", desc:"Estructuración y contraste de datos vectoriales contra SIT V2/V3 existente", periods:["Dic S23-S24","Dic S25-S26"]},
-        {id:"4.7", desc:"Clasificación predios: Sin catastro / Desactualizado / Actualizado / Nuevo", periods:["Dic S21-S22","Dic S23-S24"]},
-        {id:"4.8", desc:"Actualización fichas técnicas prediales con datos fotogramétricos y nuevas construcciones", periods:["Dic S23-S24","Dic S25-S26"]},
-        {id:"4.9", desc:"Identificación predios sin registro catastral y generación fichas técnicas nuevos predios", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.10", desc:"Empadronamiento nuevos contribuyentes ATM y emisión primeras boletas IMPBI", periods:["Dic S25-S26"]},
-        {id:"4.11", desc:"Corrección valores base imponible SIT con datos actualizados de construcciones", periods:["Dic S25-S26"]},
-        {id:"4.12", desc:"Entrega capas vectoriales prediales actualizadas, nuevos contribuyentes empadronados y fichas técnicas", periods:["Dic S25-S26"]}
+        {id:"4.1", desc:"Capacitación técnicos en digitalización vectorial sobre ortomosaicos 3D (medible: número de técnicos capacitados)", periods:["Nov S17-S18","Nov S19-S20"]},
+        {id:"4.2", desc:"Digitalización y actualización de la información predial y constructiva sobre ortofotos, incorporando lotes, manzanas, límites prediales, muros, edificaciones, anexos y alturas (meta: 40 lotes/operador/día)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.3", desc:"Clasificación materiales de construcción, tipología de vías y usos de suelo (medible: número de predios clasificados)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.4", desc:"Control de calidad digitalización (1 día de control por lote digitalizado, medible: número de lotes controlados)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"4.5", desc:"Contraste de datos vectoriales contra SIT V2/V3 existente (medible: número de registros contrastados)", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"4.6", desc:"Actualización y generación de fichas técnicas prediales (incluyendo nuevos predios, medible: número de fichas actualizadas/generadas)", periods:["Dic S23-S24","Dic S25-S26"]},
+        {id:"4.7", desc:"Clasificación predios: Sin catastro / Desactualizado / Actualizado / Nuevo (medible: conteo por categoría)", periods:["Dic S21-S22","Dic S23-S24"]},
+        {id:"4.8", desc:"Entrega de capas vectoriales prediales actualizadas, nuevos contribuyentes empadronados y fichas técnicas", periods:["Dic S25-S26"]}
       ]
     },
     { 
-      name: "FASE 5: INTEGRACIÓN — Modelo de Datos Multidimensional y SIT",
+      name: "FASE 5: INTEGRACIÓN — Modelo de Datos Multidimensional y SIT (RESUMIDA)",
       description: "Diseño e implementación del nuevo modelo de datos multidimensional (cubo OLAP geoespacial), integración con SIT V2/V3, publicación de servicios WMS/WFS, y establecimiento del protocolo operativo Catastro-ATM para transferencia de datos.",
       activities: [
-        {id:"5.1", desc:"Levantamiento requerimientos catastral, tributario, fotogramétrico y funcionales SIT", periods:["Ago S5-S6","Ago S7-S8"]},
-        {id:"5.2", desc:"Análisis arquitectura actual SIT V2 y SIT V3 y mapeo de integraciones necesarias", periods:["Ago S7-S8","Sep S9-S10"]},
-        {id:"5.3", desc:"Diseño esquema base datos multidimensional: entidades predios, construcciones, mejoras, contribuyentes", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
-        {id:"5.4", desc:"Diseño integración PostgreSQL/PostGIS con SIT V2/V3 existente y especificaciones WMS/WFS", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"5.5", desc:"Diseño interfaz de usuario para consulta de capas geoespaciales y comparativa visual antes/después", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"5.6", desc:"Especificaciones integración módulo SIG con trámites en línea SIT V3", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"5.7", desc:"Entrega diseño modelo datos multidimensional y módulo SIG institucional", periods:["Oct S13-S14"]},
-        {id:"5.8", desc:"Instalación y configuración servidor PostgreSQL/PostGIS en infraestructura municipal", periods:["Nov S17-S18","Nov S19-S20"]},
-        {id:"5.9", desc:"Creación esquemas espaciales y carga datos fotogramétricos (ortomosaicos, nubes, MDE)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24"]},
-        {id:"5.10", desc:"Carga datos catastrales actualizados (fichas, planimetrías, permisos) y tributarios (recaudación, deuda)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"5.11", desc:"Desarrollo consultas cruzadas espaciales (cubo OLAP geoespacial) para análisis territorial", periods:["Dic S23-S24","Dic S25-S26"]},
-        {id:"5.12", desc:"Configuración servicios WMS/WFS y publicación capas geoespaciales normalizadas en SIT V2/V3", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"5.13", desc:"Pruebas de integridad, rendimiento del sistema y validación funcional con usuarios", periods:["Dic S25-S26"]},
-        {id:"5.14", desc:"Protocolo transferencia datos Catastro-ATM y cruce predios actualizados con padrón contribuyentes", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
-        {id:"5.15", desc:"Generación notificaciones actualización valores a contribuyentes con predios modificados", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"5.16", desc:"Entrega modelo datos multidimensional operativo, módulos SIG publicados y protocolo Catastro-ATM", periods:["Dic S25-S26"]}
+        {id:"5.1", desc:"Análisis y diseño del modelo de datos multidimensional y especificaciones de integración", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
+        {id:"5.2", desc:"Implementación y configuración de servidor PostgreSQL/PostGIS y creación de esquemas espaciales", periods:["Oct S11-S12","Oct S13-S14","Nov S15-S16"]},
+        {id:"5.3", desc:"Carga de datos catastrales, fotogramétricos y tributarios, y desarrollo de consultas cruzadas", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
+        {id:"5.4", desc:"Configuración de servicios WMS/WFS, publicación de capas y pruebas de integridad", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
+        {id:"5.5", desc:"Entrega del modelo operativo, módulos SIG publicados y protocolo Catastro-ATM", periods:["Dic S25-S26"]}
       ]
     }
-  ];
-
-  // ===== LISTA DE USUARIOS =====
-  const usuarios = [
-    { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
-    { nombre: "Gustavo", rol: "Soporte Sistemas" },
-    { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
-    { nombre: "Omar Espinoza Vargas", rol: "Geógrafo" },
-    { nombre: "Daniel Condori Contreras", rol: "Geógrafo" },
-    { nombre: "Diana Aliaga Paton", rol: "Geógrafa" },
-    { nombre: "Albania Rojas", rol: "Supervisor Arquitecto" },
-    { nombre: "Albania Ruelas Bustillos", rol: "Arquitecta" },
-    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecta" },
-    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecta" },
-    { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
-    { nombre: "Victor Siñani", rol: "Supervisor UVA" }
-  ];
-
-  // ===== USUARIOS AUTORIZADOS PARA EDITAR =====
-  const USUARIOS_AUTORIZADOS = [
-    "Israel Roly Gutierrez Ulo",
-    "Romulo Marca",
-    "Albania Rojas",
-    "Victor Siñani"
   ];
 
   // ===== ESTADO =====
@@ -659,12 +722,14 @@
     return html;
   }
 
-  function buildResponsableOptions(selected) {
-    let html = '<option value="">-- Sin asignar --</option>';
-    usuarios.forEach(u => {
-      const label = `${u.nombre} (${u.rol})`;
-      const sel = (selected === u.nombre) ? 'selected' : '';
-      html += `<option value="${u.nombre}" ${sel}>${label}</option>`;
+  function buildResponsableOptions(selectedArray) {
+    // selectedArray es un array de nombres
+    const nombres = usuarios.map(u => u.nombre);
+    let html = '';
+    nombres.forEach(n => {
+      const sel = (selectedArray && selectedArray.includes(n)) ? 'selected' : '';
+      const rol = usuarios.find(u => u.nombre === n)?.rol || '';
+      html += `<option value="${n}" ${sel}>${n} (${rol})</option>`;
     });
     return html;
   }
@@ -712,7 +777,12 @@
     phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
     allIds.forEach(id => {
       if (!progress[id]) {
-        progress[id] = { porcentaje: 0, responsable: '', observaciones: '' };
+        progress[id] = {
+          porcentaje: 0,
+          responsables: [],
+          observaciones: '',
+          bitacora: [] // array de {fecha, nota}
+        };
       }
     });
   }
@@ -727,15 +797,15 @@
       if (error) throw error;
       
       console.log('✅ Datos obtenidos de Supabase:', data);
-      
       initProgress();
 
       if (data && data.length > 0) {
         data.forEach(row => {
           if (progress[row.id]) {
             progress[row.id].porcentaje = row.porcentaje || 0;
-            progress[row.id].responsable = row.responsable || '';
+            progress[row.id].responsables = row.responsables || [];
             progress[row.id].observaciones = row.observaciones || '';
+            progress[row.id].bitacora = row.bitacora || [];
           }
         });
         showSaveStatus('✅ Datos cargados desde Supabase', 'success');
@@ -756,6 +826,7 @@
   }
 
   async function saveActivityToSupabase(activityId) {
+    if (!isAuthorized(currentUser)) return;
     const data = progress[activityId];
     if (!data) return;
     try {
@@ -764,8 +835,9 @@
         .upsert({
           id: activityId,
           porcentaje: data.porcentaje,
-          responsable: data.responsable,
+          responsables: data.responsables,
           observaciones: data.observaciones,
+          bitacora: data.bitacora,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
       if (error) throw error;
@@ -783,6 +855,34 @@
     saveTimeout = setTimeout(() => {
       saveActivityToSupabase(activityId);
     }, 800);
+  }
+
+  // ===== BITÁCORA =====
+  function addBitacoraEntry(actId) {
+    if (!isAuthorized(currentUser)) return;
+    const textarea = document.getElementById(`bitacora-input-${actId}`);
+    const nota = textarea.value.trim();
+    if (!nota) return;
+    const entry = {
+      fecha: new Date().toISOString(),
+      nota: nota
+    };
+    progress[actId].bitacora.push(entry);
+    textarea.value = '';
+    // Actualizar UI de bitácora
+    renderBitacora(actId);
+    debouncedSave(actId);
+  }
+
+  function renderBitacora(actId) {
+    const container = document.getElementById(`bitacora-list-${actId}`);
+    if (!container) return;
+    const entries = progress[actId]?.bitacora || [];
+    container.innerHTML = entries.map(e => `
+      <div class="bitacora-item">
+        <strong>${new Date(e.fecha).toLocaleString()}</strong> - ${e.nota}
+      </div>
+    `).join('');
   }
 
   // ===== ACTUALIZACIONES UI =====
@@ -812,7 +912,11 @@
     }
     const select = document.getElementById(`resp-${actId}`);
     if (select) {
-      select.value = data.responsable || '';
+      // Actualizar opciones seleccionadas
+      const opts = select.options;
+      for (let i = 0; i < opts.length; i++) {
+        opts[i].selected = data.responsables.includes(opts[i].value);
+      }
       select.disabled = !editable;
     }
     const textarea = document.getElementById(`obs-${actId}`);
@@ -820,6 +924,12 @@
       textarea.value = data.observaciones || '';
       textarea.disabled = !editable;
     }
+    // Bitácora
+    renderBitacora(actId);
+    const inputBit = document.getElementById(`bitacora-input-${actId}`);
+    if (inputBit) inputBit.disabled = !editable;
+    const btnBit = document.getElementById(`bitacora-btn-${actId}`);
+    if (btnBit) btnBit.disabled = !editable;
   }
 
   function updatePhaseUI(phaseIndex) {
@@ -982,7 +1092,7 @@
 
       phase.activities.forEach((act) => {
         const actId = act.id;
-        const data = progress[actId] || { porcentaje: 0, responsable: '', observaciones: '' };
+        const data = progress[actId] || { porcentaje: 0, responsables: [], observaciones: '', bitacora: [] };
         const pct = data.porcentaje;
         const status = getStatus(pct);
         const color = getColorForPct(pct);
@@ -1011,13 +1121,33 @@
             <span class="activity-percent-sym">%</span>
             <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
           </div>
+
           <div class="activity-meta">
-            <select id="resp-${actId}" onchange="handleResponsableChange('${actId}', this.value)"
-              ${!editable ? 'disabled' : ''}>
-              ${buildResponsableOptions(data.responsable)}
-            </select>
-            <textarea id="obs-${actId}" placeholder="Observaciones..." onchange="handleObservacionChange('${actId}', this.value)"
-              ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
+            <div class="meta-row">
+              <label>👥 Responsables:</label>
+              <select id="resp-${actId}" multiple onchange="handleResponsablesChange('${actId}')" ${!editable ? 'disabled' : ''}>
+                ${buildResponsableOptions(data.responsables)}
+              </select>
+            </div>
+            <div class="meta-row">
+              <label>📝 Observaciones:</label>
+              <textarea id="obs-${actId}" placeholder="Observaciones generales..." onchange="handleObservacionChange('${actId}', this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
+            </div>
+          </div>
+
+          <div class="bitacora-section">
+            <label>📋 Bitácora (novedades diarias):</label>
+            <div class="bitacora-input-group">
+              <textarea id="bitacora-input-${actId}" placeholder="Escribe una novedad..." ${!editable ? 'disabled' : ''}></textarea>
+              <button id="bitacora-btn-${actId}" onclick="addBitacoraEntry('${actId}')" ${!editable ? 'disabled' : ''}>➕ Agregar</button>
+            </div>
+            <div class="bitacora-list" id="bitacora-list-${actId}">
+              ${data.bitacora.map(e => `
+                <div class="bitacora-item">
+                  <strong>${new Date(e.fecha).toLocaleString()}</strong> - ${e.nota}
+                </div>
+              `).join('')}
+            </div>
           </div>
         `;
         activitiesContainer.appendChild(row);
@@ -1060,9 +1190,16 @@
     debouncedSave(actId);
   }
 
-  function handleResponsableChange(actId, value) {
+  function handleResponsablesChange(actId) {
     if (!isAuthorized(currentUser)) return;
-    progress[actId].responsable = value;
+    const select = document.getElementById(`resp-${actId}`);
+    const selected = [];
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].selected) {
+        selected.push(select.options[i].value);
+      }
+    }
+    progress[actId].responsables = selected;
     debouncedSave(actId);
   }
 
@@ -1080,7 +1217,7 @@
     return -1;
   }
 
-  // ===== GESTIÓN DE USUARIO =====
+  // ===== CAMBIO DE USUARIO =====
   function changeUser(userName) {
     currentUser = userName;
     localStorage.setItem('catastro_user', userName);
@@ -1091,7 +1228,7 @@
     console.log(`👤 Usuario cambiado a: ${userName} (${isAuthorized(userName) ? 'EDITOR' : 'LECTOR'})`);
   }
 
-  // ===== TOGGLE =====
+  // ===== TOGGLE FASE =====
   function togglePhase(pi) {
     const el = document.getElementById(`phase-${pi}`);
     if (el) el.classList.toggle('collapsed');
@@ -1103,7 +1240,7 @@
       alert('No tienes permisos para reiniciar los avances.');
       return;
     }
-    if (!confirm('¿Estás seguro de que deseas reiniciar TODOS los avances a 0%? Esta acción no se puede deshacer.')) return;
+    if (!confirm('¿Estás seguro de que deseas reiniciar TODOS los avances a 0%?')) return;
     Object.keys(progress).forEach(id => {
       progress[id].porcentaje = 0;
     });
@@ -1111,9 +1248,7 @@
     phasesData.forEach((_, i) => updatePhaseUI(i));
     updateGlobalUI();
     updateSummaryUI();
-    Object.keys(progress).forEach(id => {
-      saveActivityToSupabase(id);
-    });
+    Object.keys(progress).forEach(id => saveActivityToSupabase(id));
     showSaveStatus('🔄 Avances reiniciados', 'success');
   }
 
@@ -1188,8 +1323,9 @@
   window.forceLocalData = forceLocalData;
   window.handleSliderChange = handleSliderChange;
   window.handleNumberChange = handleNumberChange;
-  window.handleResponsableChange = handleResponsableChange;
+  window.handleResponsablesChange = handleResponsablesChange;
   window.handleObservacionChange = handleObservacionChange;
+  window.addBitacoraEntry = addBitacoraEntry;
   window.changeUser = changeUser;
   window.clampValue = clampValue;
 </script>
