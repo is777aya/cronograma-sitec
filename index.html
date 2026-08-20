@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (sin cambios) ===== */
+    /* ===== ESTILOS (igual que antes, solo se reordenan elementos) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -120,6 +120,7 @@
     .kpi-pending .kpi-value { color: var(--accent-rose); }
     .kpi-phases .kpi-value { color: var(--accent-violet); }
 
+    /* ===== FILTER BAR (ahora al final) ===== */
     .filter-bar {
       display: flex;
       gap: 16px;
@@ -128,7 +129,7 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 16px 20px;
-      margin-bottom: 24px;
+      margin: 24px 0;
       flex-wrap: wrap;
     }
     .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
@@ -153,6 +154,82 @@
     .btn-local { background: linear-gradient(135deg, var(--accent-amber), #d97706); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
     .btn-local:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
 
+    /* ===== SUMMARY SECTION (ahora debajo de KPI) ===== */
+    .summary-section {
+      margin-bottom: 24px;
+      margin-top: 8px;
+    }
+    .summary-section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .summary-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s;
+    }
+    .summary-item:hover {
+      border-color: var(--accent-blue);
+      transform: translateX(4px);
+    }
+    .summary-ring {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    .summary-ring svg {
+      transform: rotate(-90deg);
+    }
+    .summary-ring-bg {
+      fill: none;
+      stroke: var(--bg-primary);
+      stroke-width: 4;
+    }
+    .summary-ring-fill {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s ease;
+    }
+    .summary-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .summary-info {
+      flex: 1;
+    }
+    .summary-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .summary-detail {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ===== RESTO DE ESTILOS (ACTIVIDADES, CALENDARIO, ETC.) SIN CAMBIOS ===== */
     .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
     .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
     .phase-card:hover { border-color: var(--accent-blue); }
@@ -546,20 +623,6 @@
     }
     .calendario-dia-modal .modal-actions button.btn-eliminar:hover:not(:disabled) { background: #e11d48; }
 
-    .summary-section { margin-bottom: 24px; }
-    .summary-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
-    .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-    .summary-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; transition: all 0.3s; }
-    .summary-item:hover { border-color: var(--accent-blue); transform: translateX(4px); }
-    .summary-ring { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
-    .summary-ring svg { transform: rotate(-90deg); }
-    .summary-ring-bg { fill: none; stroke: var(--bg-primary); stroke-width: 4; }
-    .summary-ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
-    .summary-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; }
-    .summary-info { flex: 1; }
-    .summary-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
-    .summary-detail { font-size: 11px; color: var(--text-muted); }
-
     .dashboard-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 8px; }
     .dashboard-footer p { margin: 4px 0; }
 
@@ -674,8 +737,20 @@
     </div>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filter-bar">
+  <!-- ===== NUEVA UBICACIÓN: RESUMEN POR FASE (AHORA DEBAJO DE KPI) ===== -->
+  <div class="summary-section">
+    <h2>📈 Resumen por Fase</h2>
+    <div class="summary-grid" id="summary-grid"></div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div id="error-message" class="error-message" style="display:none;"></div>
+
+  <!-- PHASES ACCORDION -->
+  <div class="phases-container" id="phases-container"></div>
+
+  <!-- ===== FILTROS Y BOTONES (AHORA AL FINAL DE LA PÁGINA) ===== -->
+  <div class="filter-bar" id="filter-bar">
     <div class="filter-group">
       <label>🔍 Buscar actividad:</label>
       <input type="text" id="search-input" placeholder="Escribe para filtrar..." />
@@ -701,21 +776,9 @@
         <option value="Dic">Diciembre 2026</option>
       </select>
     </div>
-    <button class="btn-export" id="btn-export" onclick="exportData()">📥 Exportar Datos</button>
+    <button class="btn-export" id="btn-export" onclick="exportData()">📥 Exportar a Excel</button>
     <button class="btn-reset" id="btn-reset" onclick="resetAll()">🔄 Reiniciar Avances</button>
     <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
-  </div>
-
-  <!-- Mensaje de error -->
-  <div id="error-message" class="error-message" style="display:none;"></div>
-
-  <!-- PHASES ACCORDION -->
-  <div class="phases-container" id="phases-container"></div>
-
-  <!-- SUMMARY SECTION -->
-  <div class="summary-section">
-    <h2>📈 Resumen por Fase</h2>
-    <div class="summary-grid" id="summary-grid"></div>
   </div>
 
   <!-- FOOTER -->
@@ -757,7 +820,7 @@
     "Victor Siñani"
   ];
 
-  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA FINAL CON AJUSTES EN FASE 1) =====
+  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA FINAL CON AJUSTES EN FASE 1 y 3) =====
   const phasesData = [
     { 
       name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
@@ -767,11 +830,8 @@
         {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
         {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
         {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
-        // Tarea fusionada de 1.6 y 1.7
         {id:"1.6", desc:"Validación cruzada de la transformación detectada vs. datos SIT V2/V3, identificación y clasificación de zonas críticas con alta transformación urbana", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
-        // 1.5 pasa a ser la final
         {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]}
-        // 1.8 eliminada
       ]
     },
     { 
@@ -793,7 +853,7 @@
         {id:"3.2", desc:"Procesamiento fotogramétrico (generación de productos)", periods:["Oct S11-S12","Oct S13-S14"]},
         {id:"3.3", desc:"Control de calidad de productos y precisiones", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
         {id:"3.4", desc:"Publicación (ortofoto y nube de puntos)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]}
-        ]
+      ]
     },
     { 
       name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral (REVISADA)",
@@ -822,17 +882,13 @@
     }
   ];
 
-  // ===== RESTO DEL CÓDIGO (sin cambios) =====
-  // ... (todo lo demás se mantiene igual, solo se modificó la fase 1)
-  // ===============================================================
-
   // ===== ESTADO =====
   let currentUser = null;
   let progress = {};
   let saveTimeout = null;
   let isLoading = true;
 
-  // ===== FUNCIONES AUXILIARES =====
+  // ===== FUNCIONES AUXILIARES (sin cambios) =====
   function clampValue(val) {
     let v = parseInt(val);
     if (isNaN(v)) return 0;
@@ -928,7 +984,7 @@
     });
   }
 
-  // ===== SUPABASE =====
+  // ===== SUPABASE (sin cambios) =====
   async function loadFromSupabase() {
     try {
       showSaveStatus('⏳ Cargando desde Supabase...', 'saving');
@@ -998,7 +1054,7 @@
     }, 800);
   }
 
-  // ===== CALENDARIO (SIN RESTRICCIONES DE FECHAS) =====
+  // ===== CALENDARIO (sin cambios) =====
   function getMonthData(actId, year, month) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -1162,7 +1218,7 @@
     }
   }
 
-  // ===== ASIGNACIÓN DE TÉCNICOS =====
+  // ===== ASIGNACIÓN DE TÉCNICOS (sin cambios) =====
   function asignarTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
     const select = document.getElementById(`resp-${actId}`);
@@ -1207,7 +1263,7 @@
     ).join('');
   }
 
-  // ===== ACTUALIZACIONES UI =====
+  // ===== ACTUALIZACIONES UI (sin cambios) =====
   function updateActivityUI(actId) {
     const data = progress[actId];
     if (!data) return;
@@ -1336,7 +1392,7 @@
     });
   }
 
-  // ===== FILTROS =====
+  // ===== FILTROS (sin cambios) =====
   function applyFilters() {
     const search = document.getElementById('search-input').value.toLowerCase();
     const statusFilter = document.getElementById('status-filter').value;
@@ -1378,7 +1434,7 @@
     });
   }
 
-  // ===== RENDER =====
+  // ===== RENDER (sin cambios estructurales) =====
   function render() {
     console.log('🔄 Renderizando...');
     const container = document.getElementById('phases-container');
@@ -1511,7 +1567,7 @@
     console.log('✅ Renderizado completado.');
   }
 
-  // ===== MANEJADORES =====
+  // ===== MANEJADORES (sin cambios) =====
   function handleSliderChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
     const val = clampValue(value);
@@ -1550,7 +1606,7 @@
     return -1;
   }
 
-  // ===== CAMBIO DE USUARIO =====
+  // ===== CAMBIO DE USUARIO (sin cambios) =====
   function changeUser(userName) {
     currentUser = userName;
     localStorage.setItem('catastro_user', userName);
@@ -1561,13 +1617,13 @@
     console.log(`👤 Usuario cambiado a: ${userName} (${isAuthorized(userName) ? 'EDITOR' : 'LECTOR'})`);
   }
 
-  // ===== TOGGLE FASE =====
+  // ===== TOGGLE FASE (sin cambios) =====
   function togglePhase(pi) {
     const el = document.getElementById(`phase-${pi}`);
     if (el) el.classList.toggle('collapsed');
   }
 
-  // ===== RESET =====
+  // ===== RESET (sin cambios) =====
   function resetAll() {
     if (!isAuthorized(currentUser)) {
       alert('No tienes permisos para reiniciar los avances.');
@@ -1585,38 +1641,57 @@
     showSaveStatus('🔄 Avances reiniciados', 'success');
   }
 
-  // ===== EXPORT =====
+  // ===== EXPORTAR A EXCEL (CSV) =====
   function exportData() {
-    const data = {
-      fecha_exportacion: new Date().toISOString(),
-      proyecto: "Cronograma Catastro 2026 - 5 Fases",
-      avances: progress,
-      resumen: {}
-    };
+    // Cabeceras del CSV
+    let csv = "Fase;ID Actividad;Descripción;Períodos;Porcentaje;Responsables;Tareas;Bitácora\n";
+
+    // Recorrer todas las fases y actividades
+    phasesData.forEach((phase) => {
+      phase.activities.forEach((act) => {
+        const data = progress[act.id] || { porcentaje: 0, responsables: [], observaciones: '', bitacora: [] };
+        const periodos = act.periods.join(' / ');
+        const responsables = (data.responsables || []).join('; ');
+        const bitacora = (data.bitacora || []).map(e => `${e.fecha}: ${e.nota}`).join(' | ');
+        const row = [
+          phase.name,
+          act.id,
+          act.desc,
+          periodos,
+          data.porcentaje,
+          responsables,
+          data.observaciones || '',
+          bitacora
+        ].join(';');
+        csv += row + '\n';
+      });
+    });
+
+    // Agregar resumen al final (separado)
+    csv += '\n\n=== RESUMEN POR FASE ===\n';
+    csv += "Fase;Avance Promedio;Completadas;Total\n";
     phasesData.forEach((phase) => {
       const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
       const avg = Math.round(phaseSum / phase.activities.length);
       const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
-      data.resumen[phase.name] = {
-        avance_promedio: avg + '%',
-        completadas: completed,
-        total: phase.activities.length
-      };
+      const total = phase.activities.length;
+      csv += `${phase.name};${avg}%;${completed};${total}\n`;
     });
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    // Descargar archivo CSV
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `catastro2026_5fases_avances_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    link.href = url;
+    link.setAttribute('download', `Cronograma_SITEC_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    showSaveStatus('📥 Datos exportados correctamente', 'success');
+    showSaveStatus('📥 Datos exportados a Excel (CSV)', 'success');
   }
 
-  // ===== FUERZA DATOS LOCALES =====
+  // ===== FUERZA DATOS LOCALES (sin cambios) =====
   function forceLocalData() {
     console.log('🔄 Forzando datos locales (reiniciando progress con ceros)');
     initProgress();
