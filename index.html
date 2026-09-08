@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (sin cambios relevantes, mantengo lo anterior) ===== */
+    /* ===== ESTILOS (sin cambios) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -194,6 +194,7 @@
       color: var(--text-muted);
     }
 
+    /* ===== CALENDARIO RESUMIDO ===== */
     .resumen-calendario-section {
       margin-bottom: 24px;
     }
@@ -286,12 +287,9 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
+      background: var(--accent-emerald);
       margin-top: 2px;
     }
-    .punto-asignacion { background: var(--accent-blue); }
-    .punto-bitacora { background: var(--accent-emerald); }
-    .punto-mixto { background: var(--accent-violet); }
-
     .resumen-calendario-grid .dia .cantidad {
       font-size: 9px;
       color: var(--text-muted);
@@ -317,92 +315,35 @@
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 6px;
     }
-    .detalle-seccion {
-      margin-top: 4px;
-    }
-    .detalle-seccion h4 {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-    .detalle-item {
+    .resumen-calendario-detalle .detalle-item {
       display: flex;
       flex-direction: column;
       gap: 2px;
       padding: 6px 0;
       border-bottom: 1px solid rgba(51,65,85,0.3);
     }
-    .detalle-item:last-child {
+    .resumen-calendario-detalle .detalle-item:last-child {
       border-bottom: none;
     }
-    .item-header {
+    .detalle-item .item-header {
       display: flex;
       justify-content: space-between;
       font-size: 13px;
       color: var(--text-secondary);
     }
-    .item-header strong {
+    .detalle-item .item-header strong {
       color: var(--text-primary);
     }
-    .item-header .fase-avance {
+    .detalle-item .item-header .fase-avance {
       color: var(--accent-amber);
       font-weight: 600;
     }
-    .item-nota {
+    .detalle-item .item-nota {
       font-size: 13px;
       color: var(--text-secondary);
       padding-left: 12px;
       border-left: 2px solid var(--accent-blue);
     }
-    .asignacion-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
-    .asignacion-actions button {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 2px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .asignacion-actions button:hover:not(:disabled) { background: var(--bg-card-hover); }
-    .asignacion-actions button.estado-completada { border-color: var(--accent-emerald); color: var(--accent-emerald); }
-    .asignacion-actions button.estado-en-progreso { border-color: var(--accent-amber); color: var(--accent-amber); }
-    .asignacion-actions button.estado-pendiente { border-color: var(--accent-rose); color: var(--accent-rose); }
-    .asignacion-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .asignacion-obs-input {
-      display: flex;
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .asignacion-obs-input textarea {
-      flex: 1;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      color: var(--text-primary);
-      padding: 4px 8px;
-      font-size: 13px;
-      resize: vertical;
-      height: 36px;
-      font-family: inherit;
-    }
-    .asignacion-obs-input button {
-      background: var(--accent-blue);
-      color: white;
-      border: none;
-      padding: 4px 12px;
-      border-radius: 4px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .asignacion-obs-input button:hover { background: #2563eb; }
 
     .filter-bar {
       display: flex;
@@ -950,9 +891,9 @@
     <div class="summary-grid" id="summary-grid"></div>
   </div>
 
-  <!-- ===== CALENDARIO RESUMIDO (con asignaciones + bitácora) ===== -->
+  <!-- ===== CALENDARIO RESUMIDO ===== -->
   <div class="resumen-calendario-section">
-    <h2>📅 Calendario de Trabajo Diario</h2>
+    <h2>📅 Calendario de Novedades Diarias</h2>
     <div class="resumen-calendario-wrapper">
       <div class="resumen-calendario-nav">
         <button id="resumen-btn-prev" onclick="cambiarMesResumen(-1)">◀</button>
@@ -963,7 +904,7 @@
       <div class="resumen-calendario-grid" id="resumen-calendario-grid"></div>
       <div class="resumen-calendario-detalle" id="resumen-detalle">
         <div class="detalle-fecha" id="detalle-fecha">Fecha</div>
-        <div id="detalle-contenido">Selecciona un día para ver las actividades.</div>
+        <div id="detalle-contenido">Selecciona un día con novedades.</div>
       </div>
     </div>
   </div>
@@ -1279,138 +1220,351 @@
     }, 800);
   }
 
-  // ============================================================
-  //  FUNCIONES PARA ASIGNACIONES DIARIAS (se mantienen igual)
-  // ============================================================
-  function periodosAFechas(periodos, year = 2026) {
-    const fechas = [];
-    const meses = { Jul: 6, Ago: 7, Sep: 8, Oct: 9, Nov: 10, Dic: 11 };
-    periodos.forEach(p => {
-      const partes = p.split(' ');
-      if (partes.length < 2) return;
-      const mes = partes[0];
-      const semanas = partes[1];
-      if (!semanas) return;
-      const rango = semanas.split('-');
-      if (rango.length < 2) return;
-      const ini = parseInt(rango[0].replace('S', ''));
-      const fin = parseInt(rango[1].replace('S', ''));
-      const mesNum = meses[mes];
-      if (mesNum === undefined) return;
-      const diaIni = (ini - 1) * 7 + 1;
-      const diaFin = Math.min(fin * 7, 31);
-      for (let d = diaIni; d <= diaFin; d++) {
-        const fecha = new Date(year, mesNum, d);
-        if (fecha.getDay() >= 1 && fecha.getDay() <= 5) {
-          fechas.push(fecha.toISOString().slice(0,10));
-        }
+  // ===== CALENDARIO DE ACTIVIDADES (individual) =====
+  function getMonthData(actId, year, month) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay();
+    const today = new Date();
+    const isToday = (d) => {
+      return d.getFullYear() === today.getFullYear() &&
+             d.getMonth() === today.getMonth() &&
+             d.getDate() === today.getDate();
+    };
+    const entries = progress[actId]?.bitacora || [];
+    const notesByDate = {};
+    entries.forEach(e => {
+      const d = new Date(e.fecha);
+      const key = d.toISOString().slice(0,10);
+      notesByDate[key] = e.nota;
+    });
+
+    let days = [];
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push({ day: null, vacio: true });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const key = dateObj.toISOString().slice(0,10);
+      const nota = notesByDate[key] || null;
+      days.push({
+        day: d,
+        vacio: false,
+        nota: nota,
+        esHoy: isToday(dateObj),
+        fecha: key
+      });
+    }
+    return { days, year, month };
+  }
+
+  function renderCalendario(actId, year, month) {
+    const container = document.getElementById(`calendario-${actId}`);
+    if (!container) return;
+    const data = getMonthData(actId, year, month);
+    const nombreMes = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
+    const editable = isAuthorized(currentUser);
+
+    let html = `
+      <div class="calendario-nav">
+        <button onclick="cambiarMes('${actId}', -1)">◀</button>
+        <span>${nombreMes}</span>
+        <button onclick="cambiarMes('${actId}', 1)">▶</button>
+      </div>
+      <div class="calendario-grid">
+    `;
+    const diasSemana = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+    diasSemana.forEach(n => {
+      html += `<div class="dia-nombre">${n}</div>`;
+    });
+    data.days.forEach(d => {
+      if (d.vacio) {
+        html += `<div class="dia vacio"></div>`;
+      } else {
+        const claseHoy = d.esHoy ? ' hoy' : '';
+        const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
+        html += `
+          <div class="dia${claseHoy}" onclick="abrirDia('${actId}', '${d.fecha}', '${d.nota || ''}')">
+            <span>${d.day}</span>
+            ${d.nota ? '<span class="punto"></span>' : ''}
+            ${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}
+          </div>
+        `;
       }
     });
-    return fechas;
+    html += `</div>`;
+
+    html += `
+      <div class="calendario-dia-modal" id="modal-${actId}">
+        <textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea>
+        <div class="modal-actions">
+          <button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button>
+          <button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button>
+          <button onclick="cerrarModal('${actId}')">✖ Cerrar</button>
+        </div>
+      </div>
+    `;
+    container.innerHTML = html;
   }
 
-  async function generarAsignaciones(actividadId, tecnicos, periodos) {
-    if (!tecnicos || tecnicos.length === 0) return;
-    const fechas = periodosAFechas(periodos);
-    if (fechas.length === 0) return;
-    for (const tecnico of tecnicos) {
-      for (const fecha of fechas) {
-        const { data: existing } = await supabaseClient
-          .from('asignaciones_diarias')
-          .select('id')
-          .eq('tecnico', tecnico)
-          .eq('actividad_id', actividadId)
-          .eq('fecha', fecha);
-        if (existing && existing.length > 0) continue;
-        await supabaseClient
-          .from('asignaciones_diarias')
-          .insert({
-            tecnico,
-            actividad_id: actividadId,
-            fecha,
-            estado: 'pendiente',
-            observaciones: ''
-          });
+  let calendarioState = {};
+
+  function cambiarMes(actId, delta) {
+    if (!calendarioState[actId]) {
+      const now = new Date();
+      calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
+    }
+    let state = calendarioState[actId];
+    state.month += delta;
+    if (state.month < 0) {
+      state.month = 11;
+      state.year--;
+    } else if (state.month > 11) {
+      state.month = 0;
+      state.year++;
+    }
+    renderCalendario(actId, state.year, state.month);
+  }
+
+  function abrirDia(actId, fecha, notaActual) {
+    if (!calendarioState[actId]) {
+      const now = new Date();
+      calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
+    }
+    calendarioState[actId].diaSeleccionado = fecha;
+    const modal = document.getElementById(`modal-${actId}`);
+    const textarea = document.getElementById(`modal-text-${actId}`);
+    if (textarea) textarea.value = notaActual || '';
+    if (modal) modal.classList.add('visible');
+  }
+
+  function cerrarModal(actId) {
+    const modal = document.getElementById(`modal-${actId}`);
+    if (modal) modal.classList.remove('visible');
+  }
+
+  function guardarNotaDia(actId) {
+    if (!isAuthorized(currentUser)) return;
+    const fecha = calendarioState[actId]?.diaSeleccionado;
+    if (!fecha) return;
+    const textarea = document.getElementById(`modal-text-${actId}`);
+    const nota = textarea.value.trim();
+    if (!nota) return;
+
+    const bitacora = progress[actId].bitacora;
+    const idx = bitacora.findIndex(e => e.fecha === fecha);
+    if (idx !== -1) {
+      bitacora[idx].nota = nota;
+    } else {
+      bitacora.push({ fecha, nota });
+    }
+    bitacora.sort((a, b) => a.fecha.localeCompare(b.fecha));
+    progress[actId].bitacora = bitacora;
+    cerrarModal(actId);
+    const state = calendarioState[actId];
+    renderCalendario(actId, state.year, state.month);
+    renderResumenCalendario();
+    debouncedSave(actId);
+  }
+
+  function eliminarNotaDia(actId) {
+    if (!isAuthorized(currentUser)) return;
+    const fecha = calendarioState[actId]?.diaSeleccionado;
+    if (!fecha) return;
+    if (!confirm(`¿Eliminar la novedad del día ${fecha}?`)) return;
+    const bitacora = progress[actId].bitacora;
+    const idx = bitacora.findIndex(e => e.fecha === fecha);
+    if (idx !== -1) {
+      bitacora.splice(idx, 1);
+      progress[actId].bitacora = bitacora;
+      cerrarModal(actId);
+      const state = calendarioState[actId];
+      renderCalendario(actId, state.year, state.month);
+      renderResumenCalendario();
+      debouncedSave(actId);
+    }
+  }
+
+  // ===== ASIGNACIÓN DE TÉCNICOS =====
+  function asignarTecnicos(actId) {
+    if (!isAuthorized(currentUser)) return;
+    const select = document.getElementById(`resp-${actId}`);
+    if (!select) return;
+    const selected = [];
+    for (let i = 0; i < select.options.length; i++) {
+      if (select.options[i].selected) {
+        selected.push(select.options[i].value);
       }
     }
-    console.log(`✅ Asignaciones generadas para actividad ${actividadId}`);
+    progress[actId].responsables = selected;
+    actualizarBadges(actId);
+    debouncedSave(actId);
+    showSaveStatus(`✅ ${selected.length} técnicos asignados`, 'success');
   }
 
-  async function obtenerAsignacionesDia(fecha, tecnico = null) {
-    let query = supabaseClient
-      .from('asignaciones_diarias')
-      .select('*')
-      .eq('fecha', fecha);
-    if (tecnico) {
-      query = query.eq('tecnico', tecnico);
+  function quitarTodosTecnicos(actId) {
+    if (!isAuthorized(currentUser)) return;
+    if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
+    progress[actId].responsables = [];
+    actualizarBadges(actId);
+    const select = document.getElementById(`resp-${actId}`);
+    if (select) {
+      for (let i = 0; i < select.options.length; i++) {
+        select.options[i].selected = false;
+      }
     }
-    const { data, error } = await query;
-    if (error) return [];
-    return data;
+    debouncedSave(actId);
+    showSaveStatus('🔄 Todos los técnicos removidos', 'success');
   }
 
-  async function actualizarEstadoAsignacion(id, nuevoEstado) {
-    const { error } = await supabaseClient
-      .from('asignaciones_diarias')
-      .update({ estado: nuevoEstado, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) return false;
-    return true;
+  function actualizarBadges(actId) {
+    const container = document.getElementById(`badges-${actId}`);
+    if (!container) return;
+    const responsables = progress[actId]?.responsables || [];
+    if (responsables.length === 0) {
+      container.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
+      return;
+    }
+    container.innerHTML = responsables.map(n => 
+      `<span class="badge-tecnico">${n}</span>`
+    ).join('');
   }
 
-  async function guardarObservacionAsignacion(id, texto) {
-    const { error } = await supabaseClient
-      .from('asignaciones_diarias')
-      .update({ observaciones: texto, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    if (error) return false;
-    return true;
-  }
+  // ===== ACTUALIZACIONES UI =====
+  function updateActivityUI(actId) {
+    const data = progress[actId];
+    if (!data) return;
+    const pct = data.porcentaje;
+    const status = getStatus(pct);
+    const color = getColorForPct(pct);
+    const editable = isAuthorized(currentUser);
 
-  async function obtenerTecnicoAsignacion(id) {
-    const { data, error } = await supabaseClient
-      .from('asignaciones_diarias')
-      .select('tecnico')
-      .eq('id', id)
-      .single();
-    if (error || !data) return null;
-    return data.tecnico;
-  }
+    const slider = document.getElementById(`slider-${actId}`);
+    if (slider) {
+      slider.value = pct;
+      slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%)`;
+      slider.disabled = !editable;
+    }
+    const numInput = document.getElementById(`num-${actId}`);
+    if (numInput) {
+      numInput.value = pct;
+      numInput.disabled = !editable;
+    }
+    const statusEl = document.getElementById(`status-${actId}`);
+    if (statusEl) {
+      statusEl.className = `activity-status ${status.cls}`;
+      statusEl.textContent = status.text;
+    }
+    const select = document.getElementById(`resp-${actId}`);
+    if (select) {
+      const opts = select.options;
+      for (let i = 0; i < opts.length; i++) {
+        opts[i].selected = data.responsables.includes(opts[i].value);
+      }
+      select.disabled = !editable;
+    }
+    actualizarBadges(actId);
+    const btnAsignar = document.getElementById(`btn-asignar-${actId}`);
+    if (btnAsignar) btnAsignar.disabled = !editable;
+    const btnQuitar = document.getElementById(`btn-quitar-${actId}`);
+    if (btnQuitar) btnQuitar.disabled = !editable;
 
-  async function recalcularAvanceActividad(asignacionId) {
-    const { data, error } = await supabaseClient
-      .from('asignaciones_diarias')
-      .select('actividad_id')
-      .eq('id', asignacionId)
-      .single();
-    if (error || !data) return;
-    const actId = data.actividad_id;
-    const { data: todas, error: err2 } = await supabaseClient
-      .from('asignaciones_diarias')
-      .select('estado')
-      .eq('actividad_id', actId);
-    if (err2 || !todas) return;
-    const total = todas.length;
-    const completadas = todas.filter(a => a.estado === 'completada').length;
-    const porcentaje = total > 0 ? Math.round((completadas / total) * 100) : 0;
-    if (progress[actId]) {
-      progress[actId].porcentaje = porcentaje;
-      await saveActivityToSupabase(actId);
-      updateActivityUI(actId);
-      const phaseIndex = findPhaseIndex(actId);
-      if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
-      updateGlobalUI();
-      updateSummaryUI();
+    const textarea = document.getElementById(`obs-${actId}`);
+    if (textarea) {
+      textarea.value = data.observaciones || '';
+      textarea.disabled = !editable;
+    }
+    if (calendarioState[actId]) {
+      renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
     }
   }
 
-  // ============================================================
-  //  NUEVA FUNCIÓN: CALENDARIO RESUMIDO CON BITÁCORA Y ASIGNACIONES
-  // ============================================================
-  let resumenCalendarioState = { year: 2026, month: 6 };
+  function updatePhaseUI(phaseIndex) {
+    const phase = phasesData[phaseIndex];
+    let sum = 0;
+    phase.activities.forEach(a => {
+      sum += (progress[a.id]?.porcentaje || 0);
+    });
+    const avg = phase.activities.length > 0 ? Math.round(sum / phase.activities.length) : 0;
+    const color = getColorForPct(avg);
+
+    const fill = document.getElementById(`phase-fill-${phaseIndex}`);
+    if (fill) {
+      fill.style.width = avg + '%';
+      fill.style.background = color;
+    }
+    const text = document.getElementById(`phase-text-${phaseIndex}`);
+    if (text) {
+      text.textContent = avg + '%';
+      text.style.color = color;
+    }
+  }
+
+  function updateGlobalUI() {
+    let total = 0, completed = 0, progressCount = 0, pending = 0;
+    let sum = 0, count = 0;
+    Object.keys(progress).forEach(id => {
+      const p = progress[id].porcentaje;
+      total++;
+      sum += p;
+      if (p === 100) completed++;
+      else if (p > 0) progressCount++;
+      else pending++;
+    });
+    count = total;
+    const globalPct = count > 0 ? Math.round(sum / count) : 0;
+
+    document.getElementById('kpi-total').textContent = total;
+    document.getElementById('kpi-completed').textContent = completed;
+    document.getElementById('kpi-progress').textContent = progressCount;
+    document.getElementById('kpi-pending').textContent = pending;
+
+    const bar = document.getElementById('global-bar');
+    bar.style.width = globalPct + '%';
+    const percent = document.getElementById('global-percent');
+    percent.textContent = globalPct + '%';
+    percent.style.color = getColorForPct(globalPct);
+  }
+
+  function updateSummaryUI() {
+    const grid = document.getElementById('summary-grid');
+    grid.innerHTML = '';
+    phasesData.forEach((phase, pi) => {
+      const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
+      const avg = Math.round(phaseSum / phase.activities.length);
+      const color = getColorForPct(avg);
+      const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
+      const total = phase.activities.length;
+      const radius = 20;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (avg / 100) * circumference;
+
+      const item = document.createElement('div');
+      item.className = 'summary-item';
+      item.innerHTML = `
+        <div class="summary-ring">
+          <svg width="48" height="48" viewBox="0 0 48 48">
+            <circle class="summary-ring-bg" cx="24" cy="24" r="${radius}"/>
+            <circle class="summary-ring-fill" cx="24" cy="24" r="${radius}"
+              stroke="${color}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+          </svg>
+          <span class="summary-ring-text" style="color:${color}">${avg}%</span>
+        </div>
+        <div class="summary-info">
+          <div class="summary-name">${phase.name}</div>
+          <div class="summary-detail">${completed}/${total} actividades completadas</div>
+        </div>
+      `;
+      grid.appendChild(item);
+    });
+  }
+
+  // ===== CALENDARIO RESUMIDO (con límites) =====
+  let resumenCalendarioState = { year: 2026, month: 6 }; // se ajustará al inicio
 
   function obtenerLimites() {
-    const inicio = { year: 2026, month: 6 };
+    const inicio = { year: 2026, month: 6 }; // julio 2026
     const ahora = new Date();
     const fin = { year: ahora.getFullYear(), month: ahora.getMonth() };
     return { inicio, fin };
@@ -1430,7 +1584,7 @@
     }
   }
 
-  async function renderResumenCalendario() {
+  function renderResumenCalendario() {
     ajustarMesResumen();
     const { year, month } = resumenCalendarioState;
     const grid = document.getElementById('resumen-calendario-grid');
@@ -1438,56 +1592,27 @@
     const nombreMes = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
     label.textContent = nombreMes;
 
-    // 1. Obtener asignaciones del mes (filtradas por técnico si no es supervisor)
-    let tecnicoFiltro = currentUser;
-    if (isAuthorized(currentUser)) {
-      tecnicoFiltro = null; // null = todas las asignaciones
-    }
-    let queryAsignaciones = supabaseClient
-      .from('asignaciones_diarias')
-      .select('*')
-      .gte('fecha', new Date(year, month, 1).toISOString().slice(0,10))
-      .lte('fecha', new Date(year, month + 1, 0).toISOString().slice(0,10));
-    if (tecnicoFiltro) {
-      queryAsignaciones = queryAsignaciones.eq('tecnico', tecnicoFiltro);
-    }
-    const { data: asignaciones, error: errAsig } = await queryAsignaciones;
-    if (errAsig) {
-      console.error('Error cargando asignaciones:', errAsig);
-      return;
-    }
-
-    // 2. Obtener notas de bitácora del mes desde progress
-    const notasBitacora = {};
-    Object.keys(progress).forEach(actId => {
-      const bit = progress[actId]?.bitacora || [];
-      bit.forEach(entry => {
-        const fecha = entry.fecha;
-        if (fecha.startsWith(`${year}-${String(month+1).padStart(2,'0')}`)) {
-          if (!notasBitacora[fecha]) notasBitacora[fecha] = [];
-          notasBitacora[fecha].push({
-            actividad: actId,
-            nota: entry.nota
+    // Obtener todas las notas agrupadas por día
+    const notasPorDia = {};
+    phasesData.forEach(phase => {
+      phase.activities.forEach(act => {
+        const data = progress[act.id];
+        if (!data || !data.bitacora) return;
+        data.bitacora.forEach(entry => {
+          const fecha = entry.fecha;
+          if (!notasPorDia[fecha]) {
+            notasPorDia[fecha] = [];
+          }
+          notasPorDia[fecha].push({
+            fase: phase.name,
+            actividad: act.desc,
+            id: act.id,
+            nota: entry.nota,
+            porcentaje: data.porcentaje,
+            faseAvance: Math.round(phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0) / phase.activities.length)
           });
-        }
+        });
       });
-    });
-
-    // Agrupar asignaciones por día
-    const diasConActividad = {};
-    asignaciones.forEach(a => {
-      const dia = a.fecha;
-      if (!diasConActividad[dia]) {
-        diasConActividad[dia] = { asignaciones: [], bitacora: [] };
-      }
-      diasConActividad[dia].asignaciones.push(a);
-    });
-    // Agregar bitácora
-    Object.keys(notasBitacora).forEach(fecha => {
-      if (!diasConActividad[fecha]) {
-        diasConActividad[fecha] = { asignaciones: [], bitacora: [] };
-      }
-      diasConActividad[fecha].bitacora = notasBitacora[fecha];
     });
 
     // Construir calendario
@@ -1515,35 +1640,23 @@
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const key = dateObj.toISOString().slice(0,10);
-      const info = diasConActividad[key] || null;
+      const notas = notasPorDia[key] || [];
+      const tieneNotas = notas.length > 0;
       const claseHoy = isToday(dateObj) ? ' hoy' : '';
-      let puntoHtml = '';
-      let cantidadHtml = '';
-      if (info) {
-        const total = info.asignaciones.length + info.bitacora.length;
-        let clasePunto = '';
-        if (info.asignaciones.length > 0 && info.bitacora.length > 0) {
-          clasePunto = 'punto-mixto';
-        } else if (info.asignaciones.length > 0) {
-          clasePunto = 'punto-asignacion';
-        } else {
-          clasePunto = 'punto-bitacora';
-        }
-        puntoHtml = `<div class="punto ${clasePunto}"></div>`;
-        cantidadHtml = `<span class="cantidad">${total}</span>`;
-      }
+      const cantidad = notas.length;
+
       html += `
         <div class="dia${claseHoy}" onclick="mostrarDetalleDia('${key}')">
           <span>${d}</span>
-          ${puntoHtml}
-          ${cantidadHtml}
+          ${tieneNotas ? `<div class="punto"></div>` : ''}
+          ${tieneNotas ? `<span class="cantidad">${cantidad}</span>` : ''}
         </div>
       `;
     }
 
     grid.innerHTML = html;
 
-    // Botones de navegación
+    // Habilitar/deshabilitar botones de navegación según límites
     const { inicio, fin } = obtenerLimites();
     const btnPrev = document.getElementById('resumen-btn-prev');
     const btnNext = document.getElementById('resumen-btn-next');
@@ -1554,54 +1667,41 @@
       btnNext.disabled = (year === fin.year && month === fin.month);
     }
 
-    // Limpiar detalle si el día ya no tiene actividad
+    // Limpiar detalle si el día seleccionado ya no tiene notas
     const detalle = document.getElementById('resumen-detalle');
     const fechaDetalle = detalle.dataset.fecha;
-    if (fechaDetalle && (!diasConActividad[fechaDetalle] || 
-        (diasConActividad[fechaDetalle].asignaciones.length === 0 && diasConActividad[fechaDetalle].bitacora.length === 0))) {
+    if (fechaDetalle && (!notasPorDia[fechaDetalle] || notasPorDia[fechaDetalle].length === 0)) {
       detalle.classList.remove('visible');
       delete detalle.dataset.fecha;
     }
   }
 
-  async function mostrarDetalleDia(fecha) {
+  function mostrarDetalleDia(fecha) {
     const detalle = document.getElementById('resumen-detalle');
     const contenedor = document.getElementById('detalle-contenido');
     const titulo = document.getElementById('detalle-fecha');
 
-    // Obtener asignaciones del día
-    let tecnicoFiltro = currentUser;
-    if (isAuthorized(currentUser)) {
-      tecnicoFiltro = null;
-    }
-    let query = supabaseClient
-      .from('asignaciones_diarias')
-      .select('*')
-      .eq('fecha', fecha);
-    if (tecnicoFiltro) {
-      query = query.eq('tecnico', tecnicoFiltro);
-    }
-    const { data: asignaciones, error } = await query;
-    if (error) {
-      console.error('Error cargando asignaciones:', error);
-      return;
-    }
-
-    // Obtener notas de bitácora del día desde progress
-    const notasDelDia = [];
-    Object.keys(progress).forEach(actId => {
-      const bit = progress[actId]?.bitacora || [];
-      bit.forEach(entry => {
-        if (entry.fecha === fecha) {
-          notasDelDia.push({
-            actividad: actId,
-            nota: entry.nota
-          });
-        }
+    const notas = [];
+    phasesData.forEach(phase => {
+      phase.activities.forEach(act => {
+        const data = progress[act.id];
+        if (!data || !data.bitacora) return;
+        data.bitacora.forEach(entry => {
+          if (entry.fecha === fecha) {
+            notas.push({
+              fase: phase.name,
+              actividad: act.desc,
+              id: act.id,
+              nota: entry.nota,
+              porcentaje: data.porcentaje,
+              faseAvance: Math.round(phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0) / phase.activities.length)
+            });
+          }
+        });
       });
     });
 
-    if ((!asignaciones || asignaciones.length === 0) && notasDelDia.length === 0) {
+    if (notas.length === 0) {
       detalle.classList.remove('visible');
       delete detalle.dataset.fecha;
       return;
@@ -1612,118 +1712,20 @@
     titulo.textContent = fechaObj.toLocaleDateString('es', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     let html = '';
-
-    // ---- SECCIÓN ASIGNACIONES ----
-    if (asignaciones && asignaciones.length > 0) {
-      html += `<div class="detalle-seccion"><h4>📋 Asignaciones del día</h4>`;
-      for (const asign of asignaciones) {
-        let actDesc = '';
-        let actId = asign.actividad_id;
-        for (const phase of phasesData) {
-          const act = phase.activities.find(a => a.id === actId);
-          if (act) {
-            actDesc = act.desc;
-            break;
-          }
-        }
-        const estadoLabel = {
-          'pendiente': '⏸️ Pendiente',
-          'en_progreso': '🔄 En progreso',
-          'completada': '✅ Completada'
-        }[asign.estado] || asign.estado;
-
-        const editable = isAuthorized(currentUser) || currentUser === asign.tecnico;
-
-        html += `
-          <div class="detalle-item" data-id="${asign.id}">
-            <div class="item-header">
-              <strong>${actId} - ${actDesc}</strong>
-              <span>👤 ${asign.tecnico}</span>
-            </div>
-            <div style="font-size:13px;color:var(--text-secondary);">
-              Estado: ${estadoLabel} ${asign.horas_planificadas ? `| ⏱️ ${asign.horas_planificadas}h` : ''}
-            </div>
-            ${asign.observaciones ? `<div class="item-nota">📌 ${asign.observaciones}</div>` : ''}
-            <div class="asignacion-actions">
-              <button class="estado-pendiente" onclick="cambiarEstadoAsignacion('${asign.id}','pendiente')" ${!editable ? 'disabled' : ''}>⏸️ Pendiente</button>
-              <button class="estado-en-progreso" onclick="cambiarEstadoAsignacion('${asign.id}','en_progreso')" ${!editable ? 'disabled' : ''}>🔄 En progreso</button>
-              <button class="estado-completada" onclick="cambiarEstadoAsignacion('${asign.id}','completada')" ${!editable ? 'disabled' : ''}>✅ Completar</button>
-            </div>
-            <div class="asignacion-obs-input">
-              <textarea id="obs-input-${asign.id}" placeholder="Añadir observación..."></textarea>
-              <button onclick="guardarObsAsignacion('${asign.id}')" ${!editable ? 'disabled' : ''}>💾 Nota</button>
-            </div>
+    notas.forEach(n => {
+      html += `
+        <div class="detalle-item">
+          <div class="item-header">
+            <strong>${n.id} - ${n.fase}</strong>
+            <span class="fase-avance">Avance fase: ${n.faseAvance}% | Actividad: ${n.porcentaje}%</span>
           </div>
-        `;
-      }
-      html += `</div>`;
-    }
-
-    // ---- SECCIÓN BITÁCORA ----
-    if (notasDelDia.length > 0) {
-      html += `<div class="detalle-seccion"><h4>📝 Bitácora del día</h4>`;
-      notasDelDia.forEach(entry => {
-        let actDesc = '';
-        for (const phase of phasesData) {
-          const act = phase.activities.find(a => a.id === entry.actividad);
-          if (act) {
-            actDesc = act.desc;
-            break;
-          }
-        }
-        html += `
-          <div class="detalle-item">
-            <div class="item-header">
-              <strong>${entry.actividad} - ${actDesc}</strong>
-            </div>
-            <div class="item-nota">📌 ${entry.nota}</div>
-          </div>
-        `;
-      });
-      html += `</div>`;
-    }
+          <div class="item-nota">📌 ${n.nota}</div>
+        </div>
+      `;
+    });
 
     contenedor.innerHTML = html;
     detalle.classList.add('visible');
-  }
-
-  // ===== MANEJADORES DE ASIGNACIONES =====
-  async function cambiarEstadoAsignacion(id, nuevoEstado) {
-    if (!isAuthorized(currentUser) && currentUser !== (await obtenerTecnicoAsignacion(id))) {
-      alert('No tienes permiso para modificar esta asignación.');
-      return;
-    }
-    const ok = await actualizarEstadoAsignacion(id, nuevoEstado);
-    if (ok) {
-      showSaveStatus('✅ Estado actualizado', 'success');
-      await recalcularAvanceActividad(id);
-      await renderResumenCalendario();
-      const detalle = document.getElementById('resumen-detalle');
-      if (detalle.classList.contains('visible') && detalle.dataset.fecha) {
-        await mostrarDetalleDia(detalle.dataset.fecha);
-      }
-    }
-  }
-
-  async function guardarObsAsignacion(id) {
-    const textarea = document.getElementById(`obs-input-${id}`);
-    if (!textarea) return;
-    const texto = textarea.value.trim();
-    if (!texto) return;
-    if (!isAuthorized(currentUser) && currentUser !== (await obtenerTecnicoAsignacion(id))) {
-      alert('No tienes permiso para modificar esta asignación.');
-      return;
-    }
-    const ok = await guardarObservacionAsignacion(id, texto);
-    if (ok) {
-      showSaveStatus('✅ Observación guardada', 'success');
-      textarea.value = '';
-      const detalle = document.getElementById('resumen-detalle');
-      if (detalle.classList.contains('visible') && detalle.dataset.fecha) {
-        await mostrarDetalleDia(detalle.dataset.fecha);
-      }
-      await renderResumenCalendario();
-    }
   }
 
   function cambiarMesResumen(delta) {
@@ -1762,79 +1764,343 @@
     renderResumenCalendario();
   }
 
-  // ===== CALENDARIO INDIVIDUAL DE ACTIVIDADES (sin cambios) =====
-  // ... (funciones getMonthData, renderCalendario, cambiarMes, abrirDia, cerrarModal, guardarNotaDia, eliminarNotaDia) se mantienen igual que antes.
-  // Las incluyo en el script completo, pero para no repetir, aquí las omito por brevedad. En el HTML entregado están completas.
+  // ===== FILTROS =====
+  function applyFilters() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const statusFilter = document.getElementById('status-filter').value;
+    const periodFilter = document.getElementById('period-filter').value;
 
-  // ===== ASIGNACIÓN DE TÉCNICOS (con generación de asignaciones) =====
-  async function asignarTecnicos(actId) {
-    if (!isAuthorized(currentUser)) return;
-    const select = document.getElementById(`resp-${actId}`);
-    if (!select) return;
-    const selected = [];
-    for (let i = 0; i < select.options.length; i++) {
-      if (select.options[i].selected) {
-        selected.push(select.options[i].value);
-      }
-    }
-    progress[actId].responsables = selected;
-    actualizarBadges(actId);
-    debouncedSave(actId);
+    const allRows = document.querySelectorAll('.activity-row');
+    allRows.forEach(row => {
+      const actId = row.dataset.activityId;
+      const data = progress[actId];
+      if (!data) return;
+      const pct = data.porcentaje;
+      const descEl = row.querySelector('.activity-desc');
+      const desc = descEl ? descEl.textContent.toLowerCase() : '';
+      const periods = [];
+      row.querySelectorAll('.period-tag').forEach(tag => periods.push(tag.textContent));
 
-    const actividad = phasesData.flatMap(p => p.activities).find(a => a.id === actId);
-    if (actividad && actividad.periods) {
-      await generarAsignaciones(actId, selected, actividad.periods);
-      showSaveStatus(`✅ Asignaciones generadas para ${selected.length} técnicos`, 'success');
-      const { data: todas } = await supabaseClient
-        .from('asignaciones_diarias')
-        .select('estado')
-        .eq('actividad_id', actId);
-      if (todas && todas.length > 0) {
-        const completadas = todas.filter(a => a.estado === 'completada').length;
-        const pct = Math.round((completadas / todas.length) * 100);
-        progress[actId].porcentaje = pct;
-        await saveActivityToSupabase(actId);
-        updateActivityUI(actId);
-        const phaseIndex = findPhaseIndex(actId);
-        if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
-        updateGlobalUI();
-        updateSummaryUI();
+      const matchesSearch = !search || actId.includes(search) || desc.includes(search);
+      const matchesStatus = statusFilter === 'all' ||
+        (statusFilter === 'completed' && pct === 100) ||
+        (statusFilter === 'progress' && pct > 0 && pct < 100) ||
+        (statusFilter === 'pending' && pct === 0);
+      const matchesPeriod = periodFilter === 'all' || periods.some(p => p.startsWith(periodFilter));
+
+      if (matchesSearch && matchesStatus && matchesPeriod) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
       }
-    }
-    await renderResumenCalendario();
+    });
+
+    const phaseCards = document.querySelectorAll('.phase-card');
+    phaseCards.forEach(card => {
+      const rows = card.querySelectorAll('.activity-row');
+      let visible = false;
+      rows.forEach(r => {
+        if (!r.classList.contains('hidden')) visible = true;
+      });
+      card.style.display = visible ? '' : 'none';
+    });
   }
 
-  function quitarTodosTecnicos(actId) {
-    if (!isAuthorized(currentUser)) return;
-    if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
-    progress[actId].responsables = [];
-    actualizarBadges(actId);
-    const select = document.getElementById(`resp-${actId}`);
-    if (select) {
-      for (let i = 0; i < select.options.length; i++) {
-        select.options[i].selected = false;
-      }
+  // ===== RENDER (con acordeón por defecto colapsado) =====
+  function render() {
+    console.log('🔄 Renderizando...');
+    const container = document.getElementById('phases-container');
+    container.innerHTML = '';
+    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
+    const editable = isAuthorized(currentUser);
+
+    phasesData.forEach((phase, pi) => {
+      const phaseColor = colors[pi % colors.length];
+      const phaseEl = document.createElement('div');
+      phaseEl.className = 'phase-card collapsed';
+      phaseEl.id = `phase-${pi}`;
+
+      let headerHTML = `
+        <div class="phase-header" onclick="togglePhase(${pi})">
+          <div class="phase-title-group">
+            <div class="phase-number" style="background:${phaseColor}">${pi+1}</div>
+            <span class="phase-name">${phase.name}</span>
+          </div>
+          <div class="phase-meta">
+            <span style="font-size:12px;color:var(--text-muted)">${phase.activities.length} act.</span>
+            <div class="phase-progress-bar">
+              <div class="phase-progress-fill" id="phase-fill-${pi}" style="width:0%;background:${phaseColor}"></div>
+            </div>
+            <span class="phase-progress-text" id="phase-text-${pi}" style="color:${phaseColor}">0%</span>
+            <span class="phase-toggle">▼</span>
+          </div>
+        </div>
+        <div class="phase-description">${phase.description}</div>
+      `;
+      phaseEl.innerHTML = headerHTML;
+
+      const activitiesContainer = document.createElement('div');
+      activitiesContainer.className = 'phase-activities';
+
+      phase.activities.forEach((act) => {
+        const actId = act.id;
+        const data = progress[actId] || { porcentaje: 0, responsables: [], observaciones: '', bitacora: [] };
+        const pct = data.porcentaje;
+        const status = getStatus(pct);
+        const color = getColorForPct(pct);
+
+        const row = document.createElement('div');
+        row.className = 'activity-row';
+        row.dataset.activityId = actId;
+
+        const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
+
+        const badgesHtml = data.responsables && data.responsables.length > 0
+          ? data.responsables.map(n => `<span class="badge-tecnico">${n}</span>`).join('')
+          : '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
+
+        row.innerHTML = `
+          <div class="activity-main">
+            <span class="activity-id">${actId}</span>
+            <span class="activity-desc">${act.desc}</span>
+            <div class="activity-periods">${periodsHtml}</div>
+            <div class="activity-control">
+              <div class="slider-container">
+                <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}"
+                  oninput="handleSliderChange('${actId}', this.value)"
+                  style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);"
+                  ${!editable ? 'disabled' : ''}>
+              </div>
+              <input type="number" min="0" max="100" value="${pct}" id="num-${actId}"
+                class="num-input" oninput="handleNumberChange('${actId}', this.value)"
+                onblur="this.value = clampValue(this.value)"
+                ${!editable ? 'disabled' : ''} />
+              <span class="activity-percent-sym">%</span>
+              <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
+            </div>
+          </div>
+
+          <div class="activity-meta">
+            <div class="meta-row">
+              <label>👥 Técnicos asignados:</label>
+              <div class="asignacion-group">
+                <div class="badges-container" id="badges-${actId}">
+                  ${badgesHtml}
+                </div>
+                <button class="btn-asignar" id="btn-asignar-${actId}" onclick="asignarTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>
+                  ✏️ Asignar seleccionados
+                </button>
+                <button class="btn-quitar-todos" id="btn-quitar-${actId}" onclick="quitarTodosTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>
+                  🗑️ Quitar todos
+                </button>
+              </div>
+            </div>
+            <div class="meta-row">
+              <label>📋 Seleccionar técnicos:</label>
+              <select id="resp-${actId}" multiple ${!editable ? 'disabled' : ''}>
+                ${buildResponsableOptions(data.responsables)}
+              </select>
+              <span style="font-size:11px;color:var(--text-muted);">(Mantén Ctrl para seleccionar varios)</span>
+            </div>
+            <div class="meta-row">
+              <label>📝 Tareas:</label>
+              <textarea id="obs-${actId}" placeholder="Tareas Especificas..." onchange="handleObservacionChange('${actId}', this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
+            </div>
+          </div>
+
+          <div class="calendario-section">
+            <label>📅 Bitácora (registro de novedades diarias)</label>
+            <div id="calendario-${actId}"></div>
+          </div>
+        `;
+        activitiesContainer.appendChild(row);
+      });
+
+      phaseEl.appendChild(activitiesContainer);
+      container.appendChild(phaseEl);
+    });
+
+    // Inicializar calendarios individuales con mes actual
+    phasesData.forEach((phase) => {
+      phase.activities.forEach(act => {
+        const actId = act.id;
+        if (!calendarioState[actId]) {
+          const now = new Date();
+          calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
+        }
+        renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
+      });
+    });
+
+    phasesData.forEach((_, i) => updatePhaseUI(i));
+    updateGlobalUI();
+    updateSummaryUI();
+
+    // Inicializar calendario resumido en el mes actual (si es >= julio 2026)
+    const ahora = new Date();
+    const inicio = { year: 2026, month: 6 };
+    if (ahora.getFullYear() > inicio.year || (ahora.getFullYear() === inicio.year && ahora.getMonth() >= inicio.month)) {
+      resumenCalendarioState.year = ahora.getFullYear();
+      resumenCalendarioState.month = ahora.getMonth();
+    } else {
+      resumenCalendarioState.year = inicio.year;
+      resumenCalendarioState.month = inicio.month;
     }
-    debouncedSave(actId);
-    showSaveStatus('🔄 Todos los técnicos removidos', 'success');
+    renderResumenCalendario();
+    updateReadonlyNotice();
+    console.log('✅ Renderizado completado.');
   }
 
-  function actualizarBadges(actId) {
-    const container = document.getElementById(`badges-${actId}`);
-    if (!container) return;
-    const responsables = progress[actId]?.responsables || [];
-    if (responsables.length === 0) {
-      container.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
+  // ===== MANEJADORES =====
+  function handleSliderChange(actId, value) {
+    if (!isAuthorized(currentUser)) return;
+    const val = clampValue(value);
+    progress[actId].porcentaje = val;
+    updateActivityUI(actId);
+    const phaseIndex = findPhaseIndex(actId);
+    if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
+    updateGlobalUI();
+    updateSummaryUI();
+    renderResumenCalendario();
+    debouncedSave(actId);
+  }
+
+  function handleNumberChange(actId, value) {
+    if (!isAuthorized(currentUser)) return;
+    const val = clampValue(value);
+    progress[actId].porcentaje = val;
+    updateActivityUI(actId);
+    const phaseIndex = findPhaseIndex(actId);
+    if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
+    updateGlobalUI();
+    updateSummaryUI();
+    renderResumenCalendario();
+    debouncedSave(actId);
+  }
+
+  function handleObservacionChange(actId, value) {
+    if (!isAuthorized(currentUser)) return;
+    progress[actId].observaciones = value;
+    debouncedSave(actId);
+  }
+
+  function findPhaseIndex(actId) {
+    for (let i = 0; i < phasesData.length; i++) {
+      const found = phasesData[i].activities.some(a => a.id === actId);
+      if (found) return i;
+    }
+    return -1;
+  }
+
+  // ===== ACORDEÓN =====
+  function togglePhase(pi) {
+    const allPhases = document.querySelectorAll('.phase-card');
+    allPhases.forEach(p => p.classList.add('collapsed'));
+    const selected = document.getElementById(`phase-${pi}`);
+    if (selected) {
+      selected.classList.remove('collapsed');
+    }
+  }
+
+  // ===== CAMBIO DE USUARIO =====
+  function changeUser(userName) {
+    currentUser = userName;
+    localStorage.setItem('catastro_user', userName);
+    document.getElementById('user-select').value = userName;
+    render();
+    applyFilters();
+    updateReadonlyNotice();
+    console.log(`👤 Usuario cambiado a: ${userName} (${isAuthorized(userName) ? 'EDITOR' : 'LECTOR'})`);
+  }
+
+  // ===== RESET =====
+  function resetAll() {
+    if (!isAuthorized(currentUser)) {
+      alert('No tienes permisos para reiniciar los avances.');
       return;
     }
-    container.innerHTML = responsables.map(n => 
-      `<span class="badge-tecnico">${n}</span>`
-    ).join('');
+    if (!confirm('¿Estás seguro de que deseas reiniciar TODOS los avances a 0%?')) return;
+    Object.keys(progress).forEach(id => {
+      progress[id].porcentaje = 0;
+    });
+    Object.keys(progress).forEach(id => updateActivityUI(id));
+    phasesData.forEach((_, i) => updatePhaseUI(i));
+    updateGlobalUI();
+    updateSummaryUI();
+    renderResumenCalendario();
+    Object.keys(progress).forEach(id => saveActivityToSupabase(id));
+    showSaveStatus('🔄 Avances reiniciados', 'success');
   }
 
-  // ===== RESTO DE FUNCIONES (updateActivityUI, updatePhaseUI, updateGlobalUI, updateSummaryUI, applyFilters, render, etc.) =====
-  // Se mantienen exactamente igual que en la versión anterior.
-  // Por brevedad, no las transcribo aquí, pero están en el HTML completo que entrego.
+  // ===== EXPORTAR A EXCEL =====
+  function exportData() {
+    const ahora = new Date();
+    const rango = `Julio2026_a_${ahora.getFullYear()}-${String(ahora.getMonth()+1).padStart(2,'0')}-${String(ahora.getDate()).padStart(2,'0')}`;
+    const nombreArchivo = `Cronograma_SITEC_${rango}.csv`;
+
+    let csv = `Proyecto: Cronograma Trabajo SITEC (5 Fases)\n`;
+    csv += `Período: 1 de julio de 2026 - ${ahora.toLocaleDateString('es')}\n`;
+    csv += `Fecha de exportación: ${ahora.toLocaleString('es')}\n\n`;
+    csv += "Fase;ID Actividad;Descripción;Períodos;Porcentaje;Responsables;Tareas;Bitácora\n";
+
+    phasesData.forEach((phase) => {
+      phase.activities.forEach((act) => {
+        const data = progress[act.id] || { porcentaje: 0, responsables: [], observaciones: '', bitacora: [] };
+        const periodos = act.periods.join(' / ');
+        const responsables = (data.responsables || []).join('; ');
+        const bitacora = (data.bitacora || []).map(e => `${e.fecha}: ${e.nota}`).join(' | ');
+        const row = [
+          phase.name,
+          act.id,
+          act.desc,
+          periodos,
+          data.porcentaje,
+          responsables,
+          data.observaciones || '',
+          bitacora
+        ].join(';');
+        csv += row + '\n';
+      });
+    });
+
+    csv += '\n\n=== RESUMEN POR FASE ===\n';
+    csv += "Fase;Avance Promedio;Completadas;Total\n";
+    phasesData.forEach((phase) => {
+      const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
+      const avg = Math.round(phaseSum / phase.activities.length);
+      const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
+      const total = phase.activities.length;
+      csv += `${phase.name};${avg}%;${completed};${total}\n`;
+    });
+
+    const totalActs = Object.keys(progress).length;
+    const sumAll = Object.values(progress).reduce((s, p) => s + p.porcentaje, 0);
+    const globalAvg = totalActs > 0 ? Math.round(sumAll / totalActs) : 0;
+    const completedAll = Object.values(progress).filter(p => p.porcentaje === 100).length;
+    csv += `\n\n=== RESUMEN GLOBAL ===\n`;
+    csv += `Avance Global;${globalAvg}%;Actividades Completadas;${completedAll};Total Actividades;${totalActs}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute('download', nombreArchivo);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showSaveStatus(`📥 Datos exportados (${rango})`, 'success');
+  }
+
+  // ===== FUERZA DATOS LOCALES =====
+  function forceLocalData() {
+    console.log('🔄 Forzando datos locales (reiniciando progress con ceros)');
+    initProgress();
+    render();
+    applyFilters();
+    showSaveStatus('🔄 Datos locales forzados (ceros)', 'success');
+    showError('Modo local activado. Los cambios no se guardarán en Supabase.');
+  }
 
   // ===== INICIO =====
   document.addEventListener('DOMContentLoaded', async () => {
@@ -1879,8 +2145,6 @@
   window.cambiarMesResumen = cambiarMesResumen;
   window.irHoyResumen = irHoyResumen;
   window.mostrarDetalleDia = mostrarDetalleDia;
-  window.cambiarEstadoAsignacion = cambiarEstadoAsignacion;
-  window.guardarObsAsignacion = guardarObsAsignacion;
 </script>
 </body>
 </html>
