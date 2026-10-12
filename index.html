@@ -8,38 +8,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-card: #1e293b;
-      --bg-card-hover: #27354f;
-      --border-color: #334155;
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --accent-blue: #3b82f6;
-      --accent-cyan: #06b6d4;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-violet: #8b5cf6;
+      --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b;
+      --bg-card-hover: #27354f; --border-color: #334155;
+      --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+      --accent-blue: #3b82f6; --accent-cyan: #06b6d4; --accent-emerald: #10b981;
+      --accent-amber: #f59e0b; --accent-rose: #f43f5e; --accent-violet: #8b5cf6;
       --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
       --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.4);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-    }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
     #dashboard-container { max-width: 1600px; margin: 0 auto; padding: 24px; }
-    .dashboard-header {
-      display: flex; justify-content: space-between; align-items: center;
-      background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-      border: 1px solid var(--border-color); border-radius: 16px;
-      padding: 24px 32px; margin-bottom: 24px; box-shadow: var(--shadow-lg);
-      flex-wrap: wrap; gap: 16px;
-    }
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; box-shadow: var(--shadow-lg); flex-wrap: wrap; gap: 16px; }
     .header-left { display: flex; align-items: center; gap: 16px; }
     .header-icon { font-size: 40px; }
     .dashboard-header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
@@ -76,8 +56,7 @@
     .filter-group input, .filter-group select { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: var(--text-primary); font-size: 14px; outline: none; transition: border-color 0.2s; }
     .filter-group input:focus, .filter-group select:focus { border-color: var(--accent-blue); }
     .btn-reset { background: linear-gradient(135deg, var(--accent-rose), #e11d48); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-reset:hover { transform: scale(1.05); }
-    .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-reset:hover { transform: scale(1.05); } .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-export { background: linear-gradient(135deg, var(--accent-emerald), #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
     .btn-export:hover { transform: scale(1.05); }
     .btn-local { background: linear-gradient(135deg, var(--accent-amber), #d97706); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
@@ -119,8 +98,7 @@
     .slider-container input[type="range"]:disabled { opacity: 0.6; cursor: not-allowed; }
     .num-input { width: 56px; height: 32px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 14px; font-weight: 700; text-align: center; outline: none; -moz-appearance: textfield; }
     .num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .num-input:focus { border-color: var(--accent-blue); }
-    .num-input:disabled { opacity: 0.6; cursor: not-allowed; }
+    .num-input:focus { border-color: var(--accent-blue); } .num-input:disabled { opacity: 0.6; cursor: not-allowed; }
     .activity-percent-sym { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-left: -4px; }
     .activity-status { font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; min-width: 90px; text-align: center; }
     .status-pending { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
@@ -187,24 +165,8 @@
     .dashboard-footer p { margin: 4px 0; }
     .error-message { background: rgba(244,63,94,0.15); border: 1px solid var(--accent-rose); color: var(--accent-rose); padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; text-align: center; font-weight: 500; }
     .readonly-notice { background: rgba(245,158,11,0.15); border: 1px solid var(--accent-amber); color: var(--accent-amber); padding: 12px 20px; border-radius: 12px; margin-bottom: 24px; text-align: center; font-weight: 500; display: none; }
-    @media (max-width: 1200px) {
-      .kpi-row { grid-template-columns: repeat(3, 1fr); }
-      .activity-control { min-width: auto; width: 100%; }
-      .meta-row { flex-direction: column; align-items: stretch; }
-      .asignacion-group { flex-direction: column; align-items: stretch; }
-      .calendario-grid { max-width: 100%; }
-    }
-    @media (max-width: 768px) {
-      .dashboard-header { flex-direction: column; gap: 16px; text-align: center; }
-      .header-right { flex-direction: column; gap: 12px; }
-      .kpi-row { grid-template-columns: repeat(2, 1fr); }
-      .filter-bar { flex-direction: column; align-items: stretch; }
-      .phase-header { flex-wrap: wrap; gap: 8px; }
-      .activity-row { padding-left: 20px; }
-      .activity-periods { max-width: none; width: 100%; }
-      .activity-meta { padding-left: 0; }
-      .calendario-section { padding-left: 0; }
-    }
+    @media (max-width: 1200px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } .activity-control { min-width: auto; width: 100%; } .meta-row { flex-direction: column; align-items: stretch; } .asignacion-group { flex-direction: column; align-items: stretch; } .calendario-grid { max-width: 100%; } }
+    @media (max-width: 768px) { .dashboard-header { flex-direction: column; gap: 16px; text-align: center; } .header-right { flex-direction: column; gap: 12px; } .kpi-row { grid-template-columns: repeat(2, 1fr); } .filter-bar { flex-direction: column; align-items: stretch; } .phase-header { flex-wrap: wrap; gap: 8px; } .activity-row { padding-left: 20px; } .activity-periods { max-width: none; width: 100%; } .activity-meta { padding-left: 0; } .calendario-section { padding-left: 0; } }
   </style>
 </head>
 <body>
@@ -290,7 +252,7 @@
 
   <div class="dashboard-footer">
     <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
-    <p>⚖️ <strong>Cálculo en dos niveles:</strong> la fase es un <strong>promedio ponderado por duración</strong> (quincenas) de sus actividades; el global es un <strong>promedio ponderado por peso de fase</strong> — así el 45,6 % es coherente con las fases 27 / 82 / 49 / 39 / 7.</p>
+    <p>⚖️ <strong>Cálculo en dos niveles:</strong> la fase es un <strong>promedio ponderado por duración</strong> (quincenas) de sus actividades; el global es un <strong>promedio ponderado por importancia de fase</strong> (F1=10%, F2=20%, F3=20%, F4=30%, F5=20%).</p>
     <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
@@ -387,8 +349,8 @@
   // ============================================================
   //  SISTEMA DE PONDERACIÓN EN DOS NIVELES
   // ============================================================
-  // NIVEL 1 — PESOS DE ACTIVIDAD: peso dentro de su fase.
-  //   Se usa para calcular el % de cada fase. Representa duración.
+  // NIVEL 1 — PESOS DE ACTIVIDAD (dentro de su fase).
+  //   Representa la duración en quincenas. Determina el % de la fase.
   const PESOS = {
     '1.1':2,'1.2':2,'1.3':2,'1.4':2,'1.6':3,'1.5':3,
     '2.1':2,'2.2':3,'2.3':2,'2.4':2,'2.5':2,
@@ -397,13 +359,15 @@
     '5.1':3,'5.2':3,'5.3':3,'5.4':3,'5.5':1
   };
 
-  // NIVEL 2 — PESOS DE FASE para el cálculo del AVANCE GLOBAL.
-  //   Verificado: con fases (27, 82, 49, 39, 7) y estos pesos,
-  //   el global resulta exactamente 45,6 %:
-  //   (6·27 + 10·82 + 4·49 + 11·39 + 5·7) / 36 = 1642/36 = 45,61 %
-  const PESOS_FASE = { 0: 6, 1: 10, 2: 4, 3: 11, 4: 5 };
+  // NIVEL 2 — PESOS DE IMPORTANCIA DE CADA FASE (fijos, suman 100%).
+  //   F1 = 10 %, F2 = 20 %, F3 = 20 %, F4 = 30 %, F5 = 20 %
+  //   Fórmula del avance global:
+  //     Global = Σ (peso_fase_i × avance_fase_i) / Σ peso_fase_i
+  //   Con avances (27, 82, 49, 39, 7):
+  //     0.10·27 + 0.20·82 + 0.20·49 + 0.30·39 + 0.20·7 = 42,00 %
+  const PESOS_FASE = { 0: 10, 1: 20, 2: 20, 3: 30, 4: 20 };
 
-  // Valores iniciales que reproducen las fases indicadas (27/82/49/39/7).
+  // Valores iniciales de actividades que reproducen las fases indicadas (27/82/49/39/7).
   // Solo se aplican si NO hay datos en Supabase (primera carga).
   const DEFAULT_ACTIVITY_PCT = {
     '1.1':27,'1.2':27,'1.3':27,'1.4':27,'1.6':27,'1.5':27,
@@ -464,34 +428,23 @@
     };
   }
 
-  // ===== ESTADO =====
   let currentUser = null;
   let progress = {};
   let saveTimeout = null;
   let isLoading = true;
 
-  function clampValue(val) {
-    let v = parseInt(val);
-    if (isNaN(v)) return 0;
-    return Math.min(100, Math.max(0, v));
-  }
+  function clampValue(val) { let v = parseInt(val); if (isNaN(v)) return 0; return Math.min(100, Math.max(0, v)); }
   function getStatus(pct) {
     if (pct === 0) return { cls: 'status-pending', text: 'Pendiente' };
     if (pct === 100) return { cls: 'status-completed', text: 'Completada' };
     return { cls: 'status-progress', text: 'En progreso' };
   }
-  function getColorForPct(pct) {
-    if (pct === 0) return '#f43f5e';
-    if (pct === 100) return '#10b981';
-    return '#f59e0b';
-  }
+  function getColorForPct(pct) { if (pct === 0) return '#f43f5e'; if (pct === 100) return '#10b981'; return '#f59e0b'; }
   function isAuthorized(user) { return USUARIOS_AUTORIZADOS.includes(user); }
 
   function buildUserOptions(selected) {
     let html = '';
-    usuarios.forEach(u => {
-      html += `<option value="${u.nombre}" ${selected === u.nombre ? 'selected' : ''}>${u.nombre} (${u.rol})</option>`;
-    });
+    usuarios.forEach(u => { html += `<option value="${u.nombre}" ${selected === u.nombre ? 'selected' : ''}>${u.nombre} (${u.rol})</option>`; });
     return html;
   }
   function buildResponsableOptions(selectedArray) {
@@ -529,8 +482,6 @@
       document.getElementById('btn-reset').disabled = true;
     }
   }
-
-  // initProgress: si no hay datos previos, aplica los valores por defecto
   function initProgress(useDefaults) {
     const allIds = [];
     phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
@@ -538,9 +489,7 @@
       if (!progress[id]) {
         progress[id] = {
           porcentaje: (useDefaults && DEFAULT_ACTIVITY_PCT[id]) ? DEFAULT_ACTIVITY_PCT[id] : 0,
-          responsables: [],
-          observaciones: '',
-          bitacora: []
+          responsables: [], observaciones: '', bitacora: []
         };
       }
     });
@@ -563,7 +512,6 @@
         });
         showSaveStatus('✅ Datos cargados desde Supabase', 'success');
       } else {
-        // Primera carga: aplica valores por defecto para reproducir las fases indicadas
         initProgress(true);
         showSaveStatus('ℹ️ Sin datos previos. Aplicando valores por defecto.', 'success');
       }
@@ -575,9 +523,7 @@
       initProgress(true);
     }
     isLoading = false;
-    render();
-    applyFilters();
-    updateReadonlyNotice();
+    render(); applyFilters(); updateReadonlyNotice();
   }
 
   async function saveActivityToSupabase(activityId) {
@@ -586,11 +532,8 @@
     if (!data) return;
     try {
       const { error } = await supabaseClient.from('progreso_catastro').upsert({
-        id: activityId,
-        porcentaje: data.porcentaje,
-        responsables: data.responsables,
-        observaciones: data.observaciones,
-        bitacora: data.bitacora,
+        id: activityId, porcentaje: data.porcentaje, responsables: data.responsables,
+        observaciones: data.observaciones, bitacora: data.bitacora,
         updated_at: new Date().toISOString()
       }, { onConflict: 'id' });
       if (error) throw error;
@@ -607,7 +550,6 @@
     saveTimeout = setTimeout(() => saveActivityToSupabase(activityId), 800);
   }
 
-  // ===== CALENDARIO =====
   function getMonthData(actId, year, month) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -648,8 +590,7 @@
   let calendarioState = {};
   function cambiarMes(actId, delta) {
     if (!calendarioState[actId]) { const now = new Date(); calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() }; }
-    const s = calendarioState[actId];
-    s.month += delta;
+    const s = calendarioState[actId]; s.month += delta;
     if (s.month < 0) { s.month = 11; s.year--; } else if (s.month > 11) { s.month = 0; s.year++; }
     renderCalendario(actId, s.year, s.month);
   }
@@ -661,79 +602,58 @@
     if (ta) ta.value = notaActual || '';
     if (modal) modal.classList.add('visible');
   }
-  function cerrarModal(actId) {
-    const m = document.getElementById(`modal-${actId}`);
-    if (m) m.classList.remove('visible');
-  }
+  function cerrarModal(actId) { const m = document.getElementById(`modal-${actId}`); if (m) m.classList.remove('visible'); }
   function guardarNotaDia(actId) {
     if (!isAuthorized(currentUser)) return;
-    const fecha = calendarioState[actId]?.diaSeleccionado;
-    if (!fecha) return;
-    const nota = document.getElementById(`modal-text-${actId}`).value.trim();
-    if (!nota) return;
+    const fecha = calendarioState[actId]?.diaSeleccionado; if (!fecha) return;
+    const nota = document.getElementById(`modal-text-${actId}`).value.trim(); if (!nota) return;
     const bitacora = progress[actId].bitacora;
     const idx = bitacora.findIndex(e => e.fecha === fecha);
     if (idx !== -1) bitacora[idx].nota = nota; else bitacora.push({ fecha, nota });
     bitacora.sort((a, b) => a.fecha.localeCompare(b.fecha));
-    progress[actId].bitacora = bitacora;
-    cerrarModal(actId);
-    const s = calendarioState[actId];
-    renderCalendario(actId, s.year, s.month);
-    debouncedSave(actId);
+    progress[actId].bitacora = bitacora; cerrarModal(actId);
+    const s = calendarioState[actId]; renderCalendario(actId, s.year, s.month); debouncedSave(actId);
   }
   function eliminarNotaDia(actId) {
     if (!isAuthorized(currentUser)) return;
-    const fecha = calendarioState[actId]?.diaSeleccionado;
-    if (!fecha) return;
+    const fecha = calendarioState[actId]?.diaSeleccionado; if (!fecha) return;
     if (!confirm(`¿Eliminar la novedad del día ${fecha}?`)) return;
     const bitacora = progress[actId].bitacora;
     const idx = bitacora.findIndex(e => e.fecha === fecha);
     if (idx !== -1) {
-      bitacora.splice(idx, 1);
-      progress[actId].bitacora = bitacora;
+      bitacora.splice(idx, 1); progress[actId].bitacora = bitacora;
       cerrarModal(actId);
-      const s = calendarioState[actId];
-      renderCalendario(actId, s.year, s.month);
-      debouncedSave(actId);
+      const s = calendarioState[actId]; renderCalendario(actId, s.year, s.month); debouncedSave(actId);
     }
   }
 
-  // ===== TÉCNICOS =====
   function asignarTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
-    const select = document.getElementById(`resp-${actId}`);
-    if (!select) return;
+    const select = document.getElementById(`resp-${actId}`); if (!select) return;
     const selected = [];
     for (let i = 0; i < select.options.length; i++) if (select.options[i].selected) selected.push(select.options[i].value);
-    progress[actId].responsables = selected;
-    actualizarBadges(actId);
-    debouncedSave(actId);
+    progress[actId].responsables = selected; actualizarBadges(actId); debouncedSave(actId);
   }
   function quitarTodosTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
     if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
-    progress[actId].responsables = [];
-    actualizarBadges(actId);
+    progress[actId].responsables = []; actualizarBadges(actId);
     const select = document.getElementById(`resp-${actId}`);
     if (select) for (let i = 0; i < select.options.length; i++) select.options[i].selected = false;
     debouncedSave(actId);
   }
   function actualizarBadges(actId) {
-    const container = document.getElementById(`badges-${actId}`);
-    if (!container) return;
+    const container = document.getElementById(`badges-${actId}`); if (!container) return;
     const r = progress[actId]?.responsables || [];
     container.innerHTML = r.length === 0
       ? '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>'
       : r.map(n => `<span class="badge-tecnico">${n}</span>`).join('');
   }
 
-  // ===== UPDATES UI =====
   function updateActivityUI(actId) {
-    const data = progress[actId];
-    if (!data) return;
+    const data = progress[actId]; if (!data) return;
     const pct = data.porcentaje;
-    const status = getStatus(pct);
-    const color = getColorForPct(pct);
+    const status = getStatus(pct); const color = getColorForPct(pct);
     const editable = isAuthorized(currentUser);
     const slider = document.getElementById(`slider-${actId}`);
     if (slider) {
@@ -768,7 +688,7 @@
     if (text) {
       text.textContent = Math.round(m.pct) + '%';
       text.style.color = color;
-      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso: ${m.peso}`;
+      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso interno: ${m.peso} quincenas | Peso global: ${PESOS_FASE[phaseIndex]}%`;
     }
   }
 
@@ -783,7 +703,7 @@
     const percent = document.getElementById('global-percent');
     percent.textContent = g.pct.toFixed(1) + '%';
     percent.style.color = getColorForPct(g.pct);
-    percent.title = `Global ponderado por fase: ${g.pct.toFixed(4)}%`;
+    percent.title = `Global ponderado por importancia de fase: ${g.pct.toFixed(4)}%`;
     const panel = document.getElementById('audit-panel');
     if (panel && panel.classList.contains('visible')) renderAuditoria();
   }
@@ -811,13 +731,12 @@
         </div>
         <div class="summary-info">
           <div class="summary-name">${phase.name}</div>
-          <div class="summary-detail">${m.completadas}/${m.total} act. · peso interno ${m.peso} · peso global ${wFase}</div>
+          <div class="summary-detail">${m.completadas}/${m.total} act. · peso interno ${m.peso} · peso global ${wFase}%</div>
         </div>`;
       grid.appendChild(item);
     });
   }
 
-  // ===== AUDITORÍA =====
   function toggleAuditoria() {
     const p = document.getElementById('audit-panel');
     p.classList.toggle('visible');
@@ -828,32 +747,33 @@
     const g = calcGlobalMetrics();
     let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
       <strong style="font-size:14px;">🔎 Auditoría de coherencia Fase ↔ Actividades ↔ Global</strong>
-      <span style="font-size:12px;color:var(--text-muted);">Ponderación: fase por duración, global por peso de fase</span>
+      <span style="font-size:12px;color:var(--text-muted);">Fase: ponderado por duración · Global: ponderado por importancia de fase</span>
     </div><table><thead><tr>
       <th>Fase</th><th>Peso int.</th><th>Peso global</th><th>Act.</th>
-      <th>Prom. simple</th><th>Prom. ponderado</th><th>Δ</th><th>Compl.</th>
+      <th>Prom. simple</th><th>Prom. ponderado</th><th>Δ</th><th>Compl.</th><th>Aporte</th>
     </tr></thead><tbody>`;
+    let totalAporte = 0;
     phasesData.forEach((phase, i) => {
       const m = calcPhaseMetrics(phase);
       const wFase = PESOS_FASE[i] || 1;
+      const aporte = (wFase / 100) * m.pct;
+      totalAporte += aporte;
       const cls = Math.abs(m.diff) < 0.5 ? 'ok' : 'warn';
       const nombreCorto = phase.name.split('—')[0].split(':')[1]?.trim() || phase.name;
-      html += `<tr><td>F${i+1} · ${nombreCorto}</td><td>${m.peso}</td><td>${wFase}</td><td>${m.total}</td><td>${m.simple.toFixed(2)}%</td><td><strong>${m.pct.toFixed(2)}%</strong></td><td class="${cls}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}</td><td>${m.completadas}/${m.total}</td></tr>`;
+      html += `<tr><td>F${i+1} · ${nombreCorto}</td><td>${m.peso}</td><td>${wFase}%</td><td>${m.total}</td><td>${m.simple.toFixed(2)}%</td><td><strong>${m.pct.toFixed(2)}%</strong></td><td class="${cls}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}</td><td>${m.completadas}/${m.total}</td><td>${aporte.toFixed(2)}%</td></tr>`;
     });
-    html += `</tbody><tfoot><tr><td>GLOBAL (ponderado por fase)</td><td>—</td><td>${g.peso}</td><td>${g.count}</td><td>${g.simple.toFixed(2)}%</td><td>${g.pct.toFixed(2)}%</td><td>—</td><td>${g.completadas}/${g.count}</td></tr></tfoot></table>
-    <p class="audit-note">El global se calcula como <strong>promedio de las 5 fases ponderado por PESOS_FASE = {6, 10, 4, 11, 5}</strong>. Con las fases actuales produce <strong>${g.pct.toFixed(2)}%</strong>. Δ = Ponderado − Simple (verde si ≈0).</p>`;
+    html += `</tbody><tfoot><tr><td>GLOBAL</td><td>—</td><td>100%</td><td>${g.count}</td><td>—</td><td>${g.pct.toFixed(2)}%</td><td>—</td><td>${g.completadas}/${g.count}</td><td>${totalAporte.toFixed(2)}%</td></tr></tfoot></table>
+    <p class="audit-note">El global se calcula con <strong>pesos de importancia de fase</strong>: F1=10%, F2=20%, F3=20%, F4=30%, F5=20%. Columna <em>Aporte</em> = peso_fase × avance_fase. Con los avances actuales el total es <strong>${g.pct.toFixed(2)}%</strong>.</p>`;
     panel.innerHTML = html;
   }
 
-  // ===== FILTROS =====
   function applyFilters() {
     const search = document.getElementById('search-input').value.toLowerCase();
     const statusFilter = document.getElementById('status-filter').value;
     const periodFilter = document.getElementById('period-filter').value;
     document.querySelectorAll('.activity-row').forEach(row => {
       const actId = row.dataset.activityId;
-      const data = progress[actId];
-      if (!data) return;
+      const data = progress[actId]; if (!data) return;
       const pct = data.porcentaje;
       const desc = row.querySelector('.activity-desc')?.textContent.toLowerCase() || '';
       const periods = [];
@@ -873,13 +793,11 @@
     });
   }
 
-  // ===== RENDER =====
   function render() {
     const container = document.getElementById('phases-container');
     container.innerHTML = '';
     const colors = ['#3b82f6','#10b981','#f59e0b','#f43f5e','#8b5cf6'];
     const editable = isAuthorized(currentUser);
-
     phasesData.forEach((phase, pi) => {
       const phaseColor = colors[pi % colors.length];
       const phaseEl = document.createElement('div');
@@ -892,7 +810,7 @@
             <span class="phase-name">${phase.name}</span>
           </div>
           <div class="phase-meta">
-            <span style="font-size:12px;color:var(--text-muted)">${phase.activities.length} act.</span>
+            <span style="font-size:12px;color:var(--text-muted)">${phase.activities.length} act. · peso global ${PESOS_FASE[pi]}%</span>
             <div class="phase-progress-bar"><div class="phase-progress-fill" id="phase-fill-${pi}" style="width:0%;background:${phaseColor}"></div></div>
             <span class="phase-progress-text" id="phase-text-${pi}" style="color:${phaseColor}">0%</span>
             <span class="phase-toggle">▼</span>
@@ -953,7 +871,6 @@
       phaseEl.appendChild(actCont);
       container.appendChild(phaseEl);
     });
-
     phasesData.forEach(phase => phase.activities.forEach(act => {
       if (!calendarioState[act.id]) {
         const now = new Date();
@@ -962,36 +879,26 @@
       renderCalendario(act.id, calendarioState[act.id].year, calendarioState[act.id].month);
     }));
     phasesData.forEach((_, i) => updatePhaseUI(i));
-    updateGlobalUI();
-    updateSummaryUI();
-    updateReadonlyNotice();
+    updateGlobalUI(); updateSummaryUI(); updateReadonlyNotice();
   }
 
-  // ===== HANDLERS =====
   function handleSliderChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
     progress[actId].porcentaje = clampValue(value);
     updateActivityUI(actId);
-    const pi = findPhaseIndex(actId);
-    if (pi !== -1) updatePhaseUI(pi);
-    updateGlobalUI();
-    updateSummaryUI();
-    debouncedSave(actId);
+    const pi = findPhaseIndex(actId); if (pi !== -1) updatePhaseUI(pi);
+    updateGlobalUI(); updateSummaryUI(); debouncedSave(actId);
   }
   function handleNumberChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
     progress[actId].porcentaje = clampValue(value);
     updateActivityUI(actId);
-    const pi = findPhaseIndex(actId);
-    if (pi !== -1) updatePhaseUI(pi);
-    updateGlobalUI();
-    updateSummaryUI();
-    debouncedSave(actId);
+    const pi = findPhaseIndex(actId); if (pi !== -1) updatePhaseUI(pi);
+    updateGlobalUI(); updateSummaryUI(); debouncedSave(actId);
   }
   function handleObservacionChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
-    progress[actId].observaciones = value;
-    debouncedSave(actId);
+    progress[actId].observaciones = value; debouncedSave(actId);
   }
   function findPhaseIndex(actId) {
     for (let i = 0; i < phasesData.length; i++) if (phasesData[i].activities.some(a => a.id === actId)) return i;
@@ -1001,13 +908,9 @@
     currentUser = userName;
     localStorage.setItem('catastro_user', userName);
     document.getElementById('user-select').value = userName;
-    render();
-    applyFilters();
-    updateReadonlyNotice();
+    render(); applyFilters(); updateReadonlyNotice();
   }
-  function togglePhase(pi) {
-    document.getElementById(`phase-${pi}`)?.classList.toggle('collapsed');
-  }
+  function togglePhase(pi) { document.getElementById(`phase-${pi}`)?.classList.toggle('collapsed'); }
   function resetAll() {
     if (!isAuthorized(currentUser)) return alert('No tienes permisos.');
     if (!confirm('¿Reiniciar TODOS los avances a 0%?')) return;
@@ -1022,16 +925,18 @@
     const data = {
       fecha_exportacion: new Date().toISOString(),
       proyecto: "Cronograma Catastro 2026 - 5 Fases",
-      metodo_calculo: "Fase: ponderado por duración. Global: ponderado por PESOS_FASE {6,10,4,11,5}.",
+      metodo_calculo: "Fase: ponderado por duración. Global: ponderado por importancia de fase {F1:10, F2:20, F3:20, F4:30, F5:20}.",
       avance_global: g.pct.toFixed(4) + '%',
       avances: progress,
       resumen: {}
     };
     phasesData.forEach((phase, i) => {
       const m = calcPhaseMetrics(phase);
+      const wFase = PESOS_FASE[i] || 1;
       data.resumen[phase.name] = {
-        peso_interno: m.peso,
-        peso_global: PESOS_FASE[i] || 1,
+        peso_interno_quincenas: m.peso,
+        peso_global_pct: wFase,
+        aporte_global_pct: ((wFase/100) * m.pct).toFixed(4) + '%',
         actividades: m.total,
         avance_ponderado: m.pct.toFixed(4) + '%',
         avance_simple: m.simple.toFixed(4) + '%',
@@ -1049,8 +954,7 @@
     showSaveStatus('📥 Datos exportados', 'success');
   }
   function forceLocalData() {
-    initProgress(true);
-    render(); applyFilters();
+    initProgress(true); render(); applyFilters();
     showSaveStatus('🔄 Datos locales forzados', 'success');
     showError('Modo local activado. Los cambios no se guardarán en Supabase.');
   }
