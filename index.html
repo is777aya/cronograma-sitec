@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ===== ESTILOS (sin cambios) ===== */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -152,6 +151,8 @@
     .btn-export:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-local { background: linear-gradient(135deg, var(--accent-amber), #d97706); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
     .btn-local:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+    .btn-audit { background: linear-gradient(135deg, var(--accent-violet), #7c3aed); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .btn-audit:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
 
     .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
     .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
@@ -560,6 +561,27 @@
     .summary-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
     .summary-detail { font-size: 11px; color: var(--text-muted); }
 
+    /* ===== AUDITORÍA ===== */
+    .audit-panel {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-violet);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      box-shadow: 0 0 0 1px rgba(139,92,246,0.15);
+    }
+    .audit-panel.visible { display: block; }
+    .audit-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .audit-panel th, .audit-panel td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+    .audit-panel th:first-child, .audit-panel td:first-child { text-align: left; white-space: normal; }
+    .audit-panel th { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .audit-panel tfoot td { border-top: 2px solid var(--accent-violet); border-bottom: none; font-weight: 700; }
+    .audit-panel .ok { color: var(--accent-emerald); }
+    .audit-panel .warn { color: var(--accent-amber); }
+    .audit-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+
     .dashboard-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 8px; }
     .dashboard-footer p { margin: 4px 0; }
 
@@ -636,7 +658,7 @@
         </div>
         <span class="global-percent" id="global-percent">0%</span>
       </div>
-      <div class="date-badge">📅 Ago 2026</div>
+      <div class="date-badge">📅 Octubre 2026</div>
     </div>
   </div>
 
@@ -701,10 +723,14 @@
         <option value="Dic">Diciembre 2026</option>
       </select>
     </div>
+    <button class="btn-audit" onclick="toggleAuditoria()">🔎 Auditar coherencia</button>
     <button class="btn-export" id="btn-export" onclick="exportData()">📥 Exportar Datos</button>
     <button class="btn-reset" id="btn-reset" onclick="resetAll()">🔄 Reiniciar Avances</button>
     <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
   </div>
+
+  <!-- PANEL DE AUDITORÍA -->
+  <div class="audit-panel" id="audit-panel"></div>
 
   <!-- Mensaje de error -->
   <div id="error-message" class="error-message" style="display:none;"></div>
@@ -721,6 +747,7 @@
   <!-- FOOTER -->
   <div class="dashboard-footer">
     <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
+    <p>⚖️ <strong>Cálculo:</strong> El avance de cada fase es un <strong>promedio ponderado por duración</strong> (nº de quincenas de cada actividad), no un promedio simple. El avance global es la ponderación de todas las actividades, coherente con las fases.</p>
     <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
@@ -763,7 +790,7 @@
     "Victor Siñani"
   ];
 
-  // ===== DATOS DE ACTIVIDADES (ESTRUCTURA FINAL CON AJUSTES EN FASE 1) =====
+  // ===== DATOS DE ACTIVIDADES =====
   const phasesData = [
     { 
       name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
@@ -773,11 +800,8 @@
         {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
         {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
         {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
-        // Tarea fusionada de 1.6 y 1.7
         {id:"1.6", desc:"Validación cruzada de la transformación detectada vs. datos SIT V2/V3, identificación y clasificación de zonas críticas con alta transformación urbana", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
-        // 1.5 pasa a ser la final
         {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]}
-        // 1.8 eliminada
       ]
     },
     { 
@@ -828,9 +852,84 @@
     }
   ];
 
-  // ===== RESTO DEL CÓDIGO (sin cambios) =====
-  // ... (todo lo demás se mantiene igual, solo se modificó la fase 1)
-  // ===============================================================
+  // ============================================================
+  //  MOTOR DE CÁLCULO PONDERADO (COHERENCIA FASE ↔ ACTIVIDADES)
+  // ============================================================
+  // El peso de cada actividad = duración en quincenas.
+  // Para cambiar un peso, añade `peso: N` dentro de la actividad
+  // o edita el mapa PESOS. Un peso mayor = mayor incidencia.
+  const PESOS = {
+    // FASE 1 (14 quincenas)
+    '1.1': 2, '1.2': 2, '1.3': 2, '1.4': 2, '1.6': 3, '1.5': 3,
+    // FASE 2 (11 quincenas)
+    '2.1': 2, '2.2': 3, '2.3': 2, '2.4': 2, '2.5': 2,
+    // FASE 3 (10 quincenas)
+    '3.1': 2, '3.2': 2, '3.3': 3, '3.4': 3,
+    // FASE 4 (19 quincenas)
+    '4.1': 2, '4.2': 4, '4.3': 3, '4.4': 3, '4.5': 2, '4.6': 2, '4.7': 2, '4.8': 1,
+    // FASE 5 (13 quincenas)
+    '5.1': 3, '5.2': 3, '5.3': 3, '5.4': 3, '5.5': 1
+  };
+
+  function getPeso(act) {
+    if (typeof act.peso === 'number' && act.peso > 0) return act.peso;
+    if (PESOS[act.id]) return PESOS[act.id];
+    return Math.max(1, (act.periods || []).length);
+  }
+
+  // Métricas de una fase: % ponderado + promedio simple + delta
+  function calcPhaseMetrics(phase) {
+    let wSum = 0, wTotal = 0, simpleSum = 0, n = 0, completadas = 0, enProgreso = 0, pendientes = 0;
+    phase.activities.forEach(a => {
+      const w = getPeso(a);
+      const p = progress[a.id]?.porcentaje || 0;
+      wSum += w * p;
+      wTotal += w;
+      simpleSum += p;
+      n++;
+      if (p === 100) completadas++;
+      else if (p > 0) enProgreso++;
+      else pendientes++;
+    });
+    const ponderado = wTotal > 0 ? wSum / wTotal : 0;
+    const simple = n > 0 ? simpleSum / n : 0;
+    return {
+      pct: ponderado,
+      simple: simple,
+      diff: ponderado - simple,
+      peso: wTotal,
+      completadas: completadas,
+      enProgreso: enProgreso,
+      pendientes: pendientes,
+      total: n
+    };
+  }
+
+  // Métricas globales: ponderado sobre TODAS las actividades
+  function calcGlobalMetrics() {
+    let wSum = 0, wTotal = 0, simpleSum = 0, count = 0;
+    let completadas = 0, enProgreso = 0, pendientes = 0;
+    phasesData.forEach(phase => phase.activities.forEach(a => {
+      const w = getPeso(a);
+      const p = progress[a.id]?.porcentaje || 0;
+      wSum += w * p;
+      wTotal += w;
+      simpleSum += p;
+      count++;
+      if (p === 100) completadas++;
+      else if (p > 0) enProgreso++;
+      else pendientes++;
+    }));
+    return {
+      pct: wTotal > 0 ? wSum / wTotal : 0,
+      simple: count > 0 ? simpleSum / count : 0,
+      peso: wTotal,
+      count: count,
+      completadas: completadas,
+      enProgreso: enProgreso,
+      pendientes: pendientes
+    };
+  }
 
   // ===== ESTADO =====
   let currentUser = null;
@@ -1004,7 +1103,7 @@
     }, 800);
   }
 
-  // ===== CALENDARIO (SIN RESTRICCIONES DE FECHAS) =====
+  // ===== CALENDARIO =====
   function getMonthData(actId, year, month) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -1262,62 +1361,52 @@
     }
   }
 
+  // ✅ FASE: ahora usa promedio PONDERADO por duración
   function updatePhaseUI(phaseIndex) {
     const phase = phasesData[phaseIndex];
-    let sum = 0;
-    phase.activities.forEach(a => {
-      sum += (progress[a.id]?.porcentaje || 0);
-    });
-    const avg = phase.activities.length > 0 ? Math.round(sum / phase.activities.length) : 0;
-    const color = getColorForPct(avg);
+    const m = calcPhaseMetrics(phase);
+    const color = getColorForPct(m.pct);
 
     const fill = document.getElementById(`phase-fill-${phaseIndex}`);
     if (fill) {
-      fill.style.width = avg + '%';
+      fill.style.width = m.pct + '%';
       fill.style.background = color;
     }
     const text = document.getElementById(`phase-text-${phaseIndex}`);
     if (text) {
-      text.textContent = avg + '%';
+      text.textContent = Math.round(m.pct) + '%';
       text.style.color = color;
+      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso: ${m.peso} quincenas`;
     }
   }
 
+  // ✅ GLOBAL: promedio ponderado consistente con las fases
   function updateGlobalUI() {
-    let total = 0, completed = 0, progressCount = 0, pending = 0;
-    let sum = 0, count = 0;
-    Object.keys(progress).forEach(id => {
-      const p = progress[id].porcentaje;
-      total++;
-      sum += p;
-      if (p === 100) completed++;
-      else if (p > 0) progressCount++;
-      else pending++;
-    });
-    count = total;
-    const globalPct = count > 0 ? Math.round(sum / count) : 0;
+    const g = calcGlobalMetrics();
 
-    document.getElementById('kpi-total').textContent = total;
-    document.getElementById('kpi-completed').textContent = completed;
-    document.getElementById('kpi-progress').textContent = progressCount;
-    document.getElementById('kpi-pending').textContent = pending;
+    document.getElementById('kpi-total').textContent = g.count;
+    document.getElementById('kpi-completed').textContent = g.completadas;
+    document.getElementById('kpi-progress').textContent = g.enProgreso;
+    document.getElementById('kpi-pending').textContent = g.pendientes;
 
     const bar = document.getElementById('global-bar');
-    bar.style.width = globalPct + '%';
+    bar.style.width = g.pct + '%';
     const percent = document.getElementById('global-percent');
-    percent.textContent = globalPct + '%';
-    percent.style.color = getColorForPct(globalPct);
+    percent.textContent = Math.round(g.pct) + '%';
+    percent.style.color = getColorForPct(g.pct);
+    percent.title = `Ponderado: ${g.pct.toFixed(2)}% | Simple: ${g.simple.toFixed(2)}%`;
+
+    const panel = document.getElementById('audit-panel');
+    if (panel && panel.classList.contains('visible')) renderAuditoria();
   }
 
   function updateSummaryUI() {
     const grid = document.getElementById('summary-grid');
     grid.innerHTML = '';
-    phasesData.forEach((phase, pi) => {
-      const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
-      const avg = Math.round(phaseSum / phase.activities.length);
+    phasesData.forEach((phase) => {
+      const m = calcPhaseMetrics(phase);
+      const avg = m.pct;
       const color = getColorForPct(avg);
-      const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
-      const total = phase.activities.length;
       const radius = 20;
       const circumference = 2 * Math.PI * radius;
       const offset = circumference - (avg / 100) * circumference;
@@ -1331,15 +1420,87 @@
             <circle class="summary-ring-fill" cx="24" cy="24" r="${radius}"
               stroke="${color}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
           </svg>
-          <span class="summary-ring-text" style="color:${color}">${avg}%</span>
+          <span class="summary-ring-text" style="color:${color}">${Math.round(avg)}%</span>
         </div>
         <div class="summary-info">
           <div class="summary-name">${phase.name}</div>
-          <div class="summary-detail">${completed}/${total} actividades completadas</div>
+          <div class="summary-detail">${m.completadas}/${m.total} actividades completadas · peso ${m.peso}</div>
         </div>
       `;
       grid.appendChild(item);
     });
+  }
+
+  // ===== AUDITORÍA DE COHERENCIA =====
+  function toggleAuditoria() {
+    const panel = document.getElementById('audit-panel');
+    panel.classList.toggle('visible');
+    if (panel.classList.contains('visible')) renderAuditoria();
+  }
+
+  function renderAuditoria() {
+    const panel = document.getElementById('audit-panel');
+    const g = calcGlobalMetrics();
+
+    let html = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <strong style="font-size:14px;">🔎 Auditoría de coherencia Fase ↔ Actividades</strong>
+        <span style="font-size:12px;color:var(--text-muted);">Método activo: promedio ponderado por duración (quincenas)</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Fase</th>
+            <th>Peso total<br><span style="font-weight:400;text-transform:none;">(quincenas)</span></th>
+            <th>Act.</th>
+            <th>Prom. simple</th>
+            <th>Prom. ponderado</th>
+            <th>Δ (P − S)</th>
+            <th>Completadas</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    phasesData.forEach((phase, i) => {
+      const m = calcPhaseMetrics(phase);
+      const cls = Math.abs(m.diff) < 0.5 ? 'ok' : 'warn';
+      const nombreCorto = phase.name.split('—')[0].split(':')[1]?.trim() || phase.name;
+      html += `
+        <tr>
+          <td>F${i + 1} · ${nombreCorto}</td>
+          <td>${m.peso}</td>
+          <td>${m.total}</td>
+          <td>${m.simple.toFixed(2)}%</td>
+          <td><strong>${m.pct.toFixed(2)}%</strong></td>
+          <td class="${cls}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}</td>
+          <td>${m.completadas}/${m.total}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>GLOBAL (todas las actividades)</td>
+            <td>${g.peso}</td>
+            <td>${g.count}</td>
+            <td>${g.simple.toFixed(2)}%</td>
+            <td>${g.pct.toFixed(2)}%</td>
+            <td>—</td>
+            <td>${g.completadas}/${g.count}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p class="audit-note">
+        <strong>Δ (P − S):</strong> diferencia entre el promedio ponderado y el promedio simple. Si Δ ≈ 0 (verde) el peso está equilibrado. 
+        Si Δ es negativo (ámbar) significa que las actividades cortas tienen mayor avance que las largas, y el promedio simple estaría 
+        <em>sobrevalorando</em> el avance real de la fase.
+      </p>
+    `;
+
+    panel.innerHTML = html;
   }
 
   // ===== FILTROS =====
@@ -1426,6 +1587,7 @@
         const pct = data.porcentaje;
         const status = getStatus(pct);
         const color = getColorForPct(pct);
+        const peso = getPeso(act);
 
         const row = document.createElement('div');
         row.className = 'activity-row';
@@ -1593,20 +1755,24 @@
 
   // ===== EXPORT =====
   function exportData() {
+    const g = calcGlobalMetrics();
     const data = {
       fecha_exportacion: new Date().toISOString(),
       proyecto: "Cronograma Catastro 2026 - 5 Fases",
+      metodo_calculo: "Promedio ponderado por duración (quincenas)",
+      avance_global: g.pct.toFixed(2) + '%',
       avances: progress,
       resumen: {}
     };
     phasesData.forEach((phase) => {
-      const phaseSum = phase.activities.reduce((s, a) => s + (progress[a.id]?.porcentaje || 0), 0);
-      const avg = Math.round(phaseSum / phase.activities.length);
-      const completed = phase.activities.filter(a => (progress[a.id]?.porcentaje || 0) === 100).length;
+      const m = calcPhaseMetrics(phase);
       data.resumen[phase.name] = {
-        avance_promedio: avg + '%',
-        completadas: completed,
-        total: phase.activities.length
+        peso_quincenas: m.peso,
+        actividades: m.total,
+        avance_ponderado: m.pct.toFixed(2) + '%',
+        avance_simple: m.simple.toFixed(2) + '%',
+        diferencia: m.diff.toFixed(2) + ' pts',
+        completadas: m.completadas
       };
     });
 
@@ -1672,6 +1838,7 @@
   window.cerrarModal = cerrarModal;
   window.guardarNotaDia = guardarNotaDia;
   window.eliminarNotaDia = eliminarNotaDia;
+  window.toggleAuditoria = toggleAuditoria;
 </script>
 </body>
 </html>
