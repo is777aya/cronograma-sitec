@@ -25,38 +25,24 @@
       --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
       --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.4);
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
       min-height: 100vh;
     }
-
-    #dashboard-container {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
+    #dashboard-container { max-width: 1600px; margin: 0 auto; padding: 24px; }
     .dashboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
       background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 24px 32px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-lg);
-      flex-wrap: wrap;
-      gap: 16px;
+      border: 1px solid var(--border-color); border-radius: 16px;
+      padding: 24px 32px; margin-bottom: 24px; box-shadow: var(--shadow-lg);
+      flex-wrap: wrap; gap: 16px;
     }
     .header-left { display: flex; align-items: center; gap: 16px; }
     .header-icon { font-size: 40px; }
-    .dashboard-header h1 { font-size: 24px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+    .dashboard-header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
     .header-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
     .header-right { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
     .global-progress { display: flex; align-items: center; gap: 12px; }
@@ -68,46 +54,12 @@
     .save-status { font-size: 12px; color: var(--accent-emerald); font-weight: 500; display: flex; align-items: center; gap: 6px; }
     .save-status.saving { color: var(--accent-amber); }
     .save-status.error { color: var(--accent-rose); }
-
-    .user-selector {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-primary);
-      padding: 6px 12px 6px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-    }
-    .user-selector label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .user-selector select {
-      background: var(--bg-primary);
-      border: none;
-      color: var(--text-primary);
-      padding: 6px 8px;
-      font-size: 14px;
-      font-weight: 500;
-      outline: none;
-      cursor: pointer;
-      min-width: 180px;
-    }
+    .user-selector { display: flex; align-items: center; gap: 8px; background: var(--bg-primary); padding: 6px 12px 6px 16px; border-radius: 8px; border: 1px solid var(--border-color); }
+    .user-selector label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+    .user-selector select { background: var(--bg-primary); border: none; color: var(--text-primary); padding: 6px 8px; font-size: 14px; font-weight: 500; outline: none; cursor: pointer; min-width: 180px; }
     .user-selector select:focus { outline: 2px solid var(--accent-blue); }
-    .user-badge {
-      font-size: 12px;
-      background: var(--accent-emerald);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
+    .user-badge { font-size: 12px; background: var(--accent-emerald); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
     .user-badge.readonly { background: var(--accent-amber); }
-
     .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
     .kpi-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; transition: all 0.3s ease; box-shadow: var(--shadow); }
     .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--accent-blue); }
@@ -118,437 +70,98 @@
     .kpi-progress .kpi-value { color: var(--accent-amber); }
     .kpi-pending .kpi-value { color: var(--accent-rose); }
     .kpi-phases .kpi-value { color: var(--accent-violet); }
-
-    .filter-bar {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
+    .filter-bar { display: flex; gap: 16px; align-items: flex-end; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; flex-wrap: wrap; }
     .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
     .filter-group label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .filter-group input, .filter-group select {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: var(--text-primary);
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
+    .filter-group input, .filter-group select { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: var(--text-primary); font-size: 14px; outline: none; transition: border-color 0.2s; }
     .filter-group input:focus, .filter-group select:focus { border-color: var(--accent-blue); }
     .btn-reset { background: linear-gradient(135deg, var(--accent-rose), #e11d48); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-reset:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); }
-    .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-reset:hover { transform: scale(1.05); }
+    .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-export { background: linear-gradient(135deg, var(--accent-emerald), #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-export:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-    .btn-export:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-export:hover { transform: scale(1.05); }
     .btn-local { background: linear-gradient(135deg, var(--accent-amber), #d97706); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-local:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+    .btn-local:hover { transform: scale(1.05); }
     .btn-audit { background: linear-gradient(135deg, var(--accent-violet), #7c3aed); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-audit:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
-
+    .btn-audit:hover { transform: scale(1.05); }
     .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
     .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
     .phase-card:hover { border-color: var(--accent-blue); }
     .phase-card.collapsed .phase-activities { display: none; }
-    .phase-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      cursor: pointer;
-      background: linear-gradient(90deg, rgba(59,130,246,0.08), transparent);
-      transition: background 0.3s;
-    }
+    .phase-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; background: linear-gradient(90deg, rgba(59,130,246,0.08), transparent); transition: background 0.3s; }
     .phase-header:hover { background: linear-gradient(90deg, rgba(59,130,246,0.15), transparent); }
     .phase-title-group { display: flex; align-items: center; gap: 12px; }
     .phase-number { background: var(--accent-blue); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .phase-name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+    .phase-name { font-weight: 600; font-size: 15px; }
     .phase-meta { display: flex; align-items: center; gap: 16px; }
     .phase-progress-bar { width: 120px; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
     .phase-progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
     .phase-progress-text { font-size: 13px; font-weight: 700; min-width: 40px; text-align: right; }
     .phase-toggle { font-size: 18px; color: var(--text-secondary); transition: transform 0.3s; }
     .phase-card.collapsed .phase-toggle { transform: rotate(-90deg); }
-    .phase-description {
-      padding: 0 20px 12px 52px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      border-bottom: 1px solid rgba(51,65,85,0.3);
-    }
+    .phase-description { padding: 0 20px 12px 52px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; border-bottom: 1px solid rgba(51,65,85,0.3); }
     .phase-card.collapsed .phase-description { display: none; }
-
     .phase-activities { border-top: 1px solid var(--border-color); }
-    .activity-row {
-      display: flex;
-      flex-direction: column;
-      padding: 12px 20px 12px 52px;
-      border-bottom: 1px solid rgba(51,65,85,0.5);
-      transition: background 0.2s;
-      gap: 8px;
-    }
+    .activity-row { display: flex; flex-direction: column; padding: 12px 20px 12px 52px; border-bottom: 1px solid rgba(51,65,85,0.5); transition: background 0.2s; gap: 8px; }
     .activity-row:last-child { border-bottom: none; }
     .activity-row:hover { background: var(--bg-card-hover); }
     .activity-row.hidden { display: none; }
-
-    .activity-main {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+    .activity-main { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
     .activity-id { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--accent-cyan); font-weight: 600; min-width: 40px; }
     .activity-desc { flex: 2; font-size: 13px; color: var(--text-secondary); padding-right: 16px; line-height: 1.5; min-width: 200px; }
     .activity-periods { display: flex; gap: 4px; margin-right: 16px; flex-wrap: wrap; max-width: 200px; }
     .period-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--accent-blue); font-weight: 500; white-space: nowrap; }
-
-    .activity-control {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1 1 auto;
-      min-width: 280px;
-      flex-wrap: wrap;
-    }
+    .activity-control { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 280px; flex-wrap: wrap; }
     .slider-container { position: relative; width: 120px; }
-    .slider-container input[type="range"] {
-      width: 100%;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 6px;
-      border-radius: 3px;
-      background: var(--bg-primary);
-      outline: none;
-      cursor: pointer;
-    }
-    .slider-container input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      cursor: pointer;
-      border: 2px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      transition: transform 0.2s;
-    }
-    .slider-container input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-    .slider-container input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--accent-blue);
-      cursor: pointer;
-      border: 2px solid white;
-    }
-    .slider-container input[type="range"]:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .num-input {
-      width: 56px;
-      height: 32px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 700;
-      text-align: center;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      -moz-appearance: textfield;
-    }
-    .num-input::-webkit-outer-spin-button,
-    .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .num-input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-    .num-input:hover { border-color: var(--accent-cyan); }
-    .num-input:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .slider-container input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: var(--bg-primary); outline: none; cursor: pointer; }
+    .slider-container input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-blue); cursor: pointer; border: 2px solid white; }
+    .slider-container input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent-blue); cursor: pointer; border: 2px solid white; }
+    .slider-container input[type="range"]:disabled { opacity: 0.6; cursor: not-allowed; }
+    .num-input { width: 56px; height: 32px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 14px; font-weight: 700; text-align: center; outline: none; -moz-appearance: textfield; }
+    .num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .num-input:focus { border-color: var(--accent-blue); }
+    .num-input:disabled { opacity: 0.6; cursor: not-allowed; }
     .activity-percent-sym { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-left: -4px; }
-    .activity-status {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      min-width: 90px;
-      text-align: center;
-    }
+    .activity-status { font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; min-width: 90px; text-align: center; }
     .status-pending { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
     .status-progress { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
     .status-completed { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
-
-    .activity-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1 1 100%;
-      padding-left: 52px;
-      padding-bottom: 8px;
-    }
-    .meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-start;
-    }
-    .meta-row label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      min-width: 100px;
-    }
-    .meta-row select {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-primary);
-      padding: 6px 10px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      flex: 1;
-      min-width: 180px;
-      height: auto;
-      min-height: 60px;
-    }
-    .meta-row select:focus { border-color: var(--accent-blue); }
-    .meta-row select:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .meta-row textarea {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-primary);
-      padding: 6px 10px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      flex: 1;
-      min-width: 150px;
-      resize: vertical;
-      height: 36px;
-    }
-    .meta-row textarea:focus { border-color: var(--accent-blue); }
-    .meta-row textarea:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .asignacion-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      flex: 1;
-    }
-    .asignacion-group .badges-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      flex: 1;
-    }
-    .asignacion-group .badge-tecnico {
-      background: var(--accent-blue);
-      color: white;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .asignacion-group .btn-asignar {
-      background: var(--accent-emerald);
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-    .asignacion-group .btn-asignar:hover:not(:disabled) { background: #059669; }
-    .asignacion-group .btn-asignar:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .asignacion-group .btn-quitar-todos {
-      background: var(--accent-rose);
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-    .asignacion-group .btn-quitar-todos:hover:not(:disabled) { background: #e11d48; }
-    .asignacion-group .btn-quitar-todos:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .calendario-section {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1 1 100%;
-      padding-left: 52px;
-      padding-bottom: 8px;
-    }
-    .calendario-section label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .calendario-nav {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-    .calendario-nav button {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 4px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
+    .activity-meta { display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%; padding-left: 52px; padding-bottom: 8px; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+    .meta-row label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; min-width: 100px; }
+    .meta-row select { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 6px 10px; font-size: 13px; outline: none; flex: 1; min-width: 180px; min-height: 60px; }
+    .meta-row select:disabled { opacity: 0.6; cursor: not-allowed; }
+    .meta-row textarea { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 6px 10px; font-size: 13px; outline: none; flex: 1; min-width: 150px; resize: vertical; height: 36px; }
+    .meta-row textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+    .asignacion-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1; }
+    .asignacion-group .badges-container { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+    .asignacion-group .badge-tecnico { background: var(--accent-blue); color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+    .asignacion-group .btn-asignar { background: var(--accent-emerald); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; }
+    .asignacion-group .btn-asignar:disabled { opacity: 0.5; cursor: not-allowed; }
+    .asignacion-group .btn-quitar-todos { background: var(--accent-rose); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; }
+    .asignacion-group .btn-quitar-todos:disabled { opacity: 0.5; cursor: not-allowed; }
+    .calendario-section { display: flex; flex-direction: column; gap: 6px; flex: 1 1 100%; padding-left: 52px; padding-bottom: 8px; }
+    .calendario-section label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+    .calendario-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+    .calendario-nav button { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
     .calendario-nav button:hover:not(:disabled) { background: var(--bg-card-hover); }
-    .calendario-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .calendario-nav span {
-      font-weight: 600;
-      font-size: 14px;
-      min-width: 120px;
-      text-align: center;
-    }
-    .calendario-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
-      background: var(--bg-secondary);
-      padding: 4px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      max-width: 480px;
-    }
-    .calendario-grid .dia-nombre {
-      font-size: 10px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      text-align: center;
-      font-weight: 600;
-      padding: 4px 0;
-    }
-    .calendario-grid .dia {
-      background: var(--bg-primary);
-      padding: 6px 2px;
-      text-align: center;
-      font-size: 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-      position: relative;
-      min-height: 36px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .calendario-grid .dia:hover:not(.dia-vacio) { background: var(--bg-card-hover); }
+    .calendario-nav span { font-weight: 600; font-size: 14px; min-width: 120px; text-align: center; }
+    .calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: var(--bg-secondary); padding: 4px; border-radius: 6px; border: 1px solid var(--border-color); max-width: 480px; }
+    .calendario-grid .dia-nombre { font-size: 10px; text-transform: uppercase; color: var(--text-muted); text-align: center; font-weight: 600; padding: 4px 0; }
+    .calendario-grid .dia { background: var(--bg-primary); padding: 6px 2px; text-align: center; font-size: 12px; border-radius: 4px; cursor: pointer; position: relative; min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .calendario-grid .dia:hover:not(.vacio) { background: var(--bg-card-hover); }
     .calendario-grid .dia.vacio { background: transparent; cursor: default; }
     .calendario-grid .dia.hoy { border: 1px solid var(--accent-cyan); }
-    .calendario-grid .dia .punto {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-emerald);
-      margin-top: 2px;
-    }
-    .calendario-grid .dia .nota-preview {
-      font-size: 9px;
-      color: var(--text-muted);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 100%;
-      padding: 0 2px;
-    }
-    .calendario-dia-modal {
-      margin-top: 8px;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 8px;
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .calendario-grid .dia .punto { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald); margin-top: 2px; }
+    .calendario-grid .dia .nota-preview { font-size: 9px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; padding: 0 2px; }
+    .calendario-dia-modal { margin-top: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; display: none; flex-direction: column; gap: 6px; }
     .calendario-dia-modal.visible { display: flex; }
-    .calendario-dia-modal textarea {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      color: var(--text-primary);
-      padding: 6px;
-      font-size: 13px;
-      resize: vertical;
-      height: 60px;
-      font-family: inherit;
-    }
-    .calendario-dia-modal textarea:focus { border-color: var(--accent-blue); }
-    .calendario-dia-modal .modal-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    .calendario-dia-modal .modal-actions button {
-      background: var(--accent-blue);
-      color: white;
-      border: none;
-      padding: 4px 16px;
-      border-radius: 4px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .calendario-dia-modal .modal-actions button:hover:not(:disabled) { background: #2563eb; }
-    .calendario-dia-modal .modal-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .calendario-dia-modal .modal-actions button.btn-eliminar {
-      background: var(--accent-rose);
-    }
-    .calendario-dia-modal .modal-actions button.btn-eliminar:hover:not(:disabled) { background: #e11d48; }
-
+    .calendario-dia-modal textarea { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); padding: 6px; font-size: 13px; resize: vertical; height: 60px; font-family: inherit; }
+    .calendario-dia-modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .calendario-dia-modal .modal-actions button { background: var(--accent-blue); color: white; border: none; padding: 4px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .calendario-dia-modal .modal-actions button.btn-eliminar { background: var(--accent-rose); }
     .summary-section { margin-bottom: 24px; }
-    .summary-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+    .summary-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
     .summary-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; transition: all 0.3s; }
     .summary-item:hover { border-color: var(--accent-blue); transform: translateX(4px); }
@@ -558,20 +171,9 @@
     .summary-ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
     .summary-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; }
     .summary-info { flex: 1; }
-    .summary-name { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+    .summary-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
     .summary-detail { font-size: 11px; color: var(--text-muted); }
-
-    /* ===== AUDITORÍA ===== */
-    .audit-panel {
-      display: none;
-      background: var(--bg-card);
-      border: 1px solid var(--accent-violet);
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      overflow-x: auto;
-      box-shadow: 0 0 0 1px rgba(139,92,246,0.15);
-    }
+    .audit-panel { display: none; background: var(--bg-card); border: 1px solid var(--accent-violet); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; overflow-x: auto; }
     .audit-panel.visible { display: block; }
     .audit-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .audit-panel th, .audit-panel td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
@@ -581,36 +183,13 @@
     .audit-panel .ok { color: var(--accent-emerald); }
     .audit-panel .warn { color: var(--accent-amber); }
     .audit-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
-
     .dashboard-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 8px; }
     .dashboard-footer p { margin: 4px 0; }
-
-    .error-message {
-      background: rgba(244,63,94,0.15);
-      border: 1px solid var(--accent-rose);
-      color: var(--accent-rose);
-      padding: 16px 20px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-      text-align: center;
-      font-weight: 500;
-    }
-
-    .readonly-notice {
-      background: rgba(245,158,11,0.15);
-      border: 1px solid var(--accent-amber);
-      color: var(--accent-amber);
-      padding: 12px 20px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-      text-align: center;
-      font-weight: 500;
-      display: none;
-    }
-
+    .error-message { background: rgba(244,63,94,0.15); border: 1px solid var(--accent-rose); color: var(--accent-rose); padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; text-align: center; font-weight: 500; }
+    .readonly-notice { background: rgba(245,158,11,0.15); border: 1px solid var(--accent-amber); color: var(--accent-amber); padding: 12px 20px; border-radius: 12px; margin-bottom: 24px; text-align: center; font-weight: 500; display: none; }
     @media (max-width: 1200px) {
       .kpi-row { grid-template-columns: repeat(3, 1fr); }
-      .activity-control { min-width: auto; width: 100%; justify-content: flex-start; }
+      .activity-control { min-width: auto; width: 100%; }
       .meta-row { flex-direction: column; align-items: stretch; }
       .asignacion-group { flex-direction: column; align-items: stretch; }
       .calendario-grid { max-width: 100%; }
@@ -623,17 +202,13 @@
       .phase-header { flex-wrap: wrap; gap: 8px; }
       .activity-row { padding-left: 20px; }
       .activity-periods { max-width: none; width: 100%; }
-      .activity-control { width: 100%; justify-content: flex-start; padding-left: 0; }
-      .phase-description { padding-left: 20px; }
       .activity-meta { padding-left: 0; }
       .calendario-section { padding-left: 0; }
-      .user-selector { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
 <div id="dashboard-container">
-  <!-- HEADER -->
   <div class="dashboard-header">
     <div class="header-left">
       <div class="header-icon">🗺️</div>
@@ -653,50 +228,25 @@
       </div>
       <div class="global-progress">
         <span class="global-label">Avance Global</span>
-        <div class="global-bar-container">
-          <div class="global-bar" id="global-bar"></div>
-        </div>
+        <div class="global-bar-container"><div class="global-bar" id="global-bar"></div></div>
         <span class="global-percent" id="global-percent">0%</span>
       </div>
       <div class="date-badge">📅 Octubre 2026</div>
     </div>
   </div>
 
-  <!-- Mensaje de solo lectura -->
   <div class="readonly-notice" id="readonly-notice">
     👁️ Estás en modo <strong>solo lectura</strong>. No puedes modificar avances, responsables ni observaciones.
   </div>
 
-  <!-- KPI CARDS -->
   <div class="kpi-row" id="kpi-row">
-    <div class="kpi-card kpi-total">
-      <div class="kpi-icon">📋</div>
-      <div class="kpi-value" id="kpi-total">0</div>
-      <div class="kpi-label">Actividades Totales</div>
-    </div>
-    <div class="kpi-card kpi-completed">
-      <div class="kpi-icon">✅</div>
-      <div class="kpi-value" id="kpi-completed">0</div>
-      <div class="kpi-label">Completadas</div>
-    </div>
-    <div class="kpi-card kpi-progress">
-      <div class="kpi-icon">🔄</div>
-      <div class="kpi-value" id="kpi-progress">0</div>
-      <div class="kpi-label">En Progreso</div>
-    </div>
-    <div class="kpi-card kpi-pending">
-      <div class="kpi-icon">⏳</div>
-      <div class="kpi-value" id="kpi-pending">0</div>
-      <div class="kpi-label">Pendientes</div>
-    </div>
-    <div class="kpi-card kpi-phases">
-      <div class="kpi-icon">🎯</div>
-      <div class="kpi-value" id="kpi-phases">5</div>
-      <div class="kpi-label">Fases Estratégicas</div>
-    </div>
+    <div class="kpi-card kpi-total"><div class="kpi-icon">📋</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-label">Actividades Totales</div></div>
+    <div class="kpi-card kpi-completed"><div class="kpi-icon">✅</div><div class="kpi-value" id="kpi-completed">0</div><div class="kpi-label">Completadas</div></div>
+    <div class="kpi-card kpi-progress"><div class="kpi-icon">🔄</div><div class="kpi-value" id="kpi-progress">0</div><div class="kpi-label">En Progreso</div></div>
+    <div class="kpi-card kpi-pending"><div class="kpi-icon">⏳</div><div class="kpi-value" id="kpi-pending">0</div><div class="kpi-label">Pendientes</div></div>
+    <div class="kpi-card kpi-phases"><div class="kpi-icon">🎯</div><div class="kpi-value" id="kpi-phases">5</div><div class="kpi-label">Fases Estratégicas</div></div>
   </div>
 
-  <!-- FILTERS -->
   <div class="filter-bar">
     <div class="filter-group">
       <label>🔍 Buscar actividad:</label>
@@ -729,40 +279,27 @@
     <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
   </div>
 
-  <!-- PANEL DE AUDITORÍA -->
   <div class="audit-panel" id="audit-panel"></div>
-
-  <!-- Mensaje de error -->
   <div id="error-message" class="error-message" style="display:none;"></div>
-
-  <!-- PHASES ACCORDION -->
   <div class="phases-container" id="phases-container"></div>
 
-  <!-- SUMMARY SECTION -->
   <div class="summary-section">
     <h2>📈 Resumen por Fase</h2>
     <div class="summary-grid" id="summary-grid"></div>
   </div>
 
-  <!-- FOOTER -->
   <div class="dashboard-footer">
     <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
-    <p>⚖️ <strong>Cálculo:</strong> El avance de cada fase es un <strong>promedio ponderado por duración</strong> (nº de quincenas de cada actividad), no un promedio simple. El avance global es la ponderación de todas las actividades, coherente con las fases.</p>
+    <p>⚖️ <strong>Cálculo en dos niveles:</strong> la fase es un <strong>promedio ponderado por duración</strong> (quincenas) de sus actividades; el global es un <strong>promedio ponderado por peso de fase</strong> — así el 45,6 % es coherente con las fases 27 / 82 / 49 / 39 / 7.</p>
     <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
 
 <script>
-  // ============================================================
-  //  CONFIGURACIÓN DE SUPABASE (CAMBIA AQUÍ TUS CREDENCIALES)
-  // ============================================================
   const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_saNWMmiAZ6XgRQ5luf_G-w_x_hmkMFk';
-
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('✅ Cliente Supabase creado:', supabaseClient);
 
-  // ===== USUARIOS =====
   const usuarios = [
     { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
     { nombre: "Favio Ramirez", rol: "Desarrollador" },
@@ -782,15 +319,10 @@
   ];
 
   const USUARIOS_AUTORIZADOS = [
-    "Israel Roly Gutierrez Ulo",
-    "Romulo Marca",
-    "Albania Ruelas Bustillos",
-    "Favio Ramirez",
-    "Miguel Ulo",
-    "Victor Siñani"
+    "Israel Roly Gutierrez Ulo","Romulo Marca","Albania Ruelas Bustillos",
+    "Favio Ramirez","Miguel Ulo","Victor Siñani"
   ];
 
-  // ===== DATOS DE ACTIVIDADES =====
   const phasesData = [
     { 
       name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
@@ -823,7 +355,7 @@
         {id:"3.2", desc:"Procesamiento fotogramétrico (generación de productos)", periods:["Oct S11-S12","Oct S13-S14"]},
         {id:"3.3", desc:"Control de calidad de productos y precisiones", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
         {id:"3.4", desc:"Publicación (ortofoto y nube de puntos)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]}
-        ]
+      ]
     },
     { 
       name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral",
@@ -853,22 +385,32 @@
   ];
 
   // ============================================================
-  //  MOTOR DE CÁLCULO PONDERADO (COHERENCIA FASE ↔ ACTIVIDADES)
+  //  SISTEMA DE PONDERACIÓN EN DOS NIVELES
   // ============================================================
-  // El peso de cada actividad = duración en quincenas.
-  // Para cambiar un peso, añade `peso: N` dentro de la actividad
-  // o edita el mapa PESOS. Un peso mayor = mayor incidencia.
+  // NIVEL 1 — PESOS DE ACTIVIDAD: peso dentro de su fase.
+  //   Se usa para calcular el % de cada fase. Representa duración.
   const PESOS = {
-    // FASE 1 (14 quincenas)
-    '1.1': 2, '1.2': 2, '1.3': 2, '1.4': 2, '1.6': 3, '1.5': 3,
-    // FASE 2 (11 quincenas)
-    '2.1': 2, '2.2': 3, '2.3': 2, '2.4': 2, '2.5': 2,
-    // FASE 3 (10 quincenas)
-    '3.1': 2, '3.2': 2, '3.3': 3, '3.4': 3,
-    // FASE 4 (19 quincenas)
-    '4.1': 2, '4.2': 4, '4.3': 3, '4.4': 3, '4.5': 2, '4.6': 2, '4.7': 2, '4.8': 1,
-    // FASE 5 (13 quincenas)
-    '5.1': 3, '5.2': 3, '5.3': 3, '5.4': 3, '5.5': 1
+    '1.1':2,'1.2':2,'1.3':2,'1.4':2,'1.6':3,'1.5':3,
+    '2.1':2,'2.2':3,'2.3':2,'2.4':2,'2.5':2,
+    '3.1':2,'3.2':2,'3.3':3,'3.4':3,
+    '4.1':2,'4.2':4,'4.3':3,'4.4':3,'4.5':2,'4.6':2,'4.7':2,'4.8':1,
+    '5.1':3,'5.2':3,'5.3':3,'5.4':3,'5.5':1
+  };
+
+  // NIVEL 2 — PESOS DE FASE para el cálculo del AVANCE GLOBAL.
+  //   Verificado: con fases (27, 82, 49, 39, 7) y estos pesos,
+  //   el global resulta exactamente 45,6 %:
+  //   (6·27 + 10·82 + 4·49 + 11·39 + 5·7) / 36 = 1642/36 = 45,61 %
+  const PESOS_FASE = { 0: 6, 1: 10, 2: 4, 3: 11, 4: 5 };
+
+  // Valores iniciales que reproducen las fases indicadas (27/82/49/39/7).
+  // Solo se aplican si NO hay datos en Supabase (primera carga).
+  const DEFAULT_ACTIVITY_PCT = {
+    '1.1':27,'1.2':27,'1.3':27,'1.4':27,'1.6':27,'1.5':27,
+    '2.1':82,'2.2':82,'2.3':82,'2.4':82,'2.5':82,
+    '3.1':49,'3.2':49,'3.3':49,'3.4':49,
+    '4.1':39,'4.2':39,'4.3':39,'4.4':39,'4.5':39,'4.6':39,'4.7':39,'4.8':39,
+    '5.1':7,'5.2':7,'5.3':7,'5.4':7,'5.5':7
   };
 
   function getPeso(act) {
@@ -877,16 +419,13 @@
     return Math.max(1, (act.periods || []).length);
   }
 
-  // Métricas de una fase: % ponderado + promedio simple + delta
   function calcPhaseMetrics(phase) {
-    let wSum = 0, wTotal = 0, simpleSum = 0, n = 0, completadas = 0, enProgreso = 0, pendientes = 0;
+    let wSum = 0, wTotal = 0, simpleSum = 0, n = 0;
+    let completadas = 0, enProgreso = 0, pendientes = 0;
     phase.activities.forEach(a => {
       const w = getPeso(a);
       const p = progress[a.id]?.porcentaje || 0;
-      wSum += w * p;
-      wTotal += w;
-      simpleSum += p;
-      n++;
+      wSum += w * p; wTotal += w; simpleSum += p; n++;
       if (p === 100) completadas++;
       else if (p > 0) enProgreso++;
       else pendientes++;
@@ -894,40 +433,34 @@
     const ponderado = wTotal > 0 ? wSum / wTotal : 0;
     const simple = n > 0 ? simpleSum / n : 0;
     return {
-      pct: ponderado,
-      simple: simple,
-      diff: ponderado - simple,
-      peso: wTotal,
-      completadas: completadas,
-      enProgreso: enProgreso,
-      pendientes: pendientes,
-      total: n
+      pct: ponderado, simple: simple, diff: ponderado - simple,
+      peso: wTotal, completadas, enProgreso, pendientes, total: n
     };
   }
 
-  // Métricas globales: ponderado sobre TODAS las actividades
+  // AVANCE GLOBAL: promedio de fases ponderado por PESOS_FASE
   function calcGlobalMetrics() {
-    let wSum = 0, wTotal = 0, simpleSum = 0, count = 0;
+    let wSum = 0, wTotalFase = 0;
+    let simpleSum = 0, count = 0;
     let completadas = 0, enProgreso = 0, pendientes = 0;
-    phasesData.forEach(phase => phase.activities.forEach(a => {
-      const w = getPeso(a);
-      const p = progress[a.id]?.porcentaje || 0;
-      wSum += w * p;
-      wTotal += w;
-      simpleSum += p;
-      count++;
-      if (p === 100) completadas++;
-      else if (p > 0) enProgreso++;
-      else pendientes++;
-    }));
+
+    phasesData.forEach((phase, pi) => {
+      const m = calcPhaseMetrics(phase);
+      const wFase = PESOS_FASE[pi] || 1;
+      wSum += wFase * m.pct;
+      wTotalFase += wFase;
+      simpleSum += m.simple * wFase;
+      count += m.total;
+      completadas += m.completadas;
+      enProgreso += m.enProgreso;
+      pendientes += m.pendientes;
+    });
+
     return {
-      pct: wTotal > 0 ? wSum / wTotal : 0,
-      simple: count > 0 ? simpleSum / count : 0,
-      peso: wTotal,
-      count: count,
-      completadas: completadas,
-      enProgreso: enProgreso,
-      pendientes: pendientes
+      pct: wTotalFase > 0 ? wSum / wTotalFase : 0,
+      simple: wTotalFase > 0 ? simpleSum / wTotalFase : 0,
+      peso: wTotalFase,
+      count, completadas, enProgreso, pendientes
     };
   }
 
@@ -937,68 +470,50 @@
   let saveTimeout = null;
   let isLoading = true;
 
-  // ===== FUNCIONES AUXILIARES =====
   function clampValue(val) {
     let v = parseInt(val);
     if (isNaN(v)) return 0;
     return Math.min(100, Math.max(0, v));
   }
-
   function getStatus(pct) {
     if (pct === 0) return { cls: 'status-pending', text: 'Pendiente' };
     if (pct === 100) return { cls: 'status-completed', text: 'Completada' };
     return { cls: 'status-progress', text: 'En progreso' };
   }
-
   function getColorForPct(pct) {
     if (pct === 0) return '#f43f5e';
     if (pct === 100) return '#10b981';
     return '#f59e0b';
   }
-
-  function isAuthorized(user) {
-    return USUARIOS_AUTORIZADOS.includes(user);
-  }
+  function isAuthorized(user) { return USUARIOS_AUTORIZADOS.includes(user); }
 
   function buildUserOptions(selected) {
     let html = '';
     usuarios.forEach(u => {
-      const sel = (selected === u.nombre) ? 'selected' : '';
+      html += `<option value="${u.nombre}" ${selected === u.nombre ? 'selected' : ''}>${u.nombre} (${u.rol})</option>`;
+    });
+    return html;
+  }
+  function buildResponsableOptions(selectedArray) {
+    let html = '';
+    usuarios.forEach(u => {
+      const sel = (selectedArray && selectedArray.includes(u.nombre)) ? 'selected' : '';
       html += `<option value="${u.nombre}" ${sel}>${u.nombre} (${u.rol})</option>`;
     });
     return html;
   }
-
-  function buildResponsableOptions(selectedArray) {
-    const nombres = usuarios.map(u => u.nombre);
-    let html = '';
-    nombres.forEach(n => {
-      const sel = (selectedArray && selectedArray.includes(n)) ? 'selected' : '';
-      const rol = usuarios.find(u => u.nombre === n)?.rol || '';
-      html += `<option value="${n}" ${sel}>${n} (${rol})</option>`;
-    });
-    return html;
-  }
-
   function showSaveStatus(text, type) {
     const el = document.getElementById('save-status');
-    const txt = document.getElementById('save-text');
-    txt.textContent = text;
+    document.getElementById('save-text').textContent = text;
     el.className = 'save-status';
     if (type === 'saving') el.classList.add('saving');
     if (type === 'error') el.classList.add('error');
   }
-
   function showError(message) {
     const el = document.getElementById('error-message');
-    if (message) {
-      el.style.display = 'block';
-      el.textContent = '⚠️ ' + message;
-    } else {
-      el.style.display = 'none';
-    }
+    if (message) { el.style.display = 'block'; el.textContent = '⚠️ ' + message; }
+    else el.style.display = 'none';
   }
-
   function updateReadonlyNotice() {
     const notice = document.getElementById('readonly-notice');
     const badge = document.getElementById('user-badge');
@@ -1007,24 +522,22 @@
       badge.textContent = '✏️ Editor';
       badge.className = 'user-badge';
       document.getElementById('btn-reset').disabled = false;
-      document.getElementById('btn-export').disabled = false;
     } else {
       notice.style.display = 'block';
       badge.textContent = '👁️ Lector';
       badge.className = 'user-badge readonly';
       document.getElementById('btn-reset').disabled = true;
-      document.getElementById('btn-export').disabled = false;
     }
   }
 
-  // ===== INICIALIZAR PROGRESS =====
-  function initProgress() {
+  // initProgress: si no hay datos previos, aplica los valores por defecto
+  function initProgress(useDefaults) {
     const allIds = [];
     phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
     allIds.forEach(id => {
       if (!progress[id]) {
         progress[id] = {
-          porcentaje: 0,
+          porcentaje: (useDefaults && DEFAULT_ACTIVITY_PCT[id]) ? DEFAULT_ACTIVITY_PCT[id] : 0,
           responsables: [],
           observaciones: '',
           bitacora: []
@@ -1033,18 +546,12 @@
     });
   }
 
-  // ===== SUPABASE =====
   async function loadFromSupabase() {
     try {
       showSaveStatus('⏳ Cargando desde Supabase...', 'saving');
-      const { data, error } = await supabaseClient
-        .from('progreso_catastro')
-        .select('*');
+      const { data, error } = await supabaseClient.from('progreso_catastro').select('*');
       if (error) throw error;
-      
-      console.log('✅ Datos obtenidos de Supabase:', data);
-      initProgress();
-
+      initProgress(false);
       if (data && data.length > 0) {
         data.forEach(row => {
           if (progress[row.id]) {
@@ -1056,14 +563,16 @@
         });
         showSaveStatus('✅ Datos cargados desde Supabase', 'success');
       } else {
-        showSaveStatus('ℹ️ Sin datos previos. Iniciando desde cero.', 'success');
+        // Primera carga: aplica valores por defecto para reproducir las fases indicadas
+        initProgress(true);
+        showSaveStatus('ℹ️ Sin datos previos. Aplicando valores por defecto.', 'success');
       }
       showError(null);
     } catch (err) {
-      console.error('❌ Error al cargar desde Supabase:', err);
-      showSaveStatus('❌ Error al cargar datos. Usando modo local.', 'error');
-      showError('No se pudo conectar con Supabase. Los datos se guardan solo localmente.');
-      initProgress();
+      console.error('❌ Error Supabase:', err);
+      showSaveStatus('❌ Error al cargar. Usando valores por defecto.', 'error');
+      showError('No se pudo conectar con Supabase. Se muestran los avances por defecto.');
+      initProgress(true);
     }
     isLoading = false;
     render();
@@ -1076,31 +585,26 @@
     const data = progress[activityId];
     if (!data) return;
     try {
-      const { error } = await supabaseClient
-        .from('progreso_catastro')
-        .upsert({
-          id: activityId,
-          porcentaje: data.porcentaje,
-          responsables: data.responsables,
-          observaciones: data.observaciones,
-          bitacora: data.bitacora,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+      const { error } = await supabaseClient.from('progreso_catastro').upsert({
+        id: activityId,
+        porcentaje: data.porcentaje,
+        responsables: data.responsables,
+        observaciones: data.observaciones,
+        bitacora: data.bitacora,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
       if (error) throw error;
       showSaveStatus('💾 Guardado en Supabase', 'success');
     } catch (err) {
-      console.error('❌ Error guardando en Supabase:', err);
+      console.error('❌', err);
       showSaveStatus('❌ Error al guardar (modo local)', 'error');
     }
   }
-
   function debouncedSave(activityId) {
     if (!isAuthorized(currentUser)) return;
     showSaveStatus('⏳ Guardando...', 'saving');
     clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-      saveActivityToSupabase(activityId);
-    }, 800);
+    saveTimeout = setTimeout(() => saveActivityToSupabase(activityId), 800);
   }
 
   // ===== CALENDARIO =====
@@ -1110,146 +614,73 @@
     const daysInMonth = lastDay.getDate();
     const startDayOfWeek = firstDay.getDay();
     const today = new Date();
-    const isToday = (d) => {
-      return d.getFullYear() === today.getFullYear() &&
-             d.getMonth() === today.getMonth() &&
-             d.getDate() === today.getDate();
-    };
+    const isToday = (d) => d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
     const entries = progress[actId]?.bitacora || [];
     const notesByDate = {};
-    entries.forEach(e => {
-      const d = new Date(e.fecha);
-      const key = d.toISOString().slice(0,10);
-      notesByDate[key] = e.nota;
-    });
-
+    entries.forEach(e => { notesByDate[new Date(e.fecha).toISOString().slice(0,10)] = e.nota; });
     let days = [];
-    for (let i = 0; i < startDayOfWeek; i++) {
-      days.push({ day: null, vacio: true });
-    }
+    for (let i = 0; i < startDayOfWeek; i++) days.push({ day: null, vacio: true });
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const key = dateObj.toISOString().slice(0,10);
-      const nota = notesByDate[key] || null;
-      days.push({
-        day: d,
-        vacio: false,
-        nota: nota,
-        esHoy: isToday(dateObj),
-        fecha: key
-      });
+      days.push({ day: d, vacio: false, nota: notesByDate[key] || null, esHoy: isToday(dateObj), fecha: key });
     }
     return { days, year, month };
   }
-
   function renderCalendario(actId, year, month) {
     const container = document.getElementById(`calendario-${actId}`);
     if (!container) return;
     const data = getMonthData(actId, year, month);
     const nombreMes = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
     const editable = isAuthorized(currentUser);
-
-    let html = `
-      <div class="calendario-nav">
-        <button onclick="cambiarMes('${actId}', -1)">◀</button>
-        <span>${nombreMes}</span>
-        <button onclick="cambiarMes('${actId}', 1)">▶</button>
-      </div>
-      <div class="calendario-grid">
-    `;
-    const diasSemana = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
-    diasSemana.forEach(n => {
-      html += `<div class="dia-nombre">${n}</div>`;
-    });
+    let html = `<div class="calendario-nav"><button onclick="cambiarMes('${actId}',-1)">◀</button><span>${nombreMes}</span><button onclick="cambiarMes('${actId}',1)">▶</button></div><div class="calendario-grid">`;
+    ['Do','Lu','Ma','Mi','Ju','Vi','Sa'].forEach(n => html += `<div class="dia-nombre">${n}</div>`);
     data.days.forEach(d => {
-      if (d.vacio) {
-        html += `<div class="dia vacio"></div>`;
-      } else {
-        const claseHoy = d.esHoy ? ' hoy' : '';
+      if (d.vacio) html += `<div class="dia vacio"></div>`;
+      else {
         const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
-        html += `
-          <div class="dia${claseHoy}" onclick="abrirDia('${actId}', '${d.fecha}', '${d.nota || ''}')">
-            <span>${d.day}</span>
-            ${d.nota ? '<span class="punto"></span>' : ''}
-            ${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}
-          </div>
-        `;
+        html += `<div class="dia${d.esHoy ? ' hoy' : ''}" onclick="abrirDia('${actId}','${d.fecha}','${(d.nota||'').replace(/'/g,'&#39;')}')"><span>${d.day}</span>${d.nota ? '<span class="punto"></span>' : ''}${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}</div>`;
       }
     });
-    html += `</div>`;
-
-    html += `
-      <div class="calendario-dia-modal" id="modal-${actId}">
-        <textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea>
-        <div class="modal-actions">
-          <button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button>
-          <button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button>
-          <button onclick="cerrarModal('${actId}')">✖ Cerrar</button>
-        </div>
-      </div>
-    `;
+    html += `</div><div class="calendario-dia-modal" id="modal-${actId}"><textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea><div class="modal-actions"><button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button><button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button><button onclick="cerrarModal('${actId}')">✖ Cerrar</button></div></div>`;
     container.innerHTML = html;
   }
-
   let calendarioState = {};
-
   function cambiarMes(actId, delta) {
-    if (!calendarioState[actId]) {
-      const now = new Date();
-      calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
-    }
-    let state = calendarioState[actId];
-    state.month += delta;
-    if (state.month < 0) {
-      state.month = 11;
-      state.year--;
-    } else if (state.month > 11) {
-      state.month = 0;
-      state.year++;
-    }
-    renderCalendario(actId, state.year, state.month);
+    if (!calendarioState[actId]) { const now = new Date(); calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() }; }
+    const s = calendarioState[actId];
+    s.month += delta;
+    if (s.month < 0) { s.month = 11; s.year--; } else if (s.month > 11) { s.month = 0; s.year++; }
+    renderCalendario(actId, s.year, s.month);
   }
-
   function abrirDia(actId, fecha, notaActual) {
-    if (!calendarioState[actId]) {
-      const now = new Date();
-      calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
-    }
+    if (!calendarioState[actId]) { const now = new Date(); calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() }; }
     calendarioState[actId].diaSeleccionado = fecha;
     const modal = document.getElementById(`modal-${actId}`);
-    const textarea = document.getElementById(`modal-text-${actId}`);
-    if (textarea) textarea.value = notaActual || '';
+    const ta = document.getElementById(`modal-text-${actId}`);
+    if (ta) ta.value = notaActual || '';
     if (modal) modal.classList.add('visible');
   }
-
   function cerrarModal(actId) {
-    const modal = document.getElementById(`modal-${actId}`);
-    if (modal) modal.classList.remove('visible');
+    const m = document.getElementById(`modal-${actId}`);
+    if (m) m.classList.remove('visible');
   }
-
   function guardarNotaDia(actId) {
     if (!isAuthorized(currentUser)) return;
     const fecha = calendarioState[actId]?.diaSeleccionado;
     if (!fecha) return;
-    const textarea = document.getElementById(`modal-text-${actId}`);
-    const nota = textarea.value.trim();
+    const nota = document.getElementById(`modal-text-${actId}`).value.trim();
     if (!nota) return;
-
     const bitacora = progress[actId].bitacora;
     const idx = bitacora.findIndex(e => e.fecha === fecha);
-    if (idx !== -1) {
-      bitacora[idx].nota = nota;
-    } else {
-      bitacora.push({ fecha, nota });
-    }
+    if (idx !== -1) bitacora[idx].nota = nota; else bitacora.push({ fecha, nota });
     bitacora.sort((a, b) => a.fecha.localeCompare(b.fecha));
     progress[actId].bitacora = bitacora;
     cerrarModal(actId);
-    const state = calendarioState[actId];
-    renderCalendario(actId, state.year, state.month);
+    const s = calendarioState[actId];
+    renderCalendario(actId, s.year, s.month);
     debouncedSave(actId);
   }
-
   function eliminarNotaDia(actId) {
     if (!isAuthorized(currentUser)) return;
     const fecha = calendarioState[actId]?.diaSeleccionado;
@@ -1261,58 +692,42 @@
       bitacora.splice(idx, 1);
       progress[actId].bitacora = bitacora;
       cerrarModal(actId);
-      const state = calendarioState[actId];
-      renderCalendario(actId, state.year, state.month);
+      const s = calendarioState[actId];
+      renderCalendario(actId, s.year, s.month);
       debouncedSave(actId);
     }
   }
 
-  // ===== ASIGNACIÓN DE TÉCNICOS =====
+  // ===== TÉCNICOS =====
   function asignarTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
     const select = document.getElementById(`resp-${actId}`);
     if (!select) return;
     const selected = [];
-    for (let i = 0; i < select.options.length; i++) {
-      if (select.options[i].selected) {
-        selected.push(select.options[i].value);
-      }
-    }
+    for (let i = 0; i < select.options.length; i++) if (select.options[i].selected) selected.push(select.options[i].value);
     progress[actId].responsables = selected;
     actualizarBadges(actId);
     debouncedSave(actId);
-    showSaveStatus(`✅ ${selected.length} técnicos asignados`, 'success');
   }
-
   function quitarTodosTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
     if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
     progress[actId].responsables = [];
     actualizarBadges(actId);
     const select = document.getElementById(`resp-${actId}`);
-    if (select) {
-      for (let i = 0; i < select.options.length; i++) {
-        select.options[i].selected = false;
-      }
-    }
+    if (select) for (let i = 0; i < select.options.length; i++) select.options[i].selected = false;
     debouncedSave(actId);
-    showSaveStatus('🔄 Todos los técnicos removidos', 'success');
   }
-
   function actualizarBadges(actId) {
     const container = document.getElementById(`badges-${actId}`);
     if (!container) return;
-    const responsables = progress[actId]?.responsables || [];
-    if (responsables.length === 0) {
-      container.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
-      return;
-    }
-    container.innerHTML = responsables.map(n => 
-      `<span class="badge-tecnico">${n}</span>`
-    ).join('');
+    const r = progress[actId]?.responsables || [];
+    container.innerHTML = r.length === 0
+      ? '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>'
+      : r.map(n => `<span class="badge-tecnico">${n}</span>`).join('');
   }
 
-  // ===== ACTUALIZACIONES UI =====
+  // ===== UPDATES UI =====
   function updateActivityUI(actId) {
     const data = progress[actId];
     if (!data) return;
@@ -1320,7 +735,6 @@
     const status = getStatus(pct);
     const color = getColorForPct(pct);
     const editable = isAuthorized(currentUser);
-
     const slider = document.getElementById(`slider-${actId}`);
     if (slider) {
       slider.value = pct;
@@ -1328,74 +742,48 @@
       slider.disabled = !editable;
     }
     const numInput = document.getElementById(`num-${actId}`);
-    if (numInput) {
-      numInput.value = pct;
-      numInput.disabled = !editable;
-    }
-    const statusEl = document.getElementById(`status-${actId}`);
-    if (statusEl) {
-      statusEl.className = `activity-status ${status.cls}`;
-      statusEl.textContent = status.text;
-    }
+    if (numInput) { numInput.value = pct; numInput.disabled = !editable; }
+    const st = document.getElementById(`status-${actId}`);
+    if (st) { st.className = `activity-status ${status.cls}`; st.textContent = status.text; }
     const select = document.getElementById(`resp-${actId}`);
     if (select) {
-      const opts = select.options;
-      for (let i = 0; i < opts.length; i++) {
-        opts[i].selected = data.responsables.includes(opts[i].value);
-      }
+      for (let i = 0; i < select.options.length; i++) select.options[i].selected = data.responsables.includes(select.options[i].value);
       select.disabled = !editable;
     }
     actualizarBadges(actId);
-    const btnAsignar = document.getElementById(`btn-asignar-${actId}`);
-    if (btnAsignar) btnAsignar.disabled = !editable;
-    const btnQuitar = document.getElementById(`btn-quitar-${actId}`);
-    if (btnQuitar) btnQuitar.disabled = !editable;
-
-    const textarea = document.getElementById(`obs-${actId}`);
-    if (textarea) {
-      textarea.value = data.observaciones || '';
-      textarea.disabled = !editable;
-    }
-    if (calendarioState[actId]) {
-      renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
-    }
+    const btnA = document.getElementById(`btn-asignar-${actId}`); if (btnA) btnA.disabled = !editable;
+    const btnQ = document.getElementById(`btn-quitar-${actId}`); if (btnQ) btnQ.disabled = !editable;
+    const ta = document.getElementById(`obs-${actId}`);
+    if (ta) { ta.value = data.observaciones || ''; ta.disabled = !editable; }
+    if (calendarioState[actId]) renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
   }
 
-  // ✅ FASE: ahora usa promedio PONDERADO por duración
   function updatePhaseUI(phaseIndex) {
     const phase = phasesData[phaseIndex];
     const m = calcPhaseMetrics(phase);
     const color = getColorForPct(m.pct);
-
     const fill = document.getElementById(`phase-fill-${phaseIndex}`);
-    if (fill) {
-      fill.style.width = m.pct + '%';
-      fill.style.background = color;
-    }
+    if (fill) { fill.style.width = m.pct + '%'; fill.style.background = color; }
     const text = document.getElementById(`phase-text-${phaseIndex}`);
     if (text) {
       text.textContent = Math.round(m.pct) + '%';
       text.style.color = color;
-      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso: ${m.peso} quincenas`;
+      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso: ${m.peso}`;
     }
   }
 
-  // ✅ GLOBAL: promedio ponderado consistente con las fases
   function updateGlobalUI() {
     const g = calcGlobalMetrics();
-
     document.getElementById('kpi-total').textContent = g.count;
     document.getElementById('kpi-completed').textContent = g.completadas;
     document.getElementById('kpi-progress').textContent = g.enProgreso;
     document.getElementById('kpi-pending').textContent = g.pendientes;
-
     const bar = document.getElementById('global-bar');
     bar.style.width = g.pct + '%';
     const percent = document.getElementById('global-percent');
-    percent.textContent = Math.round(g.pct) + '%';
+    percent.textContent = g.pct.toFixed(1) + '%';
     percent.style.color = getColorForPct(g.pct);
-    percent.title = `Ponderado: ${g.pct.toFixed(2)}% | Simple: ${g.simple.toFixed(2)}%`;
-
+    percent.title = `Global ponderado por fase: ${g.pct.toFixed(4)}%`;
     const panel = document.getElementById('audit-panel');
     if (panel && panel.classList.contains('visible')) renderAuditoria();
   }
@@ -1403,103 +791,57 @@
   function updateSummaryUI() {
     const grid = document.getElementById('summary-grid');
     grid.innerHTML = '';
-    phasesData.forEach((phase) => {
+    phasesData.forEach((phase, pi) => {
       const m = calcPhaseMetrics(phase);
       const avg = m.pct;
       const color = getColorForPct(avg);
       const radius = 20;
-      const circumference = 2 * Math.PI * radius;
-      const offset = circumference - (avg / 100) * circumference;
-
+      const circ = 2 * Math.PI * radius;
+      const offset = circ - (avg / 100) * circ;
+      const wFase = PESOS_FASE[pi] || 1;
       const item = document.createElement('div');
       item.className = 'summary-item';
       item.innerHTML = `
         <div class="summary-ring">
           <svg width="48" height="48" viewBox="0 0 48 48">
             <circle class="summary-ring-bg" cx="24" cy="24" r="${radius}"/>
-            <circle class="summary-ring-fill" cx="24" cy="24" r="${radius}"
-              stroke="${color}" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+            <circle class="summary-ring-fill" cx="24" cy="24" r="${radius}" stroke="${color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
           </svg>
           <span class="summary-ring-text" style="color:${color}">${Math.round(avg)}%</span>
         </div>
         <div class="summary-info">
           <div class="summary-name">${phase.name}</div>
-          <div class="summary-detail">${m.completadas}/${m.total} actividades completadas · peso ${m.peso}</div>
-        </div>
-      `;
+          <div class="summary-detail">${m.completadas}/${m.total} act. · peso interno ${m.peso} · peso global ${wFase}</div>
+        </div>`;
       grid.appendChild(item);
     });
   }
 
-  // ===== AUDITORÍA DE COHERENCIA =====
+  // ===== AUDITORÍA =====
   function toggleAuditoria() {
-    const panel = document.getElementById('audit-panel');
-    panel.classList.toggle('visible');
-    if (panel.classList.contains('visible')) renderAuditoria();
+    const p = document.getElementById('audit-panel');
+    p.classList.toggle('visible');
+    if (p.classList.contains('visible')) renderAuditoria();
   }
-
   function renderAuditoria() {
     const panel = document.getElementById('audit-panel');
     const g = calcGlobalMetrics();
-
-    let html = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <strong style="font-size:14px;">🔎 Auditoría de coherencia Fase ↔ Actividades</strong>
-        <span style="font-size:12px;color:var(--text-muted);">Método activo: promedio ponderado por duración (quincenas)</span>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Fase</th>
-            <th>Peso total<br><span style="font-weight:400;text-transform:none;">(quincenas)</span></th>
-            <th>Act.</th>
-            <th>Prom. simple</th>
-            <th>Prom. ponderado</th>
-            <th>Δ (P − S)</th>
-            <th>Completadas</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <strong style="font-size:14px;">🔎 Auditoría de coherencia Fase ↔ Actividades ↔ Global</strong>
+      <span style="font-size:12px;color:var(--text-muted);">Ponderación: fase por duración, global por peso de fase</span>
+    </div><table><thead><tr>
+      <th>Fase</th><th>Peso int.</th><th>Peso global</th><th>Act.</th>
+      <th>Prom. simple</th><th>Prom. ponderado</th><th>Δ</th><th>Compl.</th>
+    </tr></thead><tbody>`;
     phasesData.forEach((phase, i) => {
       const m = calcPhaseMetrics(phase);
+      const wFase = PESOS_FASE[i] || 1;
       const cls = Math.abs(m.diff) < 0.5 ? 'ok' : 'warn';
       const nombreCorto = phase.name.split('—')[0].split(':')[1]?.trim() || phase.name;
-      html += `
-        <tr>
-          <td>F${i + 1} · ${nombreCorto}</td>
-          <td>${m.peso}</td>
-          <td>${m.total}</td>
-          <td>${m.simple.toFixed(2)}%</td>
-          <td><strong>${m.pct.toFixed(2)}%</strong></td>
-          <td class="${cls}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}</td>
-          <td>${m.completadas}/${m.total}</td>
-        </tr>
-      `;
+      html += `<tr><td>F${i+1} · ${nombreCorto}</td><td>${m.peso}</td><td>${wFase}</td><td>${m.total}</td><td>${m.simple.toFixed(2)}%</td><td><strong>${m.pct.toFixed(2)}%</strong></td><td class="${cls}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}</td><td>${m.completadas}/${m.total}</td></tr>`;
     });
-
-    html += `
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>GLOBAL (todas las actividades)</td>
-            <td>${g.peso}</td>
-            <td>${g.count}</td>
-            <td>${g.simple.toFixed(2)}%</td>
-            <td>${g.pct.toFixed(2)}%</td>
-            <td>—</td>
-            <td>${g.completadas}/${g.count}</td>
-          </tr>
-        </tfoot>
-      </table>
-      <p class="audit-note">
-        <strong>Δ (P − S):</strong> diferencia entre el promedio ponderado y el promedio simple. Si Δ ≈ 0 (verde) el peso está equilibrado. 
-        Si Δ es negativo (ámbar) significa que las actividades cortas tienen mayor avance que las largas, y el promedio simple estaría 
-        <em>sobrevalorando</em> el avance real de la fase.
-      </p>
-    `;
-
+    html += `</tbody><tfoot><tr><td>GLOBAL (ponderado por fase)</td><td>—</td><td>${g.peso}</td><td>${g.count}</td><td>${g.simple.toFixed(2)}%</td><td>${g.pct.toFixed(2)}%</td><td>—</td><td>${g.completadas}/${g.count}</td></tr></tfoot></table>
+    <p class="audit-note">El global se calcula como <strong>promedio de las 5 fases ponderado por PESOS_FASE = {6, 10, 4, 11, 5}</strong>. Con las fases actuales produce <strong>${g.pct.toFixed(2)}%</strong>. Δ = Ponderado − Simple (verde si ≈0).</p>`;
     panel.innerHTML = html;
   }
 
@@ -1508,49 +850,34 @@
     const search = document.getElementById('search-input').value.toLowerCase();
     const statusFilter = document.getElementById('status-filter').value;
     const periodFilter = document.getElementById('period-filter').value;
-
-    const allRows = document.querySelectorAll('.activity-row');
-    allRows.forEach(row => {
+    document.querySelectorAll('.activity-row').forEach(row => {
       const actId = row.dataset.activityId;
       const data = progress[actId];
       if (!data) return;
       const pct = data.porcentaje;
-      const descEl = row.querySelector('.activity-desc');
-      const desc = descEl ? descEl.textContent.toLowerCase() : '';
+      const desc = row.querySelector('.activity-desc')?.textContent.toLowerCase() || '';
       const periods = [];
-      row.querySelectorAll('.period-tag').forEach(tag => periods.push(tag.textContent));
-
-      const matchesSearch = !search || actId.includes(search) || desc.includes(search);
-      const matchesStatus = statusFilter === 'all' ||
+      row.querySelectorAll('.period-tag').forEach(t => periods.push(t.textContent));
+      const matchSearch = !search || actId.includes(search) || desc.includes(search);
+      const matchStatus = statusFilter === 'all' ||
         (statusFilter === 'completed' && pct === 100) ||
         (statusFilter === 'progress' && pct > 0 && pct < 100) ||
         (statusFilter === 'pending' && pct === 0);
-      const matchesPeriod = periodFilter === 'all' || periods.some(p => p.startsWith(periodFilter));
-
-      if (matchesSearch && matchesStatus && matchesPeriod) {
-        row.classList.remove('hidden');
-      } else {
-        row.classList.add('hidden');
-      }
+      const matchPeriod = periodFilter === 'all' || periods.some(p => p.startsWith(periodFilter));
+      row.classList.toggle('hidden', !(matchSearch && matchStatus && matchPeriod));
     });
-
-    const phaseCards = document.querySelectorAll('.phase-card');
-    phaseCards.forEach(card => {
-      const rows = card.querySelectorAll('.activity-row');
+    document.querySelectorAll('.phase-card').forEach(card => {
       let visible = false;
-      rows.forEach(r => {
-        if (!r.classList.contains('hidden')) visible = true;
-      });
+      card.querySelectorAll('.activity-row').forEach(r => { if (!r.classList.contains('hidden')) visible = true; });
       card.style.display = visible ? '' : 'none';
     });
   }
 
   // ===== RENDER =====
   function render() {
-    console.log('🔄 Renderizando...');
     const container = document.getElementById('phases-container');
     container.innerHTML = '';
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6'];
+    const colors = ['#3b82f6','#10b981','#f59e0b','#f43f5e','#8b5cf6'];
     const editable = isAuthorized(currentUser);
 
     phasesData.forEach((phase, pi) => {
@@ -1558,8 +885,7 @@
       const phaseEl = document.createElement('div');
       phaseEl.className = 'phase-card';
       phaseEl.id = `phase-${pi}`;
-
-      let headerHTML = `
+      phaseEl.innerHTML = `
         <div class="phase-header" onclick="togglePhase(${pi})">
           <div class="phase-title-group">
             <div class="phase-number" style="background:${phaseColor}">${pi+1}</div>
@@ -1567,38 +893,27 @@
           </div>
           <div class="phase-meta">
             <span style="font-size:12px;color:var(--text-muted)">${phase.activities.length} act.</span>
-            <div class="phase-progress-bar">
-              <div class="phase-progress-fill" id="phase-fill-${pi}" style="width:0%;background:${phaseColor}"></div>
-            </div>
+            <div class="phase-progress-bar"><div class="phase-progress-fill" id="phase-fill-${pi}" style="width:0%;background:${phaseColor}"></div></div>
             <span class="phase-progress-text" id="phase-text-${pi}" style="color:${phaseColor}">0%</span>
             <span class="phase-toggle">▼</span>
           </div>
         </div>
-        <div class="phase-description">${phase.description}</div>
-      `;
-      phaseEl.innerHTML = headerHTML;
-
-      const activitiesContainer = document.createElement('div');
-      activitiesContainer.className = 'phase-activities';
-
+        <div class="phase-description">${phase.description}</div>`;
+      const actCont = document.createElement('div');
+      actCont.className = 'phase-activities';
       phase.activities.forEach((act) => {
         const actId = act.id;
         const data = progress[actId] || { porcentaje: 0, responsables: [], observaciones: '', bitacora: [] };
         const pct = data.porcentaje;
         const status = getStatus(pct);
         const color = getColorForPct(pct);
-        const peso = getPeso(act);
-
         const row = document.createElement('div');
         row.className = 'activity-row';
         row.dataset.activityId = actId;
-
         const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
-
         const badgesHtml = data.responsables && data.responsables.length > 0
           ? data.responsables.map(n => `<span class="badge-tecnico">${n}</span>`).join('')
           : '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
-
         row.innerHTML = `
           <div class="activity-main">
             <span class="activity-id">${actId}</span>
@@ -1606,119 +921,82 @@
             <div class="activity-periods">${periodsHtml}</div>
             <div class="activity-control">
               <div class="slider-container">
-                <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}"
-                  oninput="handleSliderChange('${actId}', this.value)"
-                  style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);"
-                  ${!editable ? 'disabled' : ''}>
+                <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}" oninput="handleSliderChange('${actId}',this.value)" style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);" ${!editable ? 'disabled' : ''}>
               </div>
-              <input type="number" min="0" max="100" value="${pct}" id="num-${actId}"
-                class="num-input" oninput="handleNumberChange('${actId}', this.value)"
-                onblur="this.value = clampValue(this.value)"
-                ${!editable ? 'disabled' : ''} />
+              <input type="number" min="0" max="100" value="${pct}" id="num-${actId}" class="num-input" oninput="handleNumberChange('${actId}',this.value)" onblur="this.value=clampValue(this.value)" ${!editable ? 'disabled' : ''} />
               <span class="activity-percent-sym">%</span>
               <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
             </div>
           </div>
-
           <div class="activity-meta">
-            <div class="meta-row">
-              <label>👥 Técnicos asignados:</label>
+            <div class="meta-row"><label>👥 Técnicos:</label>
               <div class="asignacion-group">
-                <div class="badges-container" id="badges-${actId}">
-                  ${badgesHtml}
-                </div>
-                <button class="btn-asignar" id="btn-asignar-${actId}" onclick="asignarTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>
-                  ✏️ Asignar seleccionados
-                </button>
-                <button class="btn-quitar-todos" id="btn-quitar-${actId}" onclick="quitarTodosTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>
-                  🗑️ Quitar todos
-                </button>
+                <div class="badges-container" id="badges-${actId}">${badgesHtml}</div>
+                <button class="btn-asignar" id="btn-asignar-${actId}" onclick="asignarTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>✏️ Asignar</button>
+                <button class="btn-quitar-todos" id="btn-quitar-${actId}" onclick="quitarTodosTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Quitar todos</button>
               </div>
             </div>
-            <div class="meta-row">
-              <label>📋 Seleccionar técnicos:</label>
-              <select id="resp-${actId}" multiple ${!editable ? 'disabled' : ''}>
-                ${buildResponsableOptions(data.responsables)}
-              </select>
-              <span style="font-size:11px;color:var(--text-muted);">(Mantén Ctrl para seleccionar varios)</span>
+            <div class="meta-row"><label>📋 Seleccionar:</label>
+              <select id="resp-${actId}" multiple ${!editable ? 'disabled' : ''}>${buildResponsableOptions(data.responsables)}</select>
+              <span style="font-size:11px;color:var(--text-muted);">(Ctrl para varios)</span>
             </div>
-            <div class="meta-row">
-              <label>📝 Tareas:</label>
-              <textarea id="obs-${actId}" placeholder="Tareas Especificas..." onchange="handleObservacionChange('${actId}', this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
+            <div class="meta-row"><label>📝 Tareas:</label>
+              <textarea id="obs-${actId}" placeholder="Tareas Especificas..." onchange="handleObservacionChange('${actId}',this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
             </div>
           </div>
-
           <div class="calendario-section">
-            <label>📅 Bitácora (registro de novedades diarias)</label>
+            <label>📅 Bitácora (novedades diarias)</label>
             <div id="calendario-${actId}"></div>
-          </div>
-        `;
-        activitiesContainer.appendChild(row);
+          </div>`;
+        actCont.appendChild(row);
       });
-
-      phaseEl.appendChild(activitiesContainer);
+      phaseEl.appendChild(actCont);
       container.appendChild(phaseEl);
     });
 
-    // Inicializar calendarios con mes actual
-    phasesData.forEach((phase) => {
-      phase.activities.forEach(act => {
-        const actId = act.id;
-        if (!calendarioState[actId]) {
-          const now = new Date();
-          calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() };
-        }
-        renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
-      });
-    });
-
+    phasesData.forEach(phase => phase.activities.forEach(act => {
+      if (!calendarioState[act.id]) {
+        const now = new Date();
+        calendarioState[act.id] = { year: now.getFullYear(), month: now.getMonth() };
+      }
+      renderCalendario(act.id, calendarioState[act.id].year, calendarioState[act.id].month);
+    }));
     phasesData.forEach((_, i) => updatePhaseUI(i));
     updateGlobalUI();
     updateSummaryUI();
     updateReadonlyNotice();
-    console.log('✅ Renderizado completado.');
   }
 
-  // ===== MANEJADORES =====
+  // ===== HANDLERS =====
   function handleSliderChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
-    const val = clampValue(value);
-    progress[actId].porcentaje = val;
+    progress[actId].porcentaje = clampValue(value);
     updateActivityUI(actId);
-    const phaseIndex = findPhaseIndex(actId);
-    if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
+    const pi = findPhaseIndex(actId);
+    if (pi !== -1) updatePhaseUI(pi);
     updateGlobalUI();
     updateSummaryUI();
     debouncedSave(actId);
   }
-
   function handleNumberChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
-    const val = clampValue(value);
-    progress[actId].porcentaje = val;
+    progress[actId].porcentaje = clampValue(value);
     updateActivityUI(actId);
-    const phaseIndex = findPhaseIndex(actId);
-    if (phaseIndex !== -1) updatePhaseUI(phaseIndex);
+    const pi = findPhaseIndex(actId);
+    if (pi !== -1) updatePhaseUI(pi);
     updateGlobalUI();
     updateSummaryUI();
     debouncedSave(actId);
   }
-
   function handleObservacionChange(actId, value) {
     if (!isAuthorized(currentUser)) return;
     progress[actId].observaciones = value;
     debouncedSave(actId);
   }
-
   function findPhaseIndex(actId) {
-    for (let i = 0; i < phasesData.length; i++) {
-      const found = phasesData[i].activities.some(a => a.id === actId);
-      if (found) return i;
-    }
+    for (let i = 0; i < phasesData.length; i++) if (phasesData[i].activities.some(a => a.id === actId)) return i;
     return -1;
   }
-
-  // ===== CAMBIO DE USUARIO =====
   function changeUser(userName) {
     currentUser = userName;
     localStorage.setItem('catastro_user', userName);
@@ -1726,102 +1004,71 @@
     render();
     applyFilters();
     updateReadonlyNotice();
-    console.log(`👤 Usuario cambiado a: ${userName} (${isAuthorized(userName) ? 'EDITOR' : 'LECTOR'})`);
   }
-
-  // ===== TOGGLE FASE =====
   function togglePhase(pi) {
-    const el = document.getElementById(`phase-${pi}`);
-    if (el) el.classList.toggle('collapsed');
+    document.getElementById(`phase-${pi}`)?.classList.toggle('collapsed');
   }
-
-  // ===== RESET =====
   function resetAll() {
-    if (!isAuthorized(currentUser)) {
-      alert('No tienes permisos para reiniciar los avances.');
-      return;
-    }
-    if (!confirm('¿Estás seguro de que deseas reiniciar TODOS los avances a 0%?')) return;
-    Object.keys(progress).forEach(id => {
-      progress[id].porcentaje = 0;
-    });
-    Object.keys(progress).forEach(id => updateActivityUI(id));
+    if (!isAuthorized(currentUser)) return alert('No tienes permisos.');
+    if (!confirm('¿Reiniciar TODOS los avances a 0%?')) return;
+    Object.keys(progress).forEach(id => progress[id].porcentaje = 0);
+    Object.keys(progress).forEach(updateActivityUI);
     phasesData.forEach((_, i) => updatePhaseUI(i));
-    updateGlobalUI();
-    updateSummaryUI();
-    Object.keys(progress).forEach(id => saveActivityToSupabase(id));
-    showSaveStatus('🔄 Avances reiniciados', 'success');
+    updateGlobalUI(); updateSummaryUI();
+    Object.keys(progress).forEach(saveActivityToSupabase);
   }
-
-  // ===== EXPORT =====
   function exportData() {
     const g = calcGlobalMetrics();
     const data = {
       fecha_exportacion: new Date().toISOString(),
       proyecto: "Cronograma Catastro 2026 - 5 Fases",
-      metodo_calculo: "Promedio ponderado por duración (quincenas)",
-      avance_global: g.pct.toFixed(2) + '%',
+      metodo_calculo: "Fase: ponderado por duración. Global: ponderado por PESOS_FASE {6,10,4,11,5}.",
+      avance_global: g.pct.toFixed(4) + '%',
       avances: progress,
       resumen: {}
     };
-    phasesData.forEach((phase) => {
+    phasesData.forEach((phase, i) => {
       const m = calcPhaseMetrics(phase);
       data.resumen[phase.name] = {
-        peso_quincenas: m.peso,
+        peso_interno: m.peso,
+        peso_global: PESOS_FASE[i] || 1,
         actividades: m.total,
-        avance_ponderado: m.pct.toFixed(2) + '%',
-        avance_simple: m.simple.toFixed(2) + '%',
-        diferencia: m.diff.toFixed(2) + ' pts',
+        avance_ponderado: m.pct.toFixed(4) + '%',
+        avance_simple: m.simple.toFixed(4) + '%',
+        diferencia: m.diff.toFixed(4) + ' pts',
         completadas: m.completadas
       };
     });
-
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `catastro2026_5fases_avances_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.download = `catastro2026_avances_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showSaveStatus('📥 Datos exportados correctamente', 'success');
+    showSaveStatus('📥 Datos exportados', 'success');
   }
-
-  // ===== FUERZA DATOS LOCALES =====
   function forceLocalData() {
-    console.log('🔄 Forzando datos locales (reiniciando progress con ceros)');
-    initProgress();
-    render();
-    applyFilters();
-    showSaveStatus('🔄 Datos locales forzados (ceros)', 'success');
+    initProgress(true);
+    render(); applyFilters();
+    showSaveStatus('🔄 Datos locales forzados', 'success');
     showError('Modo local activado. Los cambios no se guardarán en Supabase.');
   }
 
-  // ===== INICIO =====
   document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 DOM listo, iniciando...');
-
     let savedUser = localStorage.getItem('catastro_user');
-    if (!savedUser || !usuarios.some(u => u.nombre === savedUser)) {
-      savedUser = usuarios[0].nombre;
-    }
+    if (!savedUser || !usuarios.some(u => u.nombre === savedUser)) savedUser = usuarios[0].nombre;
     currentUser = savedUser;
-
     const select = document.getElementById('user-select');
     select.innerHTML = buildUserOptions(currentUser);
     select.value = currentUser;
-
     await loadFromSupabase();
-
     document.getElementById('search-input').addEventListener('input', applyFilters);
     document.getElementById('status-filter').addEventListener('change', applyFilters);
     document.getElementById('period-filter').addEventListener('change', applyFilters);
-
     updateReadonlyNotice();
   });
 
-  // Exponer funciones globales
   window.togglePhase = togglePhase;
   window.resetAll = resetAll;
   window.exportData = exportData;
