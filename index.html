@@ -63,6 +63,8 @@
     .btn-local:hover { transform: scale(1.05); }
     .btn-audit { background: linear-gradient(135deg, var(--accent-violet), #7c3aed); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
     .btn-audit:hover { transform: scale(1.05); }
+    .btn-toggle-all { background: linear-gradient(135deg, #475569, #334155); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .btn-toggle-all:hover { transform: scale(1.05); }
     .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
     .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
     .phase-card:hover { border-color: var(--accent-blue); }
@@ -126,12 +128,25 @@
     .calendario-nav span { font-weight: 600; font-size: 14px; min-width: 120px; text-align: center; }
     .calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: var(--bg-secondary); padding: 4px; border-radius: 6px; border: 1px solid var(--border-color); max-width: 480px; }
     .calendario-grid .dia-nombre { font-size: 10px; text-transform: uppercase; color: var(--text-muted); text-align: center; font-weight: 600; padding: 4px 0; }
-    .calendario-grid .dia { background: var(--bg-primary); padding: 6px 2px; text-align: center; font-size: 12px; border-radius: 4px; cursor: pointer; position: relative; min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .calendario-grid .dia { background: var(--bg-primary); padding: 6px 2px; text-align: center; font-size: 12px; border-radius: 4px; cursor: pointer; position: relative; min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.2s; }
     .calendario-grid .dia:hover:not(.vacio) { background: var(--bg-card-hover); }
     .calendario-grid .dia.vacio { background: transparent; cursor: default; }
     .calendario-grid .dia.hoy { border: 1px solid var(--accent-cyan); }
+    /* NUEVO: días con actividad programada según períodos */
+    .calendario-grid .dia.con-actividad {
+      background: rgba(59,130,246,0.18);
+      box-shadow: inset 3px 0 0 var(--accent-blue);
+    }
+    .calendario-grid .dia.con-actividad:hover:not(.vacio) { background: rgba(59,130,246,0.30); }
+    .calendario-grid .dia.con-actividad.hoy { border-color: var(--accent-cyan); }
     .calendario-grid .dia .punto { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald); margin-top: 2px; }
     .calendario-grid .dia .nota-preview { font-size: 9px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; padding: 0 2px; }
+    .calendario-legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); margin-top: 8px; flex-wrap: wrap; }
+    .calendario-legend .item { display: flex; align-items: center; gap: 6px; }
+    .calendario-legend .swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+    .calendario-legend .swatch.actividad { background: rgba(59,130,246,0.35); box-shadow: inset 3px 0 0 var(--accent-blue); }
+    .calendario-legend .swatch.bitacora { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); }
+    .calendario-legend .swatch.hoy { border: 1px solid var(--accent-cyan); background: transparent; }
     .calendario-dia-modal { margin-top: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; display: none; flex-direction: column; gap: 6px; }
     .calendario-dia-modal.visible { display: flex; }
     .calendario-dia-modal textarea { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); padding: 6px; font-size: 13px; resize: vertical; height: 60px; font-family: inherit; }
@@ -235,6 +250,7 @@
         <option value="Dic">Diciembre 2026</option>
       </select>
     </div>
+    <button class="btn-toggle-all" onclick="toggleAllPhases()">⊟ Cerrar / Abrir todas</button>
     <button class="btn-audit" onclick="toggleAuditoria()">🔎 Auditar coherencia</button>
     <button class="btn-export" id="btn-export" onclick="exportData()">📥 Exportar Datos</button>
     <button class="btn-reset" id="btn-reset" onclick="resetAll()">🔄 Reiniciar Avances</button>
@@ -251,8 +267,9 @@
   </div>
 
   <div class="dashboard-footer">
-    <p>💡 <strong>Instrucciones:</strong> Usa los controles deslizantes o escribe directamente el valor numérico (0-100) para registrar el % de avance. Los datos se guardan automáticamente en la nube.</p>
-    <p>⚖️ <strong>Cálculo en dos niveles:</strong> la fase es un <strong>promedio ponderado por duración</strong> (quincenas) de sus actividades; el global es un <strong>promedio ponderado por importancia de fase</strong> (F1=10%, F2=20%, F3=20%, F4=30%, F5=20%).</p>
+    <p>💡 <strong>Instrucciones:</strong> Haz clic sobre el título de cada fase para abrirla (las demás se cerrarán en cascada). Usa los deslizadores o escribe el % de avance. Los datos se guardan automáticamente.</p>
+    <p>📅 <strong>Calendario:</strong> los días en azul marcan los períodos programados de la actividad; el punto verde indica que hay una nota de bitácora ese día.</p>
+    <p>⚖️ <strong>Cálculo:</strong> fase = promedio ponderado por duración; global = promedio ponderado por importancia (F1=10%, F2=20%, F3=20%, F4=30%, F5=20%).</p>
     <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
@@ -346,11 +363,7 @@
     }
   ];
 
-  // ============================================================
-  //  SISTEMA DE PONDERACIÓN EN DOS NIVELES
-  // ============================================================
-  // NIVEL 1 — PESOS DE ACTIVIDAD (dentro de su fase).
-  //   Representa la duración en quincenas. Determina el % de la fase.
+  // ============ PONDERACIÓN ============
   const PESOS = {
     '1.1':2,'1.2':2,'1.3':2,'1.4':2,'1.6':3,'1.5':3,
     '2.1':2,'2.2':3,'2.3':2,'2.4':2,'2.5':2,
@@ -358,17 +371,8 @@
     '4.1':2,'4.2':4,'4.3':3,'4.4':3,'4.5':2,'4.6':2,'4.7':2,'4.8':1,
     '5.1':3,'5.2':3,'5.3':3,'5.4':3,'5.5':1
   };
-
-  // NIVEL 2 — PESOS DE IMPORTANCIA DE CADA FASE (fijos, suman 100%).
-  //   F1 = 10 %, F2 = 20 %, F3 = 20 %, F4 = 30 %, F5 = 20 %
-  //   Fórmula del avance global:
-  //     Global = Σ (peso_fase_i × avance_fase_i) / Σ peso_fase_i
-  //   Con avances (27, 82, 49, 39, 7):
-  //     0.10·27 + 0.20·82 + 0.20·49 + 0.30·39 + 0.20·7 = 42,00 %
   const PESOS_FASE = { 0: 10, 1: 20, 2: 20, 3: 30, 4: 20 };
 
-  // Valores iniciales de actividades que reproducen las fases indicadas (27/82/49/39/7).
-  // Solo se aplican si NO hay datos en Supabase (primera carga).
   const DEFAULT_ACTIVITY_PCT = {
     '1.1':27,'1.2':27,'1.3':27,'1.4':27,'1.6':27,'1.5':27,
     '2.1':82,'2.2':82,'2.3':82,'2.4':82,'2.5':82,
@@ -376,6 +380,28 @@
     '4.1':39,'4.2':39,'4.3':39,'4.4':39,'4.5':39,'4.6':39,'4.7':39,'4.8':39,
     '5.1':7,'5.2':7,'5.3':7,'5.4':7,'5.5':7
   };
+
+  // Mapa de meses (0-indexed) para mapear "Jul" → 6, etc.
+  const MES_MAP = { 'Jul':6, 'Ago':7, 'Sep':8, 'Oct':9, 'Nov':10, 'Dic':11 };
+
+  function findActivity(actId) {
+    for (const phase of phasesData) {
+      const a = phase.activities.find(x => x.id === actId);
+      if (a) return a;
+    }
+    return null;
+  }
+
+  // Convierte los períodos de una actividad en un Set de meses (0-indexed)
+  function getPeriodsMonths(act) {
+    const s = new Set();
+    if (!act || !act.periods) return s;
+    act.periods.forEach(p => {
+      const m = p.split(' ')[0];
+      if (MES_MAP[m] !== undefined) s.add(MES_MAP[m]);
+    });
+    return s;
+  }
 
   function getPeso(act) {
     if (typeof act.peso === 'number' && act.peso > 0) return act.peso;
@@ -396,18 +422,12 @@
     });
     const ponderado = wTotal > 0 ? wSum / wTotal : 0;
     const simple = n > 0 ? simpleSum / n : 0;
-    return {
-      pct: ponderado, simple: simple, diff: ponderado - simple,
-      peso: wTotal, completadas, enProgreso, pendientes, total: n
-    };
+    return { pct: ponderado, simple, diff: ponderado - simple, peso: wTotal, completadas, enProgreso, pendientes, total: n };
   }
 
-  // AVANCE GLOBAL: promedio de fases ponderado por PESOS_FASE
   function calcGlobalMetrics() {
-    let wSum = 0, wTotalFase = 0;
-    let simpleSum = 0, count = 0;
+    let wSum = 0, wTotalFase = 0, simpleSum = 0, count = 0;
     let completadas = 0, enProgreso = 0, pendientes = 0;
-
     phasesData.forEach((phase, pi) => {
       const m = calcPhaseMetrics(phase);
       const wFase = PESOS_FASE[pi] || 1;
@@ -419,12 +439,10 @@
       enProgreso += m.enProgreso;
       pendientes += m.pendientes;
     });
-
     return {
       pct: wTotalFase > 0 ? wSum / wTotalFase : 0,
       simple: wTotalFase > 0 ? simpleSum / wTotalFase : 0,
-      peso: wTotalFase,
-      count, completadas, enProgreso, pendientes
+      peso: wTotalFase, count, completadas, enProgreso, pendientes
     };
   }
 
@@ -432,6 +450,7 @@
   let progress = {};
   let saveTimeout = null;
   let isLoading = true;
+  let expandedPhase = -1; // -1 = ninguna abierta (estado inicial colapsado)
 
   function clampValue(val) { let v = parseInt(val); if (isNaN(v)) return 0; return Math.min(100, Math.max(0, v)); }
   function getStatus(pct) {
@@ -550,7 +569,8 @@
     saveTimeout = setTimeout(() => saveActivityToSupabase(activityId), 800);
   }
 
-  function getMonthData(actId, year, month) {
+  // ============ CALENDARIO (ahora con períodos resaltados) ============
+  function getMonthData(actId, year, month, periodMonths) {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
@@ -560,33 +580,78 @@
     const entries = progress[actId]?.bitacora || [];
     const notesByDate = {};
     entries.forEach(e => { notesByDate[new Date(e.fecha).toISOString().slice(0,10)] = e.nota; });
+    const tieneActividadMes = periodMonths && periodMonths.has(month);
+
     let days = [];
     for (let i = 0; i < startDayOfWeek; i++) days.push({ day: null, vacio: true });
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const key = dateObj.toISOString().slice(0,10);
-      days.push({ day: d, vacio: false, nota: notesByDate[key] || null, esHoy: isToday(dateObj), fecha: key });
+      days.push({
+        day: d, vacio: false,
+        nota: notesByDate[key] || null,
+        esHoy: isToday(dateObj),
+        fecha: key,
+        tieneActividad: !!tieneActividadMes
+      });
     }
     return { days, year, month };
   }
+
   function renderCalendario(actId, year, month) {
     const container = document.getElementById(`calendario-${actId}`);
     if (!container) return;
-    const data = getMonthData(actId, year, month);
+    const act = findActivity(actId);
+    const periodMonths = getPeriodsMonths(act);
+    const data = getMonthData(actId, year, month, periodMonths);
     const nombreMes = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
     const editable = isAuthorized(currentUser);
-    let html = `<div class="calendario-nav"><button onclick="cambiarMes('${actId}',-1)">◀</button><span>${nombreMes}</span><button onclick="cambiarMes('${actId}',1)">▶</button></div><div class="calendario-grid">`;
+
+    let html = `
+      <div class="calendario-nav">
+        <button onclick="cambiarMes('${actId}',-1)">◀</button>
+        <span>${nombreMes}</span>
+        <button onclick="cambiarMes('${actId}',1)">▶</button>
+      </div>
+      <div class="calendario-grid">
+    `;
     ['Do','Lu','Ma','Mi','Ju','Vi','Sa'].forEach(n => html += `<div class="dia-nombre">${n}</div>`);
     data.days.forEach(d => {
-      if (d.vacio) html += `<div class="dia vacio"></div>`;
-      else {
-        const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
-        html += `<div class="dia${d.esHoy ? ' hoy' : ''}" onclick="abrirDia('${actId}','${d.fecha}','${(d.nota||'').replace(/'/g,'&#39;')}')"><span>${d.day}</span>${d.nota ? '<span class="punto"></span>' : ''}${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}</div>`;
-      }
+      if (d.vacio) { html += `<div class="dia vacio"></div>`; return; }
+      const clases = ['dia'];
+      if (d.esHoy) clases.push('hoy');
+      if (d.tieneActividad) clases.push('con-actividad');
+      const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
+      html += `<div class="${clases.join(' ')}" onclick="abrirDia('${actId}','${d.fecha}','${(d.nota||'').replace(/'/g,'&#39;')}')">
+        <span>${d.day}</span>
+        ${d.nota ? '<span class="punto"></span>' : ''}
+        ${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}
+      </div>`;
     });
-    html += `</div><div class="calendario-dia-modal" id="modal-${actId}"><textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea><div class="modal-actions"><button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button><button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button><button onclick="cerrarModal('${actId}')">✖ Cerrar</button></div></div>`;
+    html += `</div>`;
+
+    // Leyenda
+    html += `
+      <div class="calendario-legend">
+        <div class="item"><span class="swatch actividad"></span> Día programado (período)</div>
+        <div class="item"><span class="swatch bitacora"></span> Nota de bitácora</div>
+        <div class="item"><span class="swatch hoy"></span> Hoy</div>
+      </div>
+    `;
+
+    html += `
+      <div class="calendario-dia-modal" id="modal-${actId}">
+        <textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea>
+        <div class="modal-actions">
+          <button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button>
+          <button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button>
+          <button onclick="cerrarModal('${actId}')">✖ Cerrar</button>
+        </div>
+      </div>
+    `;
     container.innerHTML = html;
   }
+
   let calendarioState = {};
   function cambiarMes(actId, delta) {
     if (!calendarioState[actId]) { const now = new Date(); calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() }; }
@@ -627,6 +692,7 @@
     }
   }
 
+  // ============ TÉCNICOS ============
   function asignarTecnicos(actId) {
     if (!isAuthorized(currentUser)) return;
     const select = document.getElementById(`resp-${actId}`); if (!select) return;
@@ -688,7 +754,7 @@
     if (text) {
       text.textContent = Math.round(m.pct) + '%';
       text.style.color = color;
-      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso interno: ${m.peso} quincenas | Peso global: ${PESOS_FASE[phaseIndex]}%`;
+      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso interno: ${m.peso} | Peso global: ${PESOS_FASE[phaseIndex]}%`;
     }
   }
 
@@ -731,7 +797,7 @@
         </div>
         <div class="summary-info">
           <div class="summary-name">${phase.name}</div>
-          <div class="summary-detail">${m.completadas}/${m.total} act. · peso interno ${m.peso} · peso global ${wFase}%</div>
+          <div class="summary-detail">${m.completadas}/${m.total} act. · peso global ${wFase}%</div>
         </div>`;
       grid.appendChild(item);
     });
@@ -793,6 +859,7 @@
     });
   }
 
+  // ============ RENDER (fases colapsadas por defecto) ============
   function render() {
     const container = document.getElementById('phases-container');
     container.innerHTML = '';
@@ -801,7 +868,8 @@
     phasesData.forEach((phase, pi) => {
       const phaseColor = colors[pi % colors.length];
       const phaseEl = document.createElement('div');
-      phaseEl.className = 'phase-card';
+      // Estado inicial: colapsada excepto si es la que el usuario tenía expandida
+      phaseEl.className = (pi === expandedPhase) ? 'phase-card' : 'phase-card collapsed';
       phaseEl.id = `phase-${pi}`;
       phaseEl.innerHTML = `
         <div class="phase-header" onclick="togglePhase(${pi})">
@@ -863,7 +931,7 @@
             </div>
           </div>
           <div class="calendario-section">
-            <label>📅 Bitácora (novedades diarias)</label>
+            <label>📅 Calendario de actividad + bitácora diaria</label>
             <div id="calendario-${actId}"></div>
           </div>`;
         actCont.appendChild(row);
@@ -910,7 +978,44 @@
     document.getElementById('user-select').value = userName;
     render(); applyFilters(); updateReadonlyNotice();
   }
-  function togglePhase(pi) { document.getElementById(`phase-${pi}`)?.classList.toggle('collapsed'); }
+
+  // ============ TOGGLE FASE — ahora en modo cascada (accordion) ============
+  function togglePhase(pi) {
+    const el = document.getElementById(`phase-${pi}`);
+    if (!el) return;
+    const estabaAbierta = !el.classList.contains('collapsed');
+
+    // Cerrar todas
+    phasesData.forEach((_, i) => {
+      const p = document.getElementById(`phase-${i}`);
+      if (p) p.classList.add('collapsed');
+    });
+
+    // Si la que tocamos estaba cerrada, la abrimos y recordamos el estado
+    if (!estabaAbierta) {
+      el.classList.remove('collapsed');
+      expandedPhase = pi;
+    } else {
+      expandedPhase = -1;
+    }
+  }
+
+  // Botón extra: abrir/cerrar todas
+  function toggleAllPhases() {
+    const algunaAbierta = phasesData.some((_, i) => {
+      const p = document.getElementById(`phase-${i}`);
+      return p && !p.classList.contains('collapsed');
+    });
+    phasesData.forEach((_, i) => {
+      const p = document.getElementById(`phase-${i}`);
+      if (p) {
+        if (algunaAbierta) p.classList.add('collapsed');
+        else p.classList.remove('collapsed');
+      }
+    });
+    expandedPhase = algunaAbierta ? -1 : 0;
+  }
+
   function resetAll() {
     if (!isAuthorized(currentUser)) return alert('No tienes permisos.');
     if (!confirm('¿Reiniciar TODOS los avances a 0%?')) return;
@@ -974,6 +1079,7 @@
   });
 
   window.togglePhase = togglePhase;
+  window.toggleAllPhases = toggleAllPhases;
   window.resetAll = resetAll;
   window.exportData = exportData;
   window.forceLocalData = forceLocalData;
