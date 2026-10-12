@@ -1,188 +1,220 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plan de trabajo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b;
-      --bg-card-hover: #27354f; --border-color: #334155;
-      --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
-      --accent-blue: #3b82f6; --accent-cyan: #06b6d4; --accent-emerald: #10b981;
-      --accent-amber: #f59e0b; --accent-rose: #f43f5e; --accent-violet: #8b5cf6;
-      --shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -4px rgba(0,0,0,0.4);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
-    #dashboard-container { max-width: 1600px; margin: 0 auto; padding: 24px; }
-    .dashboard-header { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px 32px; margin-bottom: 24px; box-shadow: var(--shadow-lg); flex-wrap: wrap; gap: 16px; }
-    .header-left { display: flex; align-items: center; gap: 16px; }
-    .header-icon { font-size: 40px; }
-    .dashboard-header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-    .header-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
-    .header-right { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-    .global-progress { display: flex; align-items: center; gap: 12px; }
-    .global-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
-    .global-bar-container { width: 200px; height: 12px; background: var(--bg-secondary); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
-    .global-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-violet)); border-radius: 6px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-    .global-percent { font-size: 18px; font-weight: 700; color: var(--accent-cyan); min-width: 50px; text-align: right; }
-    .date-badge { background: var(--accent-blue); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; }
-    .save-status { font-size: 12px; color: var(--accent-emerald); font-weight: 500; display: flex; align-items: center; gap: 6px; }
-    .save-status.saving { color: var(--accent-amber); }
-    .save-status.error { color: var(--accent-rose); }
-    .user-selector { display: flex; align-items: center; gap: 8px; background: var(--bg-primary); padding: 6px 12px 6px 16px; border-radius: 8px; border: 1px solid var(--border-color); }
-    .user-selector label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-    .user-selector select { background: var(--bg-primary); border: none; color: var(--text-primary); padding: 6px 8px; font-size: 14px; font-weight: 500; outline: none; cursor: pointer; min-width: 180px; }
-    .user-selector select:focus { outline: 2px solid var(--accent-blue); }
-    .user-badge { font-size: 12px; background: var(--accent-emerald); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
-    .user-badge.readonly { background: var(--accent-amber); }
-    .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
-    .kpi-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; text-align: center; transition: all 0.3s ease; box-shadow: var(--shadow); }
-    .kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--accent-blue); }
-    .kpi-icon { font-size: 28px; margin-bottom: 8px; }
-    .kpi-value { font-size: 32px; font-weight: 800; color: var(--text-primary); }
-    .kpi-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
-    .kpi-completed .kpi-value { color: var(--accent-emerald); }
-    .kpi-progress .kpi-value { color: var(--accent-amber); }
-    .kpi-pending .kpi-value { color: var(--accent-rose); }
-    .kpi-phases .kpi-value { color: var(--accent-violet); }
-    .filter-bar { display: flex; gap: 16px; align-items: flex-end; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
-    .filter-group label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .filter-group input, .filter-group select { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; color: var(--text-primary); font-size: 14px; outline: none; transition: border-color 0.2s; }
-    .filter-group input:focus, .filter-group select:focus { border-color: var(--accent-blue); }
-    .btn-reset { background: linear-gradient(135deg, var(--accent-rose), #e11d48); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-reset:hover { transform: scale(1.05); } .btn-reset:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-export { background: linear-gradient(135deg, var(--accent-emerald), #059669); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-export:hover { transform: scale(1.05); }
-    .btn-local { background: linear-gradient(135deg, var(--accent-amber), #d97706); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-local:hover { transform: scale(1.05); }
-    .btn-audit { background: linear-gradient(135deg, var(--accent-violet), #7c3aed); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-audit:hover { transform: scale(1.05); }
-    .btn-toggle-all { background: linear-gradient(135deg, #475569, #334155); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
-    .btn-toggle-all:hover { transform: scale(1.05); }
-    .phases-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
-    .phase-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
-    .phase-card:hover { border-color: var(--accent-blue); }
-    .phase-card.collapsed .phase-activities { display: none; }
-    .phase-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; background: linear-gradient(90deg, rgba(59,130,246,0.08), transparent); transition: background 0.3s; }
-    .phase-header:hover { background: linear-gradient(90deg, rgba(59,130,246,0.15), transparent); }
-    .phase-title-group { display: flex; align-items: center; gap: 12px; }
-    .phase-number { background: var(--accent-blue); color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
-    .phase-name { font-weight: 600; font-size: 15px; }
-    .phase-meta { display: flex; align-items: center; gap: 16px; }
-    .phase-progress-bar { width: 120px; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
-    .phase-progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-    .phase-progress-text { font-size: 13px; font-weight: 700; min-width: 40px; text-align: right; }
-    .phase-toggle { font-size: 18px; color: var(--text-secondary); transition: transform 0.3s; }
-    .phase-card.collapsed .phase-toggle { transform: rotate(-90deg); }
-    .phase-description { padding: 0 20px 12px 52px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; border-bottom: 1px solid rgba(51,65,85,0.3); }
-    .phase-card.collapsed .phase-description { display: none; }
-    .phase-activities { border-top: 1px solid var(--border-color); }
-    .activity-row { display: flex; flex-direction: column; padding: 12px 20px 12px 52px; border-bottom: 1px solid rgba(51,65,85,0.5); transition: background 0.2s; gap: 8px; }
-    .activity-row:last-child { border-bottom: none; }
-    .activity-row:hover { background: var(--bg-card-hover); }
-    .activity-row.hidden { display: none; }
-    .activity-main { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .activity-id { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--accent-cyan); font-weight: 600; min-width: 40px; }
-    .activity-desc { flex: 2; font-size: 13px; color: var(--text-secondary); padding-right: 16px; line-height: 1.5; min-width: 200px; }
-    .activity-periods { display: flex; gap: 4px; margin-right: 16px; flex-wrap: wrap; max-width: 200px; }
-    .period-tag { font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(59,130,246,0.15); color: var(--accent-blue); font-weight: 500; white-space: nowrap; }
-    .activity-control { display: flex; align-items: center; gap: 10px; flex: 1 1 auto; min-width: 280px; flex-wrap: wrap; }
-    .slider-container { position: relative; width: 120px; }
-    .slider-container input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: var(--bg-primary); outline: none; cursor: pointer; }
-    .slider-container input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-blue); cursor: pointer; border: 2px solid white; }
-    .slider-container input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent-blue); cursor: pointer; border: 2px solid white; }
-    .slider-container input[type="range"]:disabled { opacity: 0.6; cursor: not-allowed; }
-    .num-input { width: 56px; height: 32px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); font-size: 14px; font-weight: 700; text-align: center; outline: none; -moz-appearance: textfield; }
-    .num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .num-input:focus { border-color: var(--accent-blue); } .num-input:disabled { opacity: 0.6; cursor: not-allowed; }
-    .activity-percent-sym { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-left: -4px; }
-    .activity-status { font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; min-width: 90px; text-align: center; }
-    .status-pending { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
-    .status-progress { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
-    .status-completed { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
-    .activity-meta { display: flex; flex-direction: column; gap: 8px; flex: 1 1 100%; padding-left: 52px; padding-bottom: 8px; }
-    .meta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
-    .meta-row label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; min-width: 100px; }
-    .meta-row select { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 6px 10px; font-size: 13px; outline: none; flex: 1; min-width: 180px; min-height: 60px; }
-    .meta-row select:disabled { opacity: 0.6; cursor: not-allowed; }
-    .meta-row textarea { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); padding: 6px 10px; font-size: 13px; outline: none; flex: 1; min-width: 150px; resize: vertical; height: 36px; }
-    .meta-row textarea:disabled { opacity: 0.6; cursor: not-allowed; }
-    .asignacion-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1; }
-    .asignacion-group .badges-container { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
-    .asignacion-group .badge-tecnico { background: var(--accent-blue); color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap; }
-    .asignacion-group .btn-asignar { background: var(--accent-emerald); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; }
-    .asignacion-group .btn-asignar:disabled { opacity: 0.5; cursor: not-allowed; }
-    .asignacion-group .btn-quitar-todos { background: var(--accent-rose); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; }
-    .asignacion-group .btn-quitar-todos:disabled { opacity: 0.5; cursor: not-allowed; }
-    .calendario-section { display: flex; flex-direction: column; gap: 6px; flex: 1 1 100%; padding-left: 52px; padding-bottom: 8px; }
-    .calendario-section label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-    .calendario-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-    .calendario-nav button { background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
-    .calendario-nav button:hover:not(:disabled) { background: var(--bg-card-hover); }
-    .calendario-nav span { font-weight: 600; font-size: 14px; min-width: 120px; text-align: center; }
-    .calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: var(--bg-secondary); padding: 4px; border-radius: 6px; border: 1px solid var(--border-color); max-width: 480px; }
-    .calendario-grid .dia-nombre { font-size: 10px; text-transform: uppercase; color: var(--text-muted); text-align: center; font-weight: 600; padding: 4px 0; }
-    .calendario-grid .dia { background: var(--bg-primary); padding: 6px 2px; text-align: center; font-size: 12px; border-radius: 4px; cursor: pointer; position: relative; min-height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.2s; }
-    .calendario-grid .dia:hover:not(.vacio) { background: var(--bg-card-hover); }
-    .calendario-grid .dia.vacio { background: transparent; cursor: default; }
-    .calendario-grid .dia.hoy { border: 1px solid var(--accent-cyan); }
-    /* NUEVO: días con actividad programada según períodos */
-    .calendario-grid .dia.con-actividad {
-      background: rgba(59,130,246,0.18);
-      box-shadow: inset 3px 0 0 var(--accent-blue);
-    }
-    .calendario-grid .dia.con-actividad:hover:not(.vacio) { background: rgba(59,130,246,0.30); }
-    .calendario-grid .dia.con-actividad.hoy { border-color: var(--accent-cyan); }
-    .calendario-grid .dia .punto { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-emerald); margin-top: 2px; }
-    .calendario-grid .dia .nota-preview { font-size: 9px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; padding: 0 2px; }
-    .calendario-legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); margin-top: 8px; flex-wrap: wrap; }
-    .calendario-legend .item { display: flex; align-items: center; gap: 6px; }
-    .calendario-legend .swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
-    .calendario-legend .swatch.actividad { background: rgba(59,130,246,0.35); box-shadow: inset 3px 0 0 var(--accent-blue); }
-    .calendario-legend .swatch.bitacora { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-emerald); }
-    .calendario-legend .swatch.hoy { border: 1px solid var(--accent-cyan); background: transparent; }
-    .calendario-dia-modal { margin-top: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; display: none; flex-direction: column; gap: 6px; }
-    .calendario-dia-modal.visible { display: flex; }
-    .calendario-dia-modal textarea { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); padding: 6px; font-size: 13px; resize: vertical; height: 60px; font-family: inherit; }
-    .calendario-dia-modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .calendario-dia-modal .modal-actions button { background: var(--accent-blue); color: white; border: none; padding: 4px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; }
-    .calendario-dia-modal .modal-actions button.btn-eliminar { background: var(--accent-rose); }
-    .summary-section { margin-bottom: 24px; }
-    .summary-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-    .summary-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; transition: all 0.3s; }
-    .summary-item:hover { border-color: var(--accent-blue); transform: translateX(4px); }
-    .summary-ring { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
-    .summary-ring svg { transform: rotate(-90deg); }
-    .summary-ring-bg { fill: none; stroke: var(--bg-primary); stroke-width: 4; }
-    .summary-ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
-    .summary-ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; }
-    .summary-info { flex: 1; }
-    .summary-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-    .summary-detail { font-size: 11px; color: var(--text-muted); }
-    .audit-panel { display: none; background: var(--bg-card); border: 1px solid var(--accent-violet); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; overflow-x: auto; }
-    .audit-panel.visible { display: block; }
-    .audit-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .audit-panel th, .audit-panel td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-    .audit-panel th:first-child, .audit-panel td:first-child { text-align: left; white-space: normal; }
-    .audit-panel th { color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .audit-panel tfoot td { border-top: 2px solid var(--accent-violet); border-bottom: none; font-weight: 700; }
-    .audit-panel .ok { color: var(--accent-emerald); }
-    .audit-panel .warn { color: var(--accent-amber); }
-    .audit-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
-    .dashboard-footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-color); margin-top: 8px; }
-    .dashboard-footer p { margin: 4px 0; }
-    .error-message { background: rgba(244,63,94,0.15); border: 1px solid var(--accent-rose); color: var(--accent-rose); padding: 16px 20px; border-radius: 12px; margin-bottom: 24px; text-align: center; font-weight: 500; }
-    .readonly-notice { background: rgba(245,158,11,0.15); border: 1px solid var(--accent-amber); color: var(--accent-amber); padding: 12px 20px; border-radius: 12px; margin-bottom: 24px; text-align: center; font-weight: 500; display: none; }
-    @media (max-width: 1200px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } .activity-control { min-width: auto; width: 100%; } .meta-row { flex-direction: column; align-items: stretch; } .asignacion-group { flex-direction: column; align-items: stretch; } .calendario-grid { max-width: 100%; } }
-    @media (max-width: 768px) { .dashboard-header { flex-direction: column; gap: 16px; text-align: center; } .header-right { flex-direction: column; gap: 12px; } .kpi-row { grid-template-columns: repeat(2, 1fr); } .filter-bar { flex-direction: column; align-items: stretch; } .phase-header { flex-wrap: wrap; gap: 8px; } .activity-row { padding-left: 20px; } .activity-periods { max-width: none; width: 100%; } .activity-meta { padding-left: 0; } .calendario-section { padding-left: 0; } }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cronograma SITEC 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--bg-card-hover:#27354f;--border-color:#334155;
+  --text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;
+  --accent-blue:#3b82f6;--accent-cyan:#06b6d4;--accent-emerald:#10b981;--accent-amber:#f59e0b;--accent-rose:#f43f5e;--accent-violet:#8b5cf6;
+  --shadow:0 4px 6px -1px rgba(0,0,0,.3),0 2px 4px -2px rgba(0,0,0,.3);--shadow-lg:0 10px 15px -3px rgba(0,0,0,.4),0 4px 6px -4px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh}
+button{font-family:inherit}
+.muted{color:var(--text-muted)}
+#dashboard-container{max-width:1600px;margin:0 auto;padding:24px}
+.dashboard-header{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#1e3a5f 0%,#0f172a 100%);border:1px solid var(--border-color);border-radius:16px;padding:22px 28px;margin-bottom:20px;box-shadow:var(--shadow-lg);flex-wrap:wrap;gap:16px}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-icon{font-size:40px}
+.dashboard-header h1{font-size:23px;font-weight:800;letter-spacing:-.5px}
+.header-subtitle{color:var(--text-secondary);font-size:13px;margin-top:4px}
+.header-right{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.global-progress{display:flex;align-items:center;gap:12px}
+.global-label{font-size:12px;color:var(--text-secondary);font-weight:500;line-height:1.3}
+.global-bar-container{position:relative;width:200px;height:12px;background:var(--bg-secondary);border-radius:6px;border:1px solid var(--border-color)}
+.global-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-blue),var(--accent-violet));border-radius:6px;transition:width .6s}
+.plan-mark{position:absolute;top:-4px;width:2px;height:18px;background:#fff;opacity:.85;border-radius:1px}
+.global-percent{font-size:18px;font-weight:700;color:var(--accent-cyan);min-width:56px;text-align:right}
+.date-badge{background:var(--accent-blue);color:#fff;padding:8px 14px;border-radius:8px;font-weight:600;font-size:13px}
+.save-status{font-size:12px;color:var(--accent-emerald);font-weight:500;display:flex;align-items:center;gap:6px}
+.save-status.saving{color:var(--accent-amber)}.save-status.error{color:var(--accent-rose)}
+.user-selector{display:flex;align-items:center;gap:8px;background:var(--bg-primary);padding:6px 12px 6px 16px;border-radius:8px;border:1px solid var(--border-color)}
+.user-selector label{font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.user-selector select{background:var(--bg-primary);border:none;color:var(--text-primary);padding:6px 8px;font-size:14px;font-weight:500;outline:none;cursor:pointer;min-width:180px}
+.user-badge{font-size:12px;background:var(--accent-emerald);color:#fff;padding:4px 12px;border-radius:12px;font-weight:600;white-space:nowrap}
+.user-badge.readonly{background:var(--accent-amber)}
+.btn{border:none;color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;transition:transform .2s;white-space:nowrap}
+.btn:hover:not(:disabled){transform:scale(1.04)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-blue{background:linear-gradient(135deg,var(--accent-blue),#2563eb)}
+.btn-reset{background:linear-gradient(135deg,var(--accent-rose),#e11d48)}
+.btn-export{background:linear-gradient(135deg,var(--accent-emerald),#059669)}
+.btn-grey{background:linear-gradient(135deg,#475569,#334155)}
+.mode-notice{display:none;padding:12px 18px;border-radius:12px;margin-bottom:16px;text-align:center;font-weight:500;font-size:13px}
+.mode-notice.warn{display:block;background:rgba(245,158,11,.15);border:1px solid var(--accent-amber);color:var(--accent-amber)}
+.mode-notice.bad{display:block;background:rgba(244,63,94,.15);border:1px solid var(--accent-rose);color:var(--accent-rose)}
+.error-message{background:rgba(244,63,94,.15);border:1px solid var(--accent-rose);color:var(--accent-rose);padding:12px 18px;border-radius:12px;margin-bottom:16px;text-align:center;font-weight:500;font-size:13px;display:none}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+.kpi-value{font-size:30px;font-weight:800}
+.kpi-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.k-completada .kpi-value{color:var(--accent-emerald)}.k-en_curso .kpi-value{color:var(--accent-blue)}
+.k-rezago .kpi-value{color:var(--accent-amber)}.k-atrasada .kpi-value,.k-bloqueada .kpi-value{color:var(--accent-rose)}
+.k-programada .kpi-value{color:var(--text-secondary)}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{background:var(--bg-card);border:1px solid var(--border-color);color:var(--text-secondary);padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer}
+.tab.active{background:var(--accent-blue);border-color:var(--accent-blue);color:#fff}
+.view{display:none}.view.active{display:block}
+.filter-bar{display:flex;gap:14px;align-items:flex-end;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:14px 18px;margin-bottom:20px;flex-wrap:wrap}
+.filter-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:150px}
+.filter-group label{font-size:12px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.filter-group input,.filter-group select{background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;padding:10px 14px;color:var(--text-primary);font-size:14px;outline:none}
+.filter-group input:focus,.filter-group select:focus{border-color:var(--accent-blue)}
+.phases-container{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.phase-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;overflow:hidden}
+.phase-card:hover{border-color:var(--accent-blue)}
+.phase-card.collapsed .phase-activities,.phase-card.collapsed .phase-description{display:none}
+.phase-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;background:linear-gradient(90deg,rgba(59,130,246,.08),transparent);gap:12px;flex-wrap:wrap}
+.phase-header:hover{background:linear-gradient(90deg,rgba(59,130,246,.15),transparent)}
+.phase-title-group{display:flex;align-items:center;gap:12px}
+.phase-number{color:#fff;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.phase-name{font-weight:600;font-size:15px}
+.phase-lider{font-size:11px;color:var(--text-muted);margin-top:2px}
+.phase-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.phase-progress-bar{position:relative;width:130px;height:8px;background:var(--bg-primary);border-radius:4px}
+.phase-progress-fill{height:100%;border-radius:4px;transition:width .5s}
+.phase-progress-bar .plan-mark{top:-5px;height:18px}
+.phase-progress-text{font-size:13px;font-weight:700;min-width:44px;text-align:right}
+.phase-toggle{font-size:18px;color:var(--text-secondary);transition:transform .3s}
+.phase-card.collapsed .phase-toggle{transform:rotate(-90deg)}
+.phase-description{padding:0 20px 12px 64px;font-size:13px;color:var(--text-secondary);line-height:1.6}
+.phase-activities{border-top:1px solid var(--border-color)}
+.activity-row{display:flex;flex-direction:column;padding:12px 20px 12px 52px;border-bottom:1px solid rgba(51,65,85,.5);gap:8px;border-left:4px solid transparent}
+.activity-row:last-child{border-bottom:none}
+.activity-row:hover{background:var(--bg-card-hover)}
+.activity-row.hidden{display:none}
+.activity-row.e-atrasada,.activity-row.e-sin_iniciar,.activity-row.e-bloqueada{border-left-color:var(--accent-rose)}
+.activity-row.e-rezago{border-left-color:var(--accent-amber)}
+.activity-row.e-completada{border-left-color:var(--accent-emerald)}
+.activity-main{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.activity-id{font-family:'SF Mono',monospace;font-size:12px;color:var(--accent-cyan);font-weight:600;min-width:34px}
+.activity-desc-wrap{flex:2;min-width:240px}
+.activity-desc{font-size:13px;color:var(--text-primary);line-height:1.5}
+.activity-dates{font-size:11px;color:var(--text-muted);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.activity-dates .v1{opacity:.8}
+.dep-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(139,92,246,.18);color:#c4b5fd;font-weight:600}
+.dep-none{font-size:10px;opacity:.6}
+.activity-control{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:300px;flex-wrap:wrap}
+.slider{width:120px;-webkit-appearance:none;height:6px;border-radius:3px;background:var(--bg-primary);outline:none;cursor:pointer}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent-blue);cursor:pointer;border:2px solid #fff}
+.slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent-blue);cursor:pointer;border:2px solid #fff}
+.slider:disabled,.num-input:disabled{opacity:.6;cursor:not-allowed}
+.num-input{width:56px;height:32px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:14px;font-weight:700;text-align:center;outline:none;-moz-appearance:textfield}
+.num-input::-webkit-outer-spin-button,.num-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num-input:focus{border-color:var(--accent-blue)}
+.pct-sym{font-size:14px;font-weight:600;color:var(--text-muted);margin-left:-4px}
+.plan-badge{font-size:11px;color:var(--text-secondary);background:rgba(148,163,184,.12);padding:4px 8px;border-radius:6px;white-space:nowrap}
+.activity-status{font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;min-width:96px;text-align:center}
+.st-ok{background:rgba(16,185,129,.15);color:var(--accent-emerald)}.st-run{background:rgba(59,130,246,.15);color:var(--accent-blue)}
+.st-warn{background:rgba(245,158,11,.15);color:var(--accent-amber)}.st-bad{background:rgba(244,63,94,.15);color:var(--accent-rose)}
+.st-idle{background:rgba(148,163,184,.15);color:var(--text-secondary)}
+.activity-meta{display:flex;flex-direction:column;gap:8px;padding-left:46px}
+.meta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.meta-row>label{font-size:11px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.3px;min-width:120px;padding-top:4px}
+.meta-text{flex:1;font-size:12px;color:var(--text-secondary);line-height:1.5;min-width:200px}
+.meta-row textarea{background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);padding:6px 10px;font-size:13px;outline:none;flex:1;min-width:150px;resize:vertical;height:40px;font-family:inherit}
+.meta-row textarea:disabled{opacity:.6}
+.asignacion-group{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1}
+.badges-container{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.badge-tecnico{background:var(--accent-blue);color:#fff;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;white-space:nowrap}
+.resp-picker{position:relative}
+.resp-picker summary{cursor:pointer;background:var(--accent-emerald);color:#fff;padding:6px 14px;border-radius:6px;font-weight:600;font-size:12px;list-style:none}
+.resp-picker[data-off="1"] summary{opacity:.5;pointer-events:none}
+.resp-list{position:absolute;z-index:20;top:34px;left:0;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:4px;min-width:300px;box-shadow:var(--shadow-lg);max-height:280px;overflow:auto}
+.resp-list label{font-size:12px;color:var(--text-primary);display:flex;gap:8px;align-items:center;cursor:pointer}
+.resp-list small{color:var(--text-muted)}
+.btn-quitar{background:var(--accent-rose);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-weight:600;font-size:12px;cursor:pointer}
+.btn-quitar:disabled{opacity:.5;cursor:not-allowed}
+.tipo-chip{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;text-transform:uppercase}
+.t-avance{background:rgba(16,185,129,.18);color:var(--accent-emerald)}.t-bloqueo{background:rgba(244,63,94,.2);color:var(--accent-rose)}
+.t-riesgo{background:rgba(245,158,11,.2);color:var(--accent-amber)}.t-hito{background:rgba(6,182,212,.2);color:var(--accent-cyan)}
+.calendario-section{display:flex;flex-direction:column;gap:6px;padding-left:46px;padding-bottom:6px}
+.calendario-section>label{font-size:11px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.calendario-nav{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.calendario-nav button{background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-primary);padding:4px 12px;border-radius:4px;cursor:pointer;font-weight:600}
+.calendario-nav span{font-weight:600;font-size:14px;min-width:140px;text-align:center;text-transform:capitalize}
+.calendario-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--bg-secondary);padding:4px;border-radius:6px;border:1px solid var(--border-color);max-width:420px}
+.dia-nombre{font-size:10px;text-transform:uppercase;color:var(--text-muted);text-align:center;font-weight:600;padding:4px 0}
+.dia{background:var(--bg-primary);color:var(--text-primary);border:none;padding:6px 2px;text-align:center;font-size:12px;border-radius:4px;cursor:pointer;min-height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.dia:hover{background:var(--bg-card-hover)}
+.dia.vacio{background:transparent;cursor:default}
+.dia.hoy{outline:1px solid var(--accent-cyan)}
+.dia.con-actividad{background:rgba(59,130,246,.2);box-shadow:inset 3px 0 0 var(--accent-blue)}
+.dia .punto{width:6px;height:6px;border-radius:50%}
+.p-avance{background:var(--accent-emerald)}.p-bloqueo{background:var(--accent-rose)}.p-riesgo{background:var(--accent-amber)}.p-hito{background:var(--accent-cyan)}
+.calendario-legend{display:flex;gap:14px;font-size:11px;color:var(--text-muted);margin-top:6px;flex-wrap:wrap}
+.calendario-legend .item{display:flex;align-items:center;gap:6px}
+.swatch{width:14px;height:14px;border-radius:3px;display:inline-block}
+.swatch.actividad{background:rgba(59,130,246,.35);box-shadow:inset 3px 0 0 var(--accent-blue)}
+.swatch.hoy{border:1px solid var(--accent-cyan)}
+.swatch.dot{width:8px;height:8px;border-radius:50%}
+.calendario-dia-modal{margin-top:8px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:6px;padding:8px;display:none;flex-direction:column;gap:6px;max-width:420px}
+.calendario-dia-modal.visible{display:flex}
+.calendario-dia-modal textarea{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-primary);padding:6px;font-size:13px;resize:vertical;height:64px;font-family:inherit}
+.calendario-dia-modal select{background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-primary);border-radius:4px;padding:4px 6px;font-size:12px}
+.modal-head{font-size:12px;color:var(--text-secondary);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.modal-actions button{background:var(--accent-blue);color:#fff;border:none;padding:4px 14px;border-radius:4px;font-weight:600;cursor:pointer}
+.modal-actions button.btn-eliminar{background:var(--accent-rose)}
+.modal-actions button:disabled{opacity:.5;cursor:not-allowed}
+.summary-section h2,.section-title{font-size:18px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:24px}
+.summary-item{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.summary-ring{position:relative;width:48px;height:48px;flex-shrink:0}
+.summary-ring svg{transform:rotate(-90deg)}
+.summary-ring-bg{fill:none;stroke:var(--bg-primary);stroke-width:4}
+.summary-ring-fill{fill:none;stroke-width:4;stroke-linecap:round}
+.summary-ring-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700}
+.summary-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.summary-detail{font-size:11px;color:var(--text-muted)}
+.gantt-wrap{overflow-x:auto;background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:12px}
+.gantt{--gl:270px;position:relative;min-width:980px}
+.g-head,.g-row,.g-phase{display:grid;grid-template-columns:var(--gl) 1fr;align-items:center}
+.g-head{border-bottom:1px solid var(--border-color);padding-bottom:6px;margin-bottom:4px;font-size:11px;color:var(--text-secondary);font-weight:600}
+.g-months{position:relative;height:20px}
+.g-months span{position:absolute;top:0;height:20px;border-left:1px solid var(--border-color);padding-left:6px;font-size:11px}
+.g-phase{margin-top:8px;padding:6px 0;font-size:12px;font-weight:700}
+.g-row{min-height:28px;border-bottom:1px solid rgba(51,65,85,.35)}
+.g-label{font-size:11px;color:var(--text-secondary);padding-right:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-label b{color:var(--accent-cyan);font-family:'SF Mono',monospace;margin-right:6px}
+.g-track{position:relative;height:28px}
+.g-grid{position:absolute;top:0;bottom:0;width:1px;background:rgba(51,65,85,.5)}
+.g-v1{position:absolute;bottom:3px;height:4px;background:rgba(148,163,184,.45);border-radius:2px}
+.g-bar{position:absolute;top:4px;height:16px;border-radius:4px;border:1px solid;overflow:hidden;background:rgba(15,23,42,.6)}
+.g-fill{height:100%}
+.g-today{position:absolute;top:0;bottom:0;width:2px;background:var(--accent-cyan);z-index:5;pointer-events:none;left:calc(var(--gl) + (100% - var(--gl)) * var(--tf))}
+.g-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);margin-top:12px}
+.g-legend .item{display:flex;align-items:center;gap:6px}
+.g-section{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:16px 20px;margin-bottom:18px;overflow-x:auto}
+.g-section h3{font-size:15px;margin-bottom:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{padding:7px 9px;border-bottom:1px solid var(--border-color);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left;white-space:normal}
+.tbl th{color:var(--text-secondary);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+.tbl tfoot td{border-top:2px solid var(--accent-violet);font-weight:700;border-bottom:none}
+.tbl td.l{text-align:left;white-space:normal}
+.spi{font-weight:700;padding:2px 8px;border-radius:10px}
+.spi-ok{background:rgba(16,185,129,.18);color:var(--accent-emerald)}.spi-warn{background:rgba(245,158,11,.18);color:var(--accent-amber)}
+.spi-bad{background:rgba(244,63,94,.18);color:var(--accent-rose)}.spi-na{background:rgba(148,163,184,.15);color:var(--text-secondary)}
+.note{font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.5}
+.alert{display:flex;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:12.5px;line-height:1.5;border-left:4px solid}
+.al-critica{background:rgba(244,63,94,.1);border-color:var(--accent-rose)}.al-alta{background:rgba(245,158,11,.1);border-color:var(--accent-amber)}.al-media{background:rgba(59,130,246,.1);border-color:var(--accent-blue)}
+.alert .sev{font-weight:700;text-transform:uppercase;font-size:10.5px;min-width:56px}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.chain span.node{background:rgba(244,63,94,.15);color:var(--accent-rose);padding:3px 9px;border-radius:6px;font-weight:700}
+.chain span.ar{color:var(--text-muted)}
+.sug li{margin:0 0 6px 18px;font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
+.dashboard-footer{text-align:center;padding:18px;color:var(--text-muted);font-size:12px;border-top:1px solid var(--border-color);margin-top:8px}
+.dashboard-footer p{margin:4px 0}
+dialog{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color);border-radius:12px;padding:20px;min-width:320px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog input{display:block;width:100%;margin:8px 0;padding:10px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary)}
+@media (max-width:900px){.activity-row{padding-left:16px}.activity-meta,.calendario-section{padding-left:0}.dashboard-header{flex-direction:column;text-align:center}.header-right{flex-direction:column}}
+</style>
 </head>
 <body>
 <div id="dashboard-container">
@@ -191,911 +223,879 @@
       <div class="header-icon">🗺️</div>
       <div>
         <h1>Cronograma Trabajo SITEC</h1>
-        <p class="header-subtitle">5 Fases | Julio — Diciembre 2026</p>
+        <p class="header-subtitle" id="header-subtitle"></p>
       </div>
     </div>
     <div class="header-right">
-      <div class="user-selector">
+      <div class="user-selector" id="user-selector-box">
         <label>👤 Usuario:</label>
-        <select id="user-select" onchange="changeUser(this.value)"></select>
+        <select id="user-select"></select>
         <span class="user-badge" id="user-badge">Lector</span>
       </div>
-      <div class="save-status" id="save-status">
-        <span>💾</span> <span id="save-text">Inicializando...</span>
-      </div>
+      <button class="btn btn-blue" id="btn-login" style="display:none">🔐 Iniciar sesión</button>
+      <div class="save-status" id="save-status"><span>💾</span> <span id="save-text">Inicializando...</span></div>
       <div class="global-progress">
-        <span class="global-label">Avance Global</span>
-        <div class="global-bar-container"><div class="global-bar" id="global-bar"></div></div>
+        <span class="global-label">Avance real<br><small id="global-sub" class="muted"></small></span>
+        <div class="global-bar-container"><div class="global-bar" id="global-bar"></div><div class="plan-mark" id="global-plan-mark" title="Avance planificado a la fecha de corte"></div></div>
         <span class="global-percent" id="global-percent">0%</span>
+        <span class="spi spi-na" id="global-spi" title="SPI = avance real / avance planificado">SPI —</span>
       </div>
-      <div class="date-badge">📅 Octubre 2026</div>
+      <div class="date-badge" id="date-badge"></div>
     </div>
   </div>
 
-  <div class="readonly-notice" id="readonly-notice">
-    👁️ Estás en modo <strong>solo lectura</strong>. No puedes modificar avances, responsables ni observaciones.
+  <div class="mode-notice" id="mode-notice"></div>
+  <div class="error-message" id="error-message"></div>
+
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-value" id="kpi-total">0</div><div class="kpi-label">Actividades</div></div>
+    <div class="kpi-card k-completada"><div class="kpi-value" id="kpi-completada">0</div><div class="kpi-label">Completadas</div></div>
+    <div class="kpi-card k-en_curso"><div class="kpi-value" id="kpi-en_curso">0</div><div class="kpi-label">En curso</div></div>
+    <div class="kpi-card k-rezago"><div class="kpi-value" id="kpi-rezago">0</div><div class="kpi-label">Con rezago</div></div>
+    <div class="kpi-card k-atrasada"><div class="kpi-value" id="kpi-atrasada">0</div><div class="kpi-label">Atrasadas / sin iniciar</div></div>
+    <div class="kpi-card k-bloqueada"><div class="kpi-value" id="kpi-bloqueada">0</div><div class="kpi-label">Bloqueadas</div></div>
+    <div class="kpi-card k-programada"><div class="kpi-value" id="kpi-programada">0</div><div class="kpi-label">Programadas</div></div>
   </div>
 
-  <div class="kpi-row" id="kpi-row">
-    <div class="kpi-card kpi-total"><div class="kpi-icon">📋</div><div class="kpi-value" id="kpi-total">0</div><div class="kpi-label">Actividades Totales</div></div>
-    <div class="kpi-card kpi-completed"><div class="kpi-icon">✅</div><div class="kpi-value" id="kpi-completed">0</div><div class="kpi-label">Completadas</div></div>
-    <div class="kpi-card kpi-progress"><div class="kpi-icon">🔄</div><div class="kpi-value" id="kpi-progress">0</div><div class="kpi-label">En Progreso</div></div>
-    <div class="kpi-card kpi-pending"><div class="kpi-icon">⏳</div><div class="kpi-value" id="kpi-pending">0</div><div class="kpi-label">Pendientes</div></div>
-    <div class="kpi-card kpi-phases"><div class="kpi-icon">🎯</div><div class="kpi-value" id="kpi-phases">5</div><div class="kpi-label">Fases Estratégicas</div></div>
+  <div class="tabs">
+    <button class="tab active" data-view="lista">📋 Actividades</button>
+    <button class="tab" data-view="gantt">📊 Gantt</button>
+    <button class="tab" data-view="gerencial">🚦 Tablero gerencial</button>
   </div>
 
-  <div class="filter-bar">
-    <div class="filter-group">
-      <label>🔍 Buscar actividad:</label>
-      <input type="text" id="search-input" placeholder="Escribe para filtrar..." />
+  <div class="view active" id="view-lista">
+    <div class="filter-bar">
+      <div class="filter-group"><label>🔍 Buscar actividad</label><input type="text" id="search-input" placeholder="Escribe para filtrar..." /></div>
+      <div class="filter-group"><label>🚦 Estado</label>
+        <select id="status-filter">
+          <option value="all">Todos</option><option value="completada">Completadas</option><option value="en_curso">En curso</option>
+          <option value="rezago">Con rezago</option><option value="atrasada">Atrasadas / sin iniciar</option><option value="bloqueada">Bloqueadas</option><option value="programada">Programadas</option>
+        </select></div>
+      <div class="filter-group"><label>🏷️ Mes (plan v2)</label>
+        <select id="period-filter"><option value="all">Todos</option><option value="6">Julio 2026</option><option value="7">Agosto 2026</option><option value="8">Septiembre 2026</option><option value="9">Octubre 2026</option><option value="10">Noviembre 2026</option><option value="11">Diciembre 2026</option></select></div>
+      <button class="btn btn-grey" id="btn-toggle-all">⊟ Cerrar / Abrir todas</button>
+      <button class="btn btn-blue" id="btn-sync">🔄 Sincronizar</button>
+      <button class="btn btn-export" id="btn-export-json">📥 JSON</button>
+      <button class="btn btn-export" id="btn-export-csv">📊 CSV (Excel)</button>
+      <button class="btn btn-reset" id="btn-reset">♻️ Reiniciar avances</button>
     </div>
-    <div class="filter-group">
-      <label>📊 Filtrar por estado:</label>
-      <select id="status-filter">
-        <option value="all">Todas</option>
-        <option value="completed">Completadas (100%)</option>
-        <option value="progress">En progreso (1-99%)</option>
-        <option value="pending">Pendientes (0%)</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>🏷️ Período:</label>
-      <select id="period-filter">
-        <option value="all">Todos</option>
-        <option value="Jul">Julio 2026</option>
-        <option value="Ago">Agosto 2026</option>
-        <option value="Sep">Septiembre 2026</option>
-        <option value="Oct">Octubre 2026</option>
-        <option value="Nov">Noviembre 2026</option>
-        <option value="Dic">Diciembre 2026</option>
-      </select>
-    </div>
-    <button class="btn-toggle-all" onclick="toggleAllPhases()">⊟ Cerrar / Abrir todas</button>
-    <button class="btn-audit" onclick="toggleAuditoria()">🔎 Auditar coherencia</button>
-    <button class="btn-export" id="btn-export" onclick="exportData()">📥 Exportar Datos</button>
-    <button class="btn-reset" id="btn-reset" onclick="resetAll()">🔄 Reiniciar Avances</button>
-    <button class="btn-local" onclick="forceLocalData()">💾 Forzar datos locales</button>
+    <div class="phases-container" id="phases-container"></div>
+    <div class="summary-section"><h2>📈 Resumen por fase</h2><div class="summary-grid" id="summary-grid"></div></div>
   </div>
 
-  <div class="audit-panel" id="audit-panel"></div>
-  <div id="error-message" class="error-message" style="display:none;"></div>
-  <div class="phases-container" id="phases-container"></div>
-
-  <div class="summary-section">
-    <h2>📈 Resumen por Fase</h2>
-    <div class="summary-grid" id="summary-grid"></div>
-  </div>
+  <div class="view" id="view-gantt"></div>
+  <div class="view" id="view-gerencial"></div>
 
   <div class="dashboard-footer">
-    <p>💡 <strong>Instrucciones:</strong> Haz clic sobre el título de cada fase para abrirla (las demás se cerrarán en cascada). Usa los deslizadores o escribe el % de avance. Los datos se guardan automáticamente.</p>
-    <p>📅 <strong>Calendario:</strong> los días en azul marcan los períodos programados de la actividad; el punto verde indica que hay una nota de bitácora ese día.</p>
-    <p>⚖️ <strong>Cálculo:</strong> fase = promedio ponderado por duración; global = promedio ponderado por importancia (F1=10%, F2=20%, F3=20%, F4=30%, F5=20%).</p>
+    <p>⚖️ <strong>Cálculo:</strong> avance de fase = promedio ponderado por peso de actividad; global = ponderado por peso de fase (F1=10, F2=20, F3=20, F4=30, F5=20 — pendiente de sustento). Plan = interpolación lineal por fechas de la línea base v2.</p>
+    <p>📅 Calendario: azul = ventana planificada; punto = nota de bitácora (verde avance, rojo bloqueo, ámbar riesgo, celeste hito).</p>
     <p>🏛️ Gobierno Autónomo Municipal de La Paz — Equipo SITEC</p>
   </div>
 </div>
 
+<dialog id="login-dlg">
+  <form id="login-form">
+    <h3>Iniciar sesión (editores)</h3>
+    <input type="email" id="login-email" placeholder="correo institucional" autocomplete="username" required />
+    <input type="password" id="login-pass" placeholder="contraseña" autocomplete="current-password" required />
+    <div id="login-msg" style="color:var(--accent-rose);font-size:12px;min-height:16px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button type="button" class="btn btn-grey" id="login-cancel">Cancelar</button>
+      <button type="submit" class="btn btn-blue">Entrar</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
-  const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_saNWMmiAZ6XgRQ5luf_G-w_x_hmkMFk';
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+(function(){
+'use strict';
 
-  const usuarios = [
-    { nombre: "Israel Roly Gutierrez Ulo", rol: "Responsable de proyecto" },
-    { nombre: "Favio Ramirez", rol: "Desarrollador" },
-    { nombre: "Miguel Ulo", rol: "Analista de Datos" },
-    { nombre: "Romulo Marca", rol: "Supervisor Geógrafo" },
-    { nombre: "Omar Espinoza Vargas", rol: "Topógrafo" },
-    { nombre: "Daniel Condori Contreras", rol: "Topógrafo" },
-    { nombre: "Diana Aliaga Paton", rol: "Topógrafo" },
-    { nombre: "Erickh Tarqui Marquez", rol: "Topógrafo" },
-    { nombre: "Albania Ruelas Bustillos", rol: "Supervisor Arquitecto" },
-    { nombre: "Jacqueline Rios Bustillos", rol: "Arquitecto" },
-    { nombre: "Kattya Franco Gonzalos", rol: "Arquitecto" },
-    { nombre: "Diego Oscar Mamani Huanto", rol: "Arquitecto" },
-    { nombre: "Manuel Azcarrunz Salas", rol: "Arquitecto" },
-    { nombre: "Gustavo Calderon Saavedra", rol: "Arquitecto" },
-    { nombre: "Victor Siñani", rol: "Supervisor UVA" }
-  ];
+/* ================= CONFIGURACIÓN ================= */
+const CONFIG = {
+  AUTH_OBLIGATORIA: false,       // true => solo edita quien inicia sesión en Supabase Auth (ejecutar antes supabase_seguridad.sql)
+  DIAS_SIN_ACTUALIZAR: 14,
+  UMBRAL_REZAGO: 15,
+  MAX_SIMULTANEAS: 3,
+  INICIO_PROYECTO: '2026-07-01',
+  FIN_PROYECTO: '2026-12-31',
+  LINEA_BASE: 'v2 (re-planificada 12-oct-2026, propuesta a validar)'
+};
+const SUPABASE_URL = 'https://lkfvocurqeqwxneqbmgz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_saNWMmiAZ6XgRQ5luf_G-w_x_hmkMFk';
+const TABLE = 'progreso_catastro';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const PHASE_COLORS = ['#3b82f6','#10b981','#f59e0b','#f43f5e','#8b5cf6'];
 
-  const USUARIOS_AUTORIZADOS = [
-    "Israel Roly Gutierrez Ulo","Romulo Marca","Albania Ruelas Bustillos",
-    "Favio Ramirez","Miguel Ulo","Victor Siñani"
-  ];
+/* ================= UTILIDADES ================= */
+const DAY = 86400000;
+const pad = n => String(n).padStart(2,'0');
+const MESES_C = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const toDay = s => { const [y,m,d] = s.split('-').map(Number); return Math.floor(Date.UTC(y,m-1,d)/DAY); };
+const dayStr = n => { const d = new Date(n*DAY); return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate()); };
+const fmtC = s => { const [,m,d] = s.split('-').map(Number); return d+'-'+MESES_C[m-1]; };
+const fmtL = s => { const [y,m,d] = s.split('-').map(Number); return d+'-'+MESES_C[m-1]+'-'+y; };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = v => { v = parseInt(v,10); return isNaN(v) ? 0 : Math.min(100, Math.max(0, v)); };
+const $ = id => document.getElementById(id);
+const setText = (id,t) => { const e = $(id); if (e) e.textContent = t; };
+function computeHoy(){
+  const q = new URLSearchParams(location.search).get('hoy');
+  if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) return toDay(q);
+  const t = new Date();
+  return toDay(t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()));
+}
+const HOY = computeHoy();
+const HOY_STR = dayStr(HOY);
 
-  const phasesData = [
-    { 
-      name: "FASE 1: SATÉLITE — Detección de Transformación Urbana",
-      description: "Adquisición y procesamiento de imágenes Sentinel-2 para detectar cambios de cobertura del suelo mediante índices espectrales (NDBI), generando el Índice de Transformación Urbana (ITU) que servirá de base para todo el proyecto.",
-      activities: [
-        {id:"1.1", desc:"Adquisición imágenes Sentinel-2 (2019-2025) 9 macrodistritos de La Paz", periods:["Jul S1-S2","Jul S3-S4"]},
-        {id:"1.2", desc:"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito", periods:["Jul S1-S2","Jul S3-S4"]},
-        {id:"1.3", desc:"Cálculo NDBI por macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)", periods:["Jul S3-S4","Ago S5-S6"]},
-        {id:"1.4", desc:"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI)", periods:["Ago S5-S6","Ago S7-S8"]},
-        {id:"1.6", desc:"Validación cruzada de la transformación detectada vs. datos SIT V2/V3, identificación y clasificación de zonas críticas con alta transformación urbana", periods:["Ago S7-S8","Sep S9-S10","Oct S11-S12"]},
-        {id:"1.5", desc:"Generación de mapas temáticos de transformación urbana por macrodistrito", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]}
-      ]
-    },
-    { 
-      name: "FASE 2: PRIORIZACIÓN — Cruce Tributario-Territorial",
-      description: "Integración y estandarización de información catastral y tributaria para generar indicadores de crecimiento físico y comportamiento tributario por OTB.",
-      activities: [
-        {id:"2.1", desc:"Integración y estandarización de información catastral y tributaria para generar indicadores de crecimiento físico y comportamiento tributario por OTB", periods:["Jul S3-S4","Ago S5-S6"]},
-        {id:"2.2", desc:"Consolidar la base de datos Catastro-ATM mediante la validación de la metodología y resultados por OTB", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
-        {id:"2.3", desc:"Estructuración y extracción de datos del SIT mediante consultas SQL, generando registros catastrales en cuatro conjuntos de datos interoperables para su análisis e integración institucional por parte de la Secretaria de Ciudad Inteligente", periods:["Ago S7-S8","Sep S9-S10"]},
-        {id:"2.4", desc:"Construcción, presentación y validación del código CHIP para la integración de las bases de datos CATASTRO-ATM", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"2.5", desc:"Integración Catastro–ATM mediante la vinculación de registros, consolidación de una tabla única migrada al SIT e incorporación del código CHIP para consulta institucional", periods:["Oct S11-S12","Oct S13-S14"]}
-      ]
-    },
-    { 
-      name: "FASE 3: DRON — Fotogrametría UAV y Modelos 3D",
-      description: "Planificación, ejecución de vuelos fotogramétricos con drones sobre las OTBs priorizadas, y procesamiento de imágenes para generar ortofotos de alta resolución (<10cm), nubes de puntos densas, MDT/DSM y modelos 3D.",
-      activities: [
-        {id:"3.1", desc:"Vuelo fotogramétrico y postproceso cinemático", periods:["Sep S9-S10","Oct S11-S12"]},
-        {id:"3.2", desc:"Procesamiento fotogramétrico (generación de productos)", periods:["Oct S11-S12","Oct S13-S14"]},
-        {id:"3.3", desc:"Control de calidad de productos y precisiones", periods:["Nov S15-S16","Nov S17-S18","Nov S19-S20"]},
-        {id:"3.4", desc:"Publicación (ortofoto y nube de puntos)", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]}
-      ]
-    },
-    { 
-      name: "FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral",
-      description: "Digitalización vectorial de todos los cambios detectados en construcciones sobre ortofotos 3D, actualización de fichas técnicas prediales, identificación de nuevos predios sin registro y empadronamiento de nuevos contribuyentes. Se trabajará sobre 1341 predios del macrodistrito Sur, con una meta de 40 lotes/operador/día.",
-      activities: [
-        {id:"4.1", desc:"Capacitación técnicos en digitalización vectorial sobre ortomosaicos 3D (medible: número de técnicos capacitados)", periods:["Nov S17-S18","Nov S19-S20"]},
-        {id:"4.2", desc:"Digitalización y actualización de la información predial y constructiva sobre ortofotos, incorporando lotes, manzanas, límites prediales, muros, edificaciones, anexos y alturas (meta: 40 lotes/operador/día)", periods:["Nov S19-S20","Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.3", desc:"Clasificación materiales de construcción, tipología de vías y usos de suelo (medible: número de predios clasificados)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.4", desc:"Control de calidad digitalización (1 día de control por lote digitalizado, medible: número de lotes controlados)", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"4.5", desc:"Contraste de datos vectoriales contra SIT V2/V3 existente (medible: número de registros contrastados)", periods:["Dic S23-S24","Dic S25-S26"]},
-        {id:"4.6", desc:"Actualización y generación de fichas técnicas prediales (incluyendo nuevos predios, medible: número de fichas actualizadas/generadas)", periods:["Dic S23-S24","Dic S25-S26"]},
-        {id:"4.7", desc:"Clasificación predios: Sin catastro / Desactualizado / Actualizado / Nuevo (medible: conteo por categoría)", periods:["Dic S21-S22","Dic S23-S24"]},
-        {id:"4.8", desc:"Entrega de capas vectoriales prediales actualizadas, nuevos contribuyentes empadronados y fichas técnicas", periods:["Dic S25-S26"]}
-      ]
-    },
-    { 
-      name: "FASE 5: INTEGRACIÓN — Modelo de Datos Multidimensional y SIT",
-      description: "Diseño e implementación del nuevo modelo de datos multidimensional (cubo OLAP geoespacial), integración con SIT V2/V3, publicación de servicios WMS/WFS, y establecimiento del protocolo operativo Catastro-ATM para transferencia de datos.",
-      activities: [
-        {id:"5.1", desc:"Análisis y diseño del modelo de datos multidimensional y especificaciones de integración", periods:["Ago S5-S6","Ago S7-S8","Sep S9-S10"]},
-        {id:"5.2", desc:"Implementación y configuración de servidor PostgreSQL/PostGIS y creación de esquemas espaciales", periods:["Oct S11-S12","Oct S13-S14","Nov S15-S16"]},
-        {id:"5.3", desc:"Carga de datos catastrales, fotogramétricos y tributarios, y desarrollo de consultas cruzadas", periods:["Nov S17-S18","Nov S19-S20","Dic S21-S22"]},
-        {id:"5.4", desc:"Configuración de servicios WMS/WFS, publicación de capas y pruebas de integridad", periods:["Dic S21-S22","Dic S23-S24","Dic S25-S26"]},
-        {id:"5.5", desc:"Entrega del modelo operativo, módulos SIG publicados y protocolo Catastro-ATM", periods:["Dic S25-S26"]}
-      ]
-    }
-  ];
+/* ================= USUARIOS ================= */
+const usuarios = [
+  {nombre:"Israel Roly Gutierrez Ulo",rol:"Responsable de proyecto"},{nombre:"Favio Ramirez",rol:"Desarrollador"},
+  {nombre:"Miguel Ulo",rol:"Analista de Datos"},{nombre:"Romulo Marca",rol:"Supervisor Geógrafo"},
+  {nombre:"Omar Espinoza Vargas",rol:"Topógrafo"},{nombre:"Daniel Condori Contreras",rol:"Topógrafo"},
+  {nombre:"Diana Aliaga Paton",rol:"Topógrafo"},{nombre:"Erickh Tarqui Marquez",rol:"Topógrafo"},
+  {nombre:"Albania Ruelas Bustillos",rol:"Supervisor Arquitecto"},{nombre:"Jacqueline Rios Bustillos",rol:"Arquitecto"},
+  {nombre:"Kattya Franco Gonzalos",rol:"Arquitecto"},{nombre:"Diego Oscar Mamani Huanto",rol:"Arquitecto"},
+  {nombre:"Manuel Azcarrunz Salas",rol:"Arquitecto"},{nombre:"Gustavo Calderon Saavedra",rol:"Arquitecto"},
+  {nombre:"Victor Siñani",rol:"Supervisor UVA"}
+];
+const USUARIOS_AUTORIZADOS = ["Israel Roly Gutierrez Ulo","Romulo Marca","Albania Ruelas Bustillos","Favio Ramirez","Miguel Ulo","Victor Siñani"];
 
-  // ============ PONDERACIÓN ============
-  const PESOS = {
-    '1.1':2,'1.2':2,'1.3':2,'1.4':2,'1.6':3,'1.5':3,
-    '2.1':2,'2.2':3,'2.3':2,'2.4':2,'2.5':2,
-    '3.1':2,'3.2':2,'3.3':3,'3.4':3,
-    '4.1':2,'4.2':4,'4.3':3,'4.4':3,'4.5':2,'4.6':2,'4.7':2,'4.8':1,
-    '5.1':3,'5.2':3,'5.3':3,'5.4':3,'5.5':1
-  };
-  const PESOS_FASE = { 0: 10, 1: 20, 2: 20, 3: 30, 4: 20 };
+/* ================= LÍNEA BASE v1 (referencia) ================= */
+const V1_RANGOS = {
+  'Jul S1-S2':['2026-07-01','2026-07-15'],'Jul S3-S4':['2026-07-16','2026-07-31'],
+  'Ago S5-S6':['2026-08-01','2026-08-15'],'Ago S7-S8':['2026-08-16','2026-08-31'],
+  'Sep S9-S10':['2026-09-01','2026-09-30'],
+  'Oct S11-S12':['2026-10-01','2026-10-15'],'Oct S13-S14':['2026-10-16','2026-10-31'],
+  'Nov S15-S16':['2026-11-01','2026-11-10'],'Nov S17-S18':['2026-11-11','2026-11-20'],'Nov S19-S20':['2026-11-21','2026-11-30'],
+  'Dic S21-S22':['2026-12-01','2026-12-10'],'Dic S23-S24':['2026-12-11','2026-12-20'],'Dic S25-S26':['2026-12-21','2026-12-31']
+};
 
-  const DEFAULT_ACTIVITY_PCT = {
-    '1.1':27,'1.2':27,'1.3':27,'1.4':27,'1.6':27,'1.5':27,
-    '2.1':82,'2.2':82,'2.3':82,'2.4':82,'2.5':82,
-    '3.1':49,'3.2':49,'3.3':49,'3.4':49,
-    '4.1':39,'4.2':39,'4.3':39,'4.4':39,'4.5':39,'4.6':39,'4.7':39,'4.8':39,
-    '5.1':7,'5.2':7,'5.3':7,'5.4':7,'5.5':7
-  };
+/* ================= PLAN (línea base v2) =================
+   A(id, desc, inicio, fin, peso, predecesoras[[id,tipo]], periodos_v1, entregable, criterio, dbId)
+   dbId = clave histórica en Supabase (1.5 y 1.6 intercambian posición lógica; los datos NO se tocan). */
+const A = (id,desc,ini,fin,peso,pred,v1,entregable,criterio,dbId) => ({id,desc,ini,fin,peso,pred,v1,entregable,criterio,dbId:dbId||id});
 
-  // Mapa de meses (0-indexed) para mapear "Jul" → 6, etc.
-  const MES_MAP = { 'Jul':6, 'Ago':7, 'Sep':8, 'Oct':9, 'Nov':10, 'Dic':11 };
+const phasesData = [
+ { name:"FASE 1: SATÉLITE — Detección de Transformación Urbana", lider:"Israel Roly Gutierrez Ulo", peso:10,
+   description:"Adquisición y procesamiento de imágenes Sentinel-2 para detectar cambios de cobertura del suelo mediante índices espectrales (NDBI), generando el Índice de Transformación Urbana (ITU) por OTB para los 9 macrodistritos.",
+   activities:[
+    A('1.1',"Adquisición de imágenes Sentinel-2 (2019-2025) de los 9 macrodistritos de La Paz",'2026-08-03','2026-10-23',2,[],['Jul S1-S2','Jul S3-S4'],"Series Sentinel-2 por macrodistrito","9/9 macrodistritos con serie 2019-2025 completa y nubosidad documentada"),
+    A('1.2',"Preprocesamiento atmosférico, corrección radiométrica y recorte por macrodistrito (script Google Earth Engine)",'2026-08-10','2026-10-30',2,[['1.1','SS']],['Jul S1-S2','Jul S3-S4'],"Compuestos corregidos por macrodistrito + script versionado","9/9 macrodistritos procesados con el mismo script reproducible"),
+    A('1.3',"Cálculo de NDBI e Índice de Transformación Urbana (ITU) por OTB en cada macrodistrito (Cotahuma, Max Paredes, Periférica, San Antonio, Sur, Mallasa, Centro, Zongo, Hampaturi)",'2026-08-12','2026-11-06',2,[['1.2','SS']],['Jul S3-S4','Ago S5-S6'],"Tabla ITU por OTB (9 macrodistritos)","ITU calculado y tabulado en 9/9 macrodistritos"),
+    A('1.4',"Análisis de cambio de cobertura del suelo 2019-2025 (series temporales NDBI/ITU), rasterización y vectorización de superficies transformadas",'2026-08-18','2026-11-13',2,[['1.3','SS']],['Ago S5-S6','Ago S7-S8'],"Capa vectorial de superficies transformadas 2019-2025","9/9 macrodistritos con post-proceso de vectorización"),
+    A('1.5',"Validación cruzada de la transformación detectada vs. datos SIT V2/V3, identificación y clasificación de zonas críticas con alta transformación urbana",'2026-08-24','2026-11-20',3,[['1.4','SS']],['Ago S7-S8','Sep S9-S10','Oct S11-S12'],"Capa de zonas críticas + matriz de validación","Matriz de validación (exactitud global y omisión) reportada por macrodistrito",'1.6'),
+    A('1.6',"Generación de mapas temáticos de transformación urbana por macrodistrito",'2026-11-02','2026-11-27',3,[['1.5','SS']],['Ago S5-S6','Ago S7-S8','Sep S9-S10'],"Atlas de mapas temáticos (9 macrodistritos)","9 mapas aprobados por la supervisión",'1.5')
+   ]},
+ { name:"FASE 2: PRIORIZACIÓN — Cruce Tributario-Territorial", lider:"Israel Roly Gutierrez Ulo", peso:20,
+   description:"Integración y estandarización de información catastral y tributaria para generar indicadores de crecimiento físico y comportamiento tributario por OTB.",
+   activities:[
+    A('2.1',"Integración y estandarización de información catastral y tributaria para generar indicadores de crecimiento físico y comportamiento tributario por OTB",'2026-07-01','2026-07-14',2,[],['Jul S3-S4','Ago S5-S6'],"Base por OTB (inmueble, distrito, tipo, puerta, código catastral) remitida a ATM","Acta de entrega a la ATM"),
+    A('2.2',"Consolidar la base de datos Catastro-ATM mediante la validación de la metodología y resultados por OTB",'2026-07-15','2026-07-23',3,[['2.1','FS']],['Ago S5-S6','Ago S7-S8','Sep S9-S10'],"Base Catastro-ATM validada","Acta de validación de resultados por OTB"),
+    A('2.3',"Estructuración y extracción de datos del SIT mediante consultas SQL, generando registros catastrales en cuatro conjuntos de datos interoperables para su análisis e integración por la Secretaría de Ciudad Inteligente",'2026-07-24','2026-10-30',2,[['2.2','FS']],['Ago S7-S8','Sep S9-S10'],"4 conjuntos de datos interoperables","4/4 conjuntos entregados y registros no vinculados saneados"),
+    A('2.4',"Construcción, presentación y validación del código CHIP para la integración de las bases de datos CATASTRO-ATM",'2026-07-30','2026-08-05',2,[],['Sep S9-S10','Oct S11-S12'],"Documento de propuesta CHIP + acta de validación","Propuesta enviada Y validada formalmente por ATM y administración del SIT"),
+    A('2.5',"Integración Catastro–ATM mediante la vinculación de registros, consolidación de una tabla única migrada al SIT e incorporación del código CHIP para consulta institucional",'2026-08-18','2026-11-13',2,[['2.4','FS'],['2.3','SS']],['Oct S11-S12','Oct S13-S14'],"Tabla puente CHIP migrada al SIT","Tabla única en producción en el SIT y consulta institucional operativa")
+   ]},
+ { name:"FASE 3: DRON — Fotogrametría UAV y Modelos 3D", lider:"Victor Siñani", peso:20,
+   description:"Ejecución de vuelos fotogramétricos con drones y procesamiento de imágenes para generar ortofotos de alta resolución (<10 cm), nubes de puntos densas, MDT/DSM y modelos 3D.",
+   activities:[
+    A('3.1',"Vuelo fotogramétrico y postproceso cinemático",'2026-07-15','2026-11-13',2,[],['Sep S9-S10','Oct S11-S12'],"Imágenes georreferenciadas + datos PPK por sector","Cobertura 100% del polígono de vuelo definido para el macrodistrito"),
+    A('3.2',"Procesamiento fotogramétrico (generación de productos)",'2026-07-20','2026-11-20',2,[['3.1','SS']],['Oct S11-S12','Oct S13-S14'],"Ortofoto, nube de puntos, MDT/DSM por sector","Productos generados para 100% de los sectores volados"),
+    A('3.3',"Control de calidad de productos y precisiones",'2026-07-21','2026-11-27',3,[['3.2','SS']],['Nov S15-S16','Nov S17-S18','Nov S19-S20'],"Reporte de precisiones por sector","RMSE con puntos de control reportado por sector; GSD < 10 cm"),
+    A('3.4',"Publicación (ortofoto y nube de puntos)",'2026-09-02','2026-12-04',3,[['3.3','SS']],['Nov S17-S18','Nov S19-S20','Dic S21-S22'],"Productos publicados en el visor institucional","Productos visibles en el visor y almacenamiento de servidor confirmado")
+   ]},
+ { name:"FASE 4: DIGITALIZACIÓN — Vectorización y Actualización Catastral", lider:"Romulo Marca / Albania Ruelas Bustillos", peso:30,
+   description:"Digitalización vectorial de los cambios detectados en construcciones sobre ortofotos 3D, actualización de fichas técnicas prediales, identificación de nuevos predios sin registro y empadronamiento de nuevos contribuyentes. Meta operativa: 40 lotes/operador/día (el universo de predios del macrodistrito debe cuantificarse y registrarse).",
+   activities:[
+    A('4.1',"Capacitación técnicos en digitalización vectorial sobre ortomosaicos 3D (medible: número de técnicos capacitados)",'2026-08-17','2026-09-11',2,[],['Nov S17-S18','Nov S19-S20'],"Técnicos capacitados y criterios de digitalización unificados","Nº de técnicos capacitados con registro de asistencia"),
+    A('4.2',"Digitalización y actualización de la información predial y constructiva sobre ortofotos, incorporando lotes, manzanas, límites prediales, muros, edificaciones, anexos y alturas (meta: 40 lotes/operador/día)",'2026-08-25','2026-12-04',4,[['4.1','SS'],['3.3','SS']],['Nov S19-S20','Dic S21-S22','Dic S23-S24','Dic S25-S26'],"Capas vectoriales prediales actualizadas","Predios digitalizados / universo definido = 100%"),
+    A('4.3',"Clasificación materiales de construcción, tipología de vías y usos de suelo (medible: número de predios clasificados)",'2026-08-25','2026-12-04',3,[['4.2','SS']],['Dic S21-S22','Dic S23-S24','Dic S25-S26'],"Atributos clasificados","Predios clasificados / predios digitalizados = 100%"),
+    A('4.4',"Control de calidad digitalización (1 día de control por lote digitalizado, medible: número de lotes controlados)",'2026-10-19','2026-12-11',3,[['4.2','SS']],['Dic S21-S22','Dic S23-S24','Dic S25-S26'],"Reporte de control de calidad","Lotes controlados / lotes digitalizados = 100%"),
+    A('4.5',"Contraste de datos vectoriales contra SIT V2/V3 existente (medible: número de registros contrastados)",'2026-10-26','2026-12-11',2,[['4.2','SS']],['Dic S23-S24','Dic S25-S26'],"Matriz de contraste vs. SIT","Registros contrastados / registros digitalizados = 100%"),
+    A('4.6',"Actualización y generación de fichas técnicas prediales (incluyendo nuevos predios, medible: número de fichas actualizadas/generadas)",'2026-11-02','2026-12-11',2,[['4.2','SS'],['4.5','SS']],['Dic S23-S24','Dic S25-S26'],"Fichas técnicas actualizadas/generadas","Fichas generadas / predios a actualizar = 100%"),
+    A('4.7',"Clasificación predios: Sin catastro / Desactualizado / Actualizado / Nuevo (medible: conteo por categoría)",'2026-10-26','2026-12-11',2,[['4.5','SS']],['Dic S21-S22','Dic S23-S24'],"Tabla de clasificación de predios","100% de predios con categoría asignada"),
+    A('4.8',"Entrega de capas vectoriales prediales actualizadas, nuevos contribuyentes empadronados y fichas técnicas",'2026-12-14','2026-12-18',1,[['4.4','FS'],['4.6','FS'],['4.7','FS'],['3.4','FS']],['Dic S25-S26'],"Paquete de entrega (capas, fichas, empadronamiento)","Acta de entrega firmada")
+   ]},
+ { name:"FASE 5: INTEGRACIÓN — Modelo de Datos Multidimensional y SIT", lider:null, peso:20,
+   description:"Diseño e implementación del modelo de datos multidimensional (cubo OLAP geoespacial), integración con SIT V2/V3, publicación de servicios WMS/WFS y protocolo operativo Catastro-ATM para transferencia de datos.",
+   activities:[
+    A('5.1',"Análisis y diseño del modelo de datos multidimensional y especificaciones de integración",'2026-10-12','2026-10-23',3,[],['Ago S5-S6','Ago S7-S8','Sep S9-S10'],"Documento de diseño del modelo","Diseño aprobado por la supervisión"),
+    A('5.2',"Implementación y configuración de servidor PostgreSQL/PostGIS y creación de esquemas espaciales",'2026-10-26','2026-11-13',3,[['5.1','FS']],['Oct S11-S12','Oct S13-S14','Nov S15-S16'],"Servidor PostGIS operativo con esquemas","Servidor operativo con capacidad de almacenamiento confirmada"),
+    A('5.3',"Carga de datos catastrales, fotogramétricos y tributarios, y desarrollo de consultas cruzadas (carga incremental; carga final tras 4.8)",'2026-11-16','2026-12-18',3,[['5.2','SS'],['2.5','FS'],['4.8','FF']],['Nov S17-S18','Nov S19-S20','Dic S21-S22'],"Datos cargados + consultas cruzadas","Conteos origen vs. destino conciliados"),
+    A('5.4',"Configuración de servicios WMS/WFS, publicación de capas y pruebas de integridad",'2026-11-30','2026-12-18',3,[['5.3','SS']],['Dic S21-S22','Dic S23-S24','Dic S25-S26'],"Servicios WMS/WFS publicados","Servicios operativos con pruebas de integridad aprobadas"),
+    A('5.5',"Entrega del modelo operativo, módulos SIG publicados y protocolo Catastro-ATM",'2026-12-21','2026-12-29',1,[['5.4','FS'],['5.3','FS']],['Dic S25-S26'],"Modelo operativo + protocolo Catastro-ATM","Acta de entrega firmada")
+   ]}
+];
 
-  function findActivity(actId) {
-    for (const phase of phasesData) {
-      const a = phase.activities.find(x => x.id === actId);
-      if (a) return a;
-    }
-    return null;
-  }
+/* ================= RIESGOS (registro inicial 12-oct-2026, con evidencia de bitácora) ================= */
+const RIESGOS = [
+ {id:'R1',desc:'Servidor del visor institucional sin espacio: no se puede publicar ortofotos (bloqueo registrado 2 al 8 de septiembre).',afecta:'3.4, 5.2',prob:'Alta',imp:'Alto',mit:'Ampliar/migrar almacenamiento; publicar productos optimizados; fijar responsable TI y fecha.'},
+ {id:'R2',desc:'Logística de campo: 4 vuelos cancelados por falta de vehículo/combustible (18, 19, 26 y 31-ago) y 1 por lluvia (17-ago).',afecta:'3.1',prob:'Alta',imp:'Alto',mit:'Reservar vehículo y combustible por adelantado; calendario de vuelo con ventana alternativa.'},
+ {id:'R3',desc:'Inicio de la temporada de lluvias reduce ventanas de vuelo en nov-dic.',afecta:'3.1, 3.2',prob:'Media',imp:'Alto',mit:'Priorizar sectores pendientes en octubre; incluir sectores de reserva.'},
+ {id:'R4',desc:'Dependencia de una sola administradora del SIT para la tabla puente y las cargas (en espera desde 19-ago).',afecta:'2.5, 5.3',prob:'Alta',imp:'Alto',mit:'Designar suplente y acceso delegado; agendar ventanas de carga.'},
+ {id:'R5',desc:'Saneamiento de registros no vinculados depende de la Secretaría de Ciudad Inteligente; sin resultados al 19-ago.',afecta:'2.3, 2.5',prob:'Media',imp:'Medio',mit:'Acta con fecha límite y escalamiento a nivel secretaría.'},
+ {id:'R6',desc:'Sin entradas de bitácora desde el 8-sep: se pierde trazabilidad del avance real.',afecta:'Todas',prob:'Alta',imp:'Alto',mit:'Registro semanal obligatorio; revisión gerencial con este tablero.'},
+ {id:'R7',desc:'El piloto satelital (ITU) cubre Mallasa, pero vuelos y digitalización se ejecutan en el Macrodistrito Sur: la priorización satelital no alimenta aún a F3/F4.',afecta:'F1, F3, F4',prob:'Alta',imp:'Medio',mit:'Calcular ITU del Macrodistrito Sur o declarar formalmente el cambio de alcance.'},
+ {id:'R8',desc:'Cierre con holgura de 2 días y feriados el 25-dic y 1-ene.',afecta:'5.5',prob:'Media',imp:'Alto',mit:'Adelantar 5.1/5.2; congelar alcance en noviembre.'},
+ {id:'R9',desc:'Fase 5 sin responsable asignado y sin avance verificable (valores de 7% sin respaldo).',afecta:'F5',prob:'Alta',imp:'Alto',mit:'Asignar líder y arrancar 5.1 de inmediato.'},
+ {id:'R10',desc:'Universo de F4 inconsistente: meta de 1.341 predios vs. 153.212 registros vinculados Catastro-ATM; sin conteo de predios digitalizados.',afecta:'4.2–4.8',prob:'Alta',imp:'Alto',mit:'Cuantificar universo y registrar predios digitalizados por día en bitácora.'}
+];
 
-  // Convierte los períodos de una actividad en un Set de meses (0-indexed)
-  function getPeriodsMonths(act) {
-    const s = new Set();
-    if (!act || !act.periods) return s;
-    act.periods.forEach(p => {
-      const m = p.split(' ')[0];
-      if (MES_MAP[m] !== undefined) s.add(MES_MAP[m]);
-    });
-    return s;
-  }
+const SUGERENCIAS = [
+ 'Complementar NDBI con NDVI/BSI para separar suelo desnudo de superficie construida en macrodistritos con laderas y erosión (Mallasa, Zongo, Hampaturi).',
+ 'Actividad sugerida (no incluida): planificación de vuelos — polígonos, plan de vuelo, autorizaciones y puntos de control (GCP/check points).',
+ 'Actividad sugerida (no incluida): control topográfico de posición con brigada (ya solicitado el 3-sep en 3.3).',
+ 'Actividades sugeridas de cierre: informe técnico final, manual/protocolo operativo, capacitación y transferencia a la SMCPH, respaldo y metadatos.',
+ 'Medir actividades por cantidades (predios digitalizados / universo, macrodistritos procesados / 9) en lugar de porcentajes estimados.',
+ 'Fundamentar los pesos de fase (10/20/20/30/20) con esfuerzo en jornadas; hoy no tienen sustento documentado.',
+ 'Alinear la nomenclatura institucional (Secretaría de Ciudad Inteligente / Ciudad Planificada / SMCPH / SCPH) en actas y bitácoras.'
+];
 
-  function getPeso(act) {
-    if (typeof act.peso === 'number' && act.peso > 0) return act.peso;
-    if (PESOS[act.id]) return PESOS[act.id];
-    return Math.max(1, (act.periods || []).length);
-  }
+/* ================= NORMALIZACIÓN ================= */
+const ACT = {}, DB2ID = {};
+const allActs = () => phasesData.reduce((r,p) => r.concat(p.activities), []);
+phasesData.forEach((p,pi) => p.activities.forEach(a => {
+  a.pi = pi; a.i = toDay(a.ini); a.f = toDay(a.fin);
+  const rs = a.v1.map(t => V1_RANGOS[t]);
+  a.v1i = Math.min.apply(null, rs.map(r => toDay(r[0]))); a.v1f = Math.max.apply(null, rs.map(r => toDay(r[1])));
+  ACT[a.id] = a; DB2ID[a.dbId] = a.id;
+}));
 
-  function calcPhaseMetrics(phase) {
-    let wSum = 0, wTotal = 0, simpleSum = 0, n = 0;
-    let completadas = 0, enProgreso = 0, pendientes = 0;
-    phase.activities.forEach(a => {
-      const w = getPeso(a);
-      const p = progress[a.id]?.porcentaje || 0;
-      wSum += w * p; wTotal += w; simpleSum += p; n++;
-      if (p === 100) completadas++;
-      else if (p > 0) enProgreso++;
-      else pendientes++;
-    });
-    const ponderado = wTotal > 0 ? wSum / wTotal : 0;
-    const simple = n > 0 ? simpleSum / n : 0;
-    return { pct: ponderado, simple, diff: ponderado - simple, peso: wTotal, completadas, enProgreso, pendientes, total: n };
-  }
+/* ================= ESTADO ================= */
+let currentUser = null, session = null, offline = false;
+const progress = {};
+const timers = {}, pending = new Set(), inflight = new Set(), rerun = new Set();
+const calState = {};
+let expanded = new Set();
 
-  function calcGlobalMetrics() {
-    let wSum = 0, wTotalFase = 0, simpleSum = 0, count = 0;
-    let completadas = 0, enProgreso = 0, pendientes = 0;
-    phasesData.forEach((phase, pi) => {
-      const m = calcPhaseMetrics(phase);
-      const wFase = PESOS_FASE[pi] || 1;
-      wSum += wFase * m.pct;
-      wTotalFase += wFase;
-      simpleSum += m.simple * wFase;
-      count += m.total;
-      completadas += m.completadas;
-      enProgreso += m.enProgreso;
-      pendientes += m.pendientes;
-    });
-    return {
-      pct: wTotalFase > 0 ? wSum / wTotalFase : 0,
-      simple: wTotalFase > 0 ? simpleSum / wTotalFase : 0,
-      peso: wTotalFase, count, completadas, enProgreso, pendientes
-    };
-  }
+function initProgress(){
+  allActs().forEach(a => { progress[a.id] = {porcentaje:0,responsables:[],observaciones:'',bitacora:[],_ver:null}; });
+}
+const isAuthorized = u => USUARIOS_AUTORIZADOS.includes(u);
+const getActor = () => CONFIG.AUTH_OBLIGATORIA ? (session && session.user ? session.user.email : '') : (currentUser || '');
+const canEdit = () => !offline && (CONFIG.AUTH_OBLIGATORIA ? !!session : isAuthorized(currentUser));
 
-  let currentUser = null;
-  let progress = {};
-  let saveTimeout = null;
-  let isLoading = true;
-  let expandedPhase = -1; // -1 = ninguna abierta (estado inicial colapsado)
+/* ================= CÁLCULOS ================= */
+const KW_BLOQUEO = /cancelad|no se puede|no existe espacio|no tiene espacio|sin espacio|falta de|no se recibi|en espera|esperado/i;
+const tipoEntrada = e => e.tipo || (KW_BLOQUEO.test(e.nota || '') ? 'bloqueo' : 'avance');
+function ultimaEntrada(id){
+  const b = progress[id].bitacora; if (!b.length) return null;
+  let best = b[0]; b.forEach(e => { if ((e.fecha||'') >= (best.fecha||'')) best = e; }); return best;
+}
+const bloqueoAbierto = id => { const u = ultimaEntrada(id); return !!u && tipoEntrada(u) === 'bloqueo' && progress[id].porcentaje < 100; };
+const tieneEvidencia = id => progress[id].bitacora.length > 0;
+const diasSinBitacora = id => { const u = ultimaEntrada(id); return u ? HOY - toDay(u.fecha) : null; };
+function planPct(a){ if (HOY < a.i) return 0; if (HOY >= a.f) return 100; return (HOY - a.i + 1) / (a.f - a.i + 1) * 100; }
 
-  function clampValue(val) { let v = parseInt(val); if (isNaN(v)) return 0; return Math.min(100, Math.max(0, v)); }
-  function getStatus(pct) {
-    if (pct === 0) return { cls: 'status-pending', text: 'Pendiente' };
-    if (pct === 100) return { cls: 'status-completed', text: 'Completada' };
-    return { cls: 'status-progress', text: 'En progreso' };
-  }
-  function getColorForPct(pct) { if (pct === 0) return '#f43f5e'; if (pct === 100) return '#10b981'; return '#f59e0b'; }
-  function isAuthorized(user) { return USUARIOS_AUTORIZADOS.includes(user); }
+const ESTADOS = {
+  completada:{label:'Completada',cls:'st-ok',color:'#10b981'}, en_curso:{label:'En curso',cls:'st-run',color:'#3b82f6'},
+  adelantada:{label:'Adelantada',cls:'st-run',color:'#06b6d4'}, rezago:{label:'Rezago',cls:'st-warn',color:'#f59e0b'},
+  atrasada:{label:'Atrasada',cls:'st-bad',color:'#f43f5e'}, sin_iniciar:{label:'Sin iniciar',cls:'st-bad',color:'#f43f5e'},
+  bloqueada:{label:'Bloqueada',cls:'st-bad',color:'#f43f5e'}, programada:{label:'Programada',cls:'st-idle',color:'#64748b'}
+};
+const GRUPO = {completada:'completada',en_curso:'en_curso',adelantada:'en_curso',rezago:'rezago',atrasada:'atrasada',sin_iniciar:'atrasada',bloqueada:'bloqueada',programada:'programada'};
+function estadoKey(a){
+  const p = progress[a.id].porcentaje;
+  if (p >= 100) return 'completada';
+  if (bloqueoAbierto(a.id)) return 'bloqueada';
+  if (HOY > a.f) return 'atrasada';
+  if (HOY < a.i) return p > 0 ? 'adelantada' : 'programada';
+  if (p === 0) return (HOY - a.i >= 3) ? 'sin_iniciar' : 'programada';
+  return (planPct(a) - p >= CONFIG.UMBRAL_REZAGO) ? 'rezago' : 'en_curso';
+}
+const spiClass = s => s == null ? 'spi-na' : (s >= 0.95 ? 'spi-ok' : (s >= 0.85 ? 'spi-warn' : 'spi-bad'));
+const spiTxt = s => s == null ? '—' : s.toFixed(2);
 
-  function buildUserOptions(selected) {
-    let html = '';
-    usuarios.forEach(u => { html += `<option value="${u.nombre}" ${selected === u.nombre ? 'selected' : ''}>${u.nombre} (${u.rol})</option>`; });
-    return html;
-  }
-  function buildResponsableOptions(selectedArray) {
-    let html = '';
-    usuarios.forEach(u => {
-      const sel = (selectedArray && selectedArray.includes(u.nombre)) ? 'selected' : '';
-      html += `<option value="${u.nombre}" ${sel}>${u.nombre} (${u.rol})</option>`;
-    });
-    return html;
-  }
-  function showSaveStatus(text, type) {
-    const el = document.getElementById('save-status');
-    document.getElementById('save-text').textContent = text;
-    el.className = 'save-status';
-    if (type === 'saving') el.classList.add('saving');
-    if (type === 'error') el.classList.add('error');
-  }
-  function showError(message) {
-    const el = document.getElementById('error-message');
-    if (message) { el.style.display = 'block'; el.textContent = '⚠️ ' + message; }
-    else el.style.display = 'none';
-  }
-  function updateReadonlyNotice() {
-    const notice = document.getElementById('readonly-notice');
-    const badge = document.getElementById('user-badge');
-    if (currentUser && isAuthorized(currentUser)) {
-      notice.style.display = 'none';
-      badge.textContent = '✏️ Editor';
-      badge.className = 'user-badge';
-      document.getElementById('btn-reset').disabled = false;
-    } else {
-      notice.style.display = 'block';
-      badge.textContent = '👁️ Lector';
-      badge.className = 'user-badge readonly';
-      document.getElementById('btn-reset').disabled = true;
-    }
-  }
-  function initProgress(useDefaults) {
-    const allIds = [];
-    phasesData.forEach(p => p.activities.forEach(a => allIds.push(a.id)));
-    allIds.forEach(id => {
-      if (!progress[id]) {
-        progress[id] = {
-          porcentaje: (useDefaults && DEFAULT_ACTIVITY_PCT[id]) ? DEFAULT_ACTIVITY_PCT[id] : 0,
-          responsables: [], observaciones: '', bitacora: []
-        };
-      }
-    });
-  }
-
-  async function loadFromSupabase() {
-    try {
-      showSaveStatus('⏳ Cargando desde Supabase...', 'saving');
-      const { data, error } = await supabaseClient.from('progreso_catastro').select('*');
-      if (error) throw error;
-      initProgress(false);
-      if (data && data.length > 0) {
-        data.forEach(row => {
-          if (progress[row.id]) {
-            progress[row.id].porcentaje = row.porcentaje || 0;
-            progress[row.id].responsables = row.responsables || [];
-            progress[row.id].observaciones = row.observaciones || '';
-            progress[row.id].bitacora = row.bitacora || [];
-          }
-        });
-        showSaveStatus('✅ Datos cargados desde Supabase', 'success');
-      } else {
-        initProgress(true);
-        showSaveStatus('ℹ️ Sin datos previos. Aplicando valores por defecto.', 'success');
-      }
-      showError(null);
-    } catch (err) {
-      console.error('❌ Error Supabase:', err);
-      showSaveStatus('❌ Error al cargar. Usando valores por defecto.', 'error');
-      showError('No se pudo conectar con Supabase. Se muestran los avances por defecto.');
-      initProgress(true);
-    }
-    isLoading = false;
-    render(); applyFilters(); updateReadonlyNotice();
-  }
-
-  async function saveActivityToSupabase(activityId) {
-    if (!isAuthorized(currentUser)) return;
-    const data = progress[activityId];
-    if (!data) return;
-    try {
-      const { error } = await supabaseClient.from('progreso_catastro').upsert({
-        id: activityId, porcentaje: data.porcentaje, responsables: data.responsables,
-        observaciones: data.observaciones, bitacora: data.bitacora,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
-      if (error) throw error;
-      showSaveStatus('💾 Guardado en Supabase', 'success');
-    } catch (err) {
-      console.error('❌', err);
-      showSaveStatus('❌ Error al guardar (modo local)', 'error');
-    }
-  }
-  function debouncedSave(activityId) {
-    if (!isAuthorized(currentUser)) return;
-    showSaveStatus('⏳ Guardando...', 'saving');
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => saveActivityToSupabase(activityId), 800);
-  }
-
-  // ============ CALENDARIO (ahora con períodos resaltados) ============
-  function getMonthData(actId, year, month, periodMonths) {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startDayOfWeek = firstDay.getDay();
-    const today = new Date();
-    const isToday = (d) => d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
-    const entries = progress[actId]?.bitacora || [];
-    const notesByDate = {};
-    entries.forEach(e => { notesByDate[new Date(e.fecha).toISOString().slice(0,10)] = e.nota; });
-    const tieneActividadMes = periodMonths && periodMonths.has(month);
-
-    let days = [];
-    for (let i = 0; i < startDayOfWeek; i++) days.push({ day: null, vacio: true });
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateObj = new Date(year, month, d);
-      const key = dateObj.toISOString().slice(0,10);
-      days.push({
-        day: d, vacio: false,
-        nota: notesByDate[key] || null,
-        esHoy: isToday(dateObj),
-        fecha: key,
-        tieneActividad: !!tieneActividadMes
-      });
-    }
-    return { days, year, month };
-  }
-
-  function renderCalendario(actId, year, month) {
-    const container = document.getElementById(`calendario-${actId}`);
-    if (!container) return;
-    const act = findActivity(actId);
-    const periodMonths = getPeriodsMonths(act);
-    const data = getMonthData(actId, year, month, periodMonths);
-    const nombreMes = new Date(year, month).toLocaleString('es', { month: 'long', year: 'numeric' });
-    const editable = isAuthorized(currentUser);
-
-    let html = `
-      <div class="calendario-nav">
-        <button onclick="cambiarMes('${actId}',-1)">◀</button>
-        <span>${nombreMes}</span>
-        <button onclick="cambiarMes('${actId}',1)">▶</button>
-      </div>
-      <div class="calendario-grid">
-    `;
-    ['Do','Lu','Ma','Mi','Ju','Vi','Sa'].forEach(n => html += `<div class="dia-nombre">${n}</div>`);
-    data.days.forEach(d => {
-      if (d.vacio) { html += `<div class="dia vacio"></div>`; return; }
-      const clases = ['dia'];
-      if (d.esHoy) clases.push('hoy');
-      if (d.tieneActividad) clases.push('con-actividad');
-      const preview = d.nota ? d.nota.slice(0,20) + (d.nota.length > 20 ? '...' : '') : '';
-      html += `<div class="${clases.join(' ')}" onclick="abrirDia('${actId}','${d.fecha}','${(d.nota||'').replace(/'/g,'&#39;')}')">
-        <span>${d.day}</span>
-        ${d.nota ? '<span class="punto"></span>' : ''}
-        ${d.nota ? `<div class="nota-preview">${preview}</div>` : ''}
-      </div>`;
-    });
-    html += `</div>`;
-
-    // Leyenda
-    html += `
-      <div class="calendario-legend">
-        <div class="item"><span class="swatch actividad"></span> Día programado (período)</div>
-        <div class="item"><span class="swatch bitacora"></span> Nota de bitácora</div>
-        <div class="item"><span class="swatch hoy"></span> Hoy</div>
-      </div>
-    `;
-
-    html += `
-      <div class="calendario-dia-modal" id="modal-${actId}">
-        <textarea id="modal-text-${actId}" placeholder="Escribe la novedad para este día..." ${!editable ? 'disabled' : ''}></textarea>
-        <div class="modal-actions">
-          <button onclick="guardarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>💾 Guardar</button>
-          <button class="btn-eliminar" onclick="eliminarNotaDia('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Eliminar</button>
-          <button onclick="cerrarModal('${actId}')">✖ Cerrar</button>
-        </div>
-      </div>
-    `;
-    container.innerHTML = html;
-  }
-
-  let calendarioState = {};
-  function cambiarMes(actId, delta) {
-    if (!calendarioState[actId]) { const now = new Date(); calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() }; }
-    const s = calendarioState[actId]; s.month += delta;
-    if (s.month < 0) { s.month = 11; s.year--; } else if (s.month > 11) { s.month = 0; s.year++; }
-    renderCalendario(actId, s.year, s.month);
-  }
-  function abrirDia(actId, fecha, notaActual) {
-    if (!calendarioState[actId]) { const now = new Date(); calendarioState[actId] = { year: now.getFullYear(), month: now.getMonth() }; }
-    calendarioState[actId].diaSeleccionado = fecha;
-    const modal = document.getElementById(`modal-${actId}`);
-    const ta = document.getElementById(`modal-text-${actId}`);
-    if (ta) ta.value = notaActual || '';
-    if (modal) modal.classList.add('visible');
-  }
-  function cerrarModal(actId) { const m = document.getElementById(`modal-${actId}`); if (m) m.classList.remove('visible'); }
-  function guardarNotaDia(actId) {
-    if (!isAuthorized(currentUser)) return;
-    const fecha = calendarioState[actId]?.diaSeleccionado; if (!fecha) return;
-    const nota = document.getElementById(`modal-text-${actId}`).value.trim(); if (!nota) return;
-    const bitacora = progress[actId].bitacora;
-    const idx = bitacora.findIndex(e => e.fecha === fecha);
-    if (idx !== -1) bitacora[idx].nota = nota; else bitacora.push({ fecha, nota });
-    bitacora.sort((a, b) => a.fecha.localeCompare(b.fecha));
-    progress[actId].bitacora = bitacora; cerrarModal(actId);
-    const s = calendarioState[actId]; renderCalendario(actId, s.year, s.month); debouncedSave(actId);
-  }
-  function eliminarNotaDia(actId) {
-    if (!isAuthorized(currentUser)) return;
-    const fecha = calendarioState[actId]?.diaSeleccionado; if (!fecha) return;
-    if (!confirm(`¿Eliminar la novedad del día ${fecha}?`)) return;
-    const bitacora = progress[actId].bitacora;
-    const idx = bitacora.findIndex(e => e.fecha === fecha);
-    if (idx !== -1) {
-      bitacora.splice(idx, 1); progress[actId].bitacora = bitacora;
-      cerrarModal(actId);
-      const s = calendarioState[actId]; renderCalendario(actId, s.year, s.month); debouncedSave(actId);
-    }
-  }
-
-  // ============ TÉCNICOS ============
-  function asignarTecnicos(actId) {
-    if (!isAuthorized(currentUser)) return;
-    const select = document.getElementById(`resp-${actId}`); if (!select) return;
-    const selected = [];
-    for (let i = 0; i < select.options.length; i++) if (select.options[i].selected) selected.push(select.options[i].value);
-    progress[actId].responsables = selected; actualizarBadges(actId); debouncedSave(actId);
-  }
-  function quitarTodosTecnicos(actId) {
-    if (!isAuthorized(currentUser)) return;
-    if (!confirm('¿Quitar todos los técnicos asignados a esta actividad?')) return;
-    progress[actId].responsables = []; actualizarBadges(actId);
-    const select = document.getElementById(`resp-${actId}`);
-    if (select) for (let i = 0; i < select.options.length; i++) select.options[i].selected = false;
-    debouncedSave(actId);
-  }
-  function actualizarBadges(actId) {
-    const container = document.getElementById(`badges-${actId}`); if (!container) return;
-    const r = progress[actId]?.responsables || [];
-    container.innerHTML = r.length === 0
-      ? '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>'
-      : r.map(n => `<span class="badge-tecnico">${n}</span>`).join('');
-  }
-
-  function updateActivityUI(actId) {
-    const data = progress[actId]; if (!data) return;
-    const pct = data.porcentaje;
-    const status = getStatus(pct); const color = getColorForPct(pct);
-    const editable = isAuthorized(currentUser);
-    const slider = document.getElementById(`slider-${actId}`);
-    if (slider) {
-      slider.value = pct;
-      slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%)`;
-      slider.disabled = !editable;
-    }
-    const numInput = document.getElementById(`num-${actId}`);
-    if (numInput) { numInput.value = pct; numInput.disabled = !editable; }
-    const st = document.getElementById(`status-${actId}`);
-    if (st) { st.className = `activity-status ${status.cls}`; st.textContent = status.text; }
-    const select = document.getElementById(`resp-${actId}`);
-    if (select) {
-      for (let i = 0; i < select.options.length; i++) select.options[i].selected = data.responsables.includes(select.options[i].value);
-      select.disabled = !editable;
-    }
-    actualizarBadges(actId);
-    const btnA = document.getElementById(`btn-asignar-${actId}`); if (btnA) btnA.disabled = !editable;
-    const btnQ = document.getElementById(`btn-quitar-${actId}`); if (btnQ) btnQ.disabled = !editable;
-    const ta = document.getElementById(`obs-${actId}`);
-    if (ta) { ta.value = data.observaciones || ''; ta.disabled = !editable; }
-    if (calendarioState[actId]) renderCalendario(actId, calendarioState[actId].year, calendarioState[actId].month);
-  }
-
-  function updatePhaseUI(phaseIndex) {
-    const phase = phasesData[phaseIndex];
-    const m = calcPhaseMetrics(phase);
-    const color = getColorForPct(m.pct);
-    const fill = document.getElementById(`phase-fill-${phaseIndex}`);
-    if (fill) { fill.style.width = m.pct + '%'; fill.style.background = color; }
-    const text = document.getElementById(`phase-text-${phaseIndex}`);
-    if (text) {
-      text.textContent = Math.round(m.pct) + '%';
-      text.style.color = color;
-      text.title = `Ponderado: ${m.pct.toFixed(2)}% | Simple: ${m.simple.toFixed(2)}% | Peso interno: ${m.peso} | Peso global: ${PESOS_FASE[phaseIndex]}%`;
-    }
-  }
-
-  function updateGlobalUI() {
-    const g = calcGlobalMetrics();
-    document.getElementById('kpi-total').textContent = g.count;
-    document.getElementById('kpi-completed').textContent = g.completadas;
-    document.getElementById('kpi-progress').textContent = g.enProgreso;
-    document.getElementById('kpi-pending').textContent = g.pendientes;
-    const bar = document.getElementById('global-bar');
-    bar.style.width = g.pct + '%';
-    const percent = document.getElementById('global-percent');
-    percent.textContent = g.pct.toFixed(1) + '%';
-    percent.style.color = getColorForPct(g.pct);
-    percent.title = `Global ponderado por importancia de fase: ${g.pct.toFixed(4)}%`;
-    const panel = document.getElementById('audit-panel');
-    if (panel && panel.classList.contains('visible')) renderAuditoria();
-  }
-
-  function updateSummaryUI() {
-    const grid = document.getElementById('summary-grid');
-    grid.innerHTML = '';
-    phasesData.forEach((phase, pi) => {
-      const m = calcPhaseMetrics(phase);
-      const avg = m.pct;
-      const color = getColorForPct(avg);
-      const radius = 20;
-      const circ = 2 * Math.PI * radius;
-      const offset = circ - (avg / 100) * circ;
-      const wFase = PESOS_FASE[pi] || 1;
-      const item = document.createElement('div');
-      item.className = 'summary-item';
-      item.innerHTML = `
-        <div class="summary-ring">
-          <svg width="48" height="48" viewBox="0 0 48 48">
-            <circle class="summary-ring-bg" cx="24" cy="24" r="${radius}"/>
-            <circle class="summary-ring-fill" cx="24" cy="24" r="${radius}" stroke="${color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
-          </svg>
-          <span class="summary-ring-text" style="color:${color}">${Math.round(avg)}%</span>
-        </div>
-        <div class="summary-info">
-          <div class="summary-name">${phase.name}</div>
-          <div class="summary-detail">${m.completadas}/${m.total} act. · peso global ${wFase}%</div>
-        </div>`;
-      grid.appendChild(item);
-    });
-  }
-
-  function toggleAuditoria() {
-    const p = document.getElementById('audit-panel');
-    p.classList.toggle('visible');
-    if (p.classList.contains('visible')) renderAuditoria();
-  }
-  function renderAuditoria() {
-    const panel = document.getElementById('audit-panel');
-    const g = calcGlobalMetrics();
-    let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <strong style="font-size:14px;">🔎 Auditoría de coherencia Fase ↔ Actividades ↔ Global</strong>
-      <span style="font-size:12px;color:var(--text-muted);">Fase: ponderado por duración · Global: ponderado por importancia de fase</span>
-    </div><table><thead><tr>
-      <th>Fase</th><th>Peso int.</th><th>Peso global</th><th>Act.</th>
-      <th>Prom. simple</th><th>Prom. ponderado</th><th>Δ</th><th>Compl.</th><th>Aporte</th>
-    </tr></thead><tbody>`;
-    let totalAporte = 0;
-    phasesData.forEach((phase, i) => {
-      const m = calcPhaseMetrics(phase);
-      const wFase = PESOS_FASE[i] || 1;
-      const aporte = (wFase / 100) * m.pct;
-      totalAporte += aporte;
-      const cls = Math.abs(m.diff) < 0.5 ? 'ok' : 'warn';
-      const nombreCorto = phase.name.split('—')[0].split(':')[1]?.trim() || phase.name;
-      html += `<tr><td>F${i+1} · ${nombreCorto}</td><td>${m.peso}</td><td>${wFase}%</td><td>${m.total}</td><td>${m.simple.toFixed(2)}%</td><td><strong>${m.pct.toFixed(2)}%</strong></td><td class="${cls}">${m.diff >= 0 ? '+' : ''}${m.diff.toFixed(2)}</td><td>${m.completadas}/${m.total}</td><td>${aporte.toFixed(2)}%</td></tr>`;
-    });
-    html += `</tbody><tfoot><tr><td>GLOBAL</td><td>—</td><td>100%</td><td>${g.count}</td><td>—</td><td>${g.pct.toFixed(2)}%</td><td>—</td><td>${g.completadas}/${g.count}</td><td>${totalAporte.toFixed(2)}%</td></tr></tfoot></table>
-    <p class="audit-note">El global se calcula con <strong>pesos de importancia de fase</strong>: F1=10%, F2=20%, F3=20%, F4=30%, F5=20%. Columna <em>Aporte</em> = peso_fase × avance_fase. Con los avances actuales el total es <strong>${g.pct.toFixed(2)}%</strong>.</p>`;
-    panel.innerHTML = html;
-  }
-
-  function applyFilters() {
-    const search = document.getElementById('search-input').value.toLowerCase();
-    const statusFilter = document.getElementById('status-filter').value;
-    const periodFilter = document.getElementById('period-filter').value;
-    document.querySelectorAll('.activity-row').forEach(row => {
-      const actId = row.dataset.activityId;
-      const data = progress[actId]; if (!data) return;
-      const pct = data.porcentaje;
-      const desc = row.querySelector('.activity-desc')?.textContent.toLowerCase() || '';
-      const periods = [];
-      row.querySelectorAll('.period-tag').forEach(t => periods.push(t.textContent));
-      const matchSearch = !search || actId.includes(search) || desc.includes(search);
-      const matchStatus = statusFilter === 'all' ||
-        (statusFilter === 'completed' && pct === 100) ||
-        (statusFilter === 'progress' && pct > 0 && pct < 100) ||
-        (statusFilter === 'pending' && pct === 0);
-      const matchPeriod = periodFilter === 'all' || periods.some(p => p.startsWith(periodFilter));
-      row.classList.toggle('hidden', !(matchSearch && matchStatus && matchPeriod));
-    });
-    document.querySelectorAll('.phase-card').forEach(card => {
-      let visible = false;
-      card.querySelectorAll('.activity-row').forEach(r => { if (!r.classList.contains('hidden')) visible = true; });
-      card.style.display = visible ? '' : 'none';
-    });
-  }
-
-  // ============ RENDER (fases colapsadas por defecto) ============
-  function render() {
-    const container = document.getElementById('phases-container');
-    container.innerHTML = '';
-    const colors = ['#3b82f6','#10b981','#f59e0b','#f43f5e','#8b5cf6'];
-    const editable = isAuthorized(currentUser);
-    phasesData.forEach((phase, pi) => {
-      const phaseColor = colors[pi % colors.length];
-      const phaseEl = document.createElement('div');
-      // Estado inicial: colapsada excepto si es la que el usuario tenía expandida
-      phaseEl.className = (pi === expandedPhase) ? 'phase-card' : 'phase-card collapsed';
-      phaseEl.id = `phase-${pi}`;
-      phaseEl.innerHTML = `
-        <div class="phase-header" onclick="togglePhase(${pi})">
-          <div class="phase-title-group">
-            <div class="phase-number" style="background:${phaseColor}">${pi+1}</div>
-            <span class="phase-name">${phase.name}</span>
-          </div>
-          <div class="phase-meta">
-            <span style="font-size:12px;color:var(--text-muted)">${phase.activities.length} act. · peso global ${PESOS_FASE[pi]}%</span>
-            <div class="phase-progress-bar"><div class="phase-progress-fill" id="phase-fill-${pi}" style="width:0%;background:${phaseColor}"></div></div>
-            <span class="phase-progress-text" id="phase-text-${pi}" style="color:${phaseColor}">0%</span>
-            <span class="phase-toggle">▼</span>
-          </div>
-        </div>
-        <div class="phase-description">${phase.description}</div>`;
-      const actCont = document.createElement('div');
-      actCont.className = 'phase-activities';
-      phase.activities.forEach((act) => {
-        const actId = act.id;
-        const data = progress[actId] || { porcentaje: 0, responsables: [], observaciones: '', bitacora: [] };
-        const pct = data.porcentaje;
-        const status = getStatus(pct);
-        const color = getColorForPct(pct);
-        const row = document.createElement('div');
-        row.className = 'activity-row';
-        row.dataset.activityId = actId;
-        const periodsHtml = act.periods.map(p => `<span class="period-tag">${p}</span>`).join('');
-        const badgesHtml = data.responsables && data.responsables.length > 0
-          ? data.responsables.map(n => `<span class="badge-tecnico">${n}</span>`).join('')
-          : '<span style="color:var(--text-muted);font-size:12px;">Sin técnicos asignados</span>';
-        row.innerHTML = `
-          <div class="activity-main">
-            <span class="activity-id">${actId}</span>
-            <span class="activity-desc">${act.desc}</span>
-            <div class="activity-periods">${periodsHtml}</div>
-            <div class="activity-control">
-              <div class="slider-container">
-                <input type="range" min="0" max="100" value="${pct}" id="slider-${actId}" oninput="handleSliderChange('${actId}',this.value)" style="background: linear-gradient(to right, ${color} 0%, ${color} ${pct}%, #0f172a ${pct}%, #0f172a 100%);" ${!editable ? 'disabled' : ''}>
-              </div>
-              <input type="number" min="0" max="100" value="${pct}" id="num-${actId}" class="num-input" oninput="handleNumberChange('${actId}',this.value)" onblur="this.value=clampValue(this.value)" ${!editable ? 'disabled' : ''} />
-              <span class="activity-percent-sym">%</span>
-              <span class="activity-status ${status.cls}" id="status-${actId}">${status.text}</span>
-            </div>
-          </div>
-          <div class="activity-meta">
-            <div class="meta-row"><label>👥 Técnicos:</label>
-              <div class="asignacion-group">
-                <div class="badges-container" id="badges-${actId}">${badgesHtml}</div>
-                <button class="btn-asignar" id="btn-asignar-${actId}" onclick="asignarTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>✏️ Asignar</button>
-                <button class="btn-quitar-todos" id="btn-quitar-${actId}" onclick="quitarTodosTecnicos('${actId}')" ${!editable ? 'disabled' : ''}>🗑️ Quitar todos</button>
-              </div>
-            </div>
-            <div class="meta-row"><label>📋 Seleccionar:</label>
-              <select id="resp-${actId}" multiple ${!editable ? 'disabled' : ''}>${buildResponsableOptions(data.responsables)}</select>
-              <span style="font-size:11px;color:var(--text-muted);">(Ctrl para varios)</span>
-            </div>
-            <div class="meta-row"><label>📝 Tareas:</label>
-              <textarea id="obs-${actId}" placeholder="Tareas Especificas..." onchange="handleObservacionChange('${actId}',this.value)" ${!editable ? 'disabled' : ''}>${data.observaciones || ''}</textarea>
-            </div>
-          </div>
-          <div class="calendario-section">
-            <label>📅 Calendario de actividad + bitácora diaria</label>
-            <div id="calendario-${actId}"></div>
-          </div>`;
-        actCont.appendChild(row);
-      });
-      phaseEl.appendChild(actCont);
-      container.appendChild(phaseEl);
-    });
-    phasesData.forEach(phase => phase.activities.forEach(act => {
-      if (!calendarioState[act.id]) {
-        const now = new Date();
-        calendarioState[act.id] = { year: now.getFullYear(), month: now.getMonth() };
-      }
-      renderCalendario(act.id, calendarioState[act.id].year, calendarioState[act.id].month);
-    }));
-    phasesData.forEach((_, i) => updatePhaseUI(i));
-    updateGlobalUI(); updateSummaryUI(); updateReadonlyNotice();
-  }
-
-  function handleSliderChange(actId, value) {
-    if (!isAuthorized(currentUser)) return;
-    progress[actId].porcentaje = clampValue(value);
-    updateActivityUI(actId);
-    const pi = findPhaseIndex(actId); if (pi !== -1) updatePhaseUI(pi);
-    updateGlobalUI(); updateSummaryUI(); debouncedSave(actId);
-  }
-  function handleNumberChange(actId, value) {
-    if (!isAuthorized(currentUser)) return;
-    progress[actId].porcentaje = clampValue(value);
-    updateActivityUI(actId);
-    const pi = findPhaseIndex(actId); if (pi !== -1) updatePhaseUI(pi);
-    updateGlobalUI(); updateSummaryUI(); debouncedSave(actId);
-  }
-  function handleObservacionChange(actId, value) {
-    if (!isAuthorized(currentUser)) return;
-    progress[actId].observaciones = value; debouncedSave(actId);
-  }
-  function findPhaseIndex(actId) {
-    for (let i = 0; i < phasesData.length; i++) if (phasesData[i].activities.some(a => a.id === actId)) return i;
-    return -1;
-  }
-  function changeUser(userName) {
-    currentUser = userName;
-    localStorage.setItem('catastro_user', userName);
-    document.getElementById('user-select').value = userName;
-    render(); applyFilters(); updateReadonlyNotice();
-  }
-
-  // ============ TOGGLE FASE — ahora en modo cascada (accordion) ============
-  function togglePhase(pi) {
-    const el = document.getElementById(`phase-${pi}`);
-    if (!el) return;
-    const estabaAbierta = !el.classList.contains('collapsed');
-
-    // Cerrar todas
-    phasesData.forEach((_, i) => {
-      const p = document.getElementById(`phase-${i}`);
-      if (p) p.classList.add('collapsed');
-    });
-
-    // Si la que tocamos estaba cerrada, la abrimos y recordamos el estado
-    if (!estabaAbierta) {
-      el.classList.remove('collapsed');
-      expandedPhase = pi;
-    } else {
-      expandedPhase = -1;
-    }
-  }
-
-  // Botón extra: abrir/cerrar todas
-  function toggleAllPhases() {
-    const algunaAbierta = phasesData.some((_, i) => {
-      const p = document.getElementById(`phase-${i}`);
-      return p && !p.classList.contains('collapsed');
-    });
-    phasesData.forEach((_, i) => {
-      const p = document.getElementById(`phase-${i}`);
-      if (p) {
-        if (algunaAbierta) p.classList.add('collapsed');
-        else p.classList.remove('collapsed');
-      }
-    });
-    expandedPhase = algunaAbierta ? -1 : 0;
-  }
-
-  function resetAll() {
-    if (!isAuthorized(currentUser)) return alert('No tienes permisos.');
-    if (!confirm('¿Reiniciar TODOS los avances a 0%?')) return;
-    Object.keys(progress).forEach(id => progress[id].porcentaje = 0);
-    Object.keys(progress).forEach(updateActivityUI);
-    phasesData.forEach((_, i) => updatePhaseUI(i));
-    updateGlobalUI(); updateSummaryUI();
-    Object.keys(progress).forEach(saveActivityToSupabase);
-  }
-  function exportData() {
-    const g = calcGlobalMetrics();
-    const data = {
-      fecha_exportacion: new Date().toISOString(),
-      proyecto: "Cronograma Catastro 2026 - 5 Fases",
-      metodo_calculo: "Fase: ponderado por duración. Global: ponderado por importancia de fase {F1:10, F2:20, F3:20, F4:30, F5:20}.",
-      avance_global: g.pct.toFixed(4) + '%',
-      avances: progress,
-      resumen: {}
-    };
-    phasesData.forEach((phase, i) => {
-      const m = calcPhaseMetrics(phase);
-      const wFase = PESOS_FASE[i] || 1;
-      data.resumen[phase.name] = {
-        peso_interno_quincenas: m.peso,
-        peso_global_pct: wFase,
-        aporte_global_pct: ((wFase/100) * m.pct).toFixed(4) + '%',
-        actividades: m.total,
-        avance_ponderado: m.pct.toFixed(4) + '%',
-        avance_simple: m.simple.toFixed(4) + '%',
-        diferencia: m.diff.toFixed(4) + ' pts',
-        completadas: m.completadas
-      };
-    });
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `catastro2026_avances_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showSaveStatus('📥 Datos exportados', 'success');
-  }
-  function forceLocalData() {
-    initProgress(true); render(); applyFilters();
-    showSaveStatus('🔄 Datos locales forzados', 'success');
-    showError('Modo local activado. Los cambios no se guardarán en Supabase.');
-  }
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    let savedUser = localStorage.getItem('catastro_user');
-    if (!savedUser || !usuarios.some(u => u.nombre === savedUser)) savedUser = usuarios[0].nombre;
-    currentUser = savedUser;
-    const select = document.getElementById('user-select');
-    select.innerHTML = buildUserOptions(currentUser);
-    select.value = currentUser;
-    await loadFromSupabase();
-    document.getElementById('search-input').addEventListener('input', applyFilters);
-    document.getElementById('status-filter').addEventListener('change', applyFilters);
-    document.getElementById('period-filter').addEventListener('change', applyFilters);
-    updateReadonlyNotice();
+function metricasFase(phase){
+  let w = 0, sr = 0, sp = 0, sv = 0;
+  const c = {completada:0,en_curso:0,rezago:0,atrasada:0,bloqueada:0,programada:0};
+  phase.activities.forEach(a => {
+    const p = progress[a.id].porcentaje;
+    w += a.peso; sr += a.peso*p; sp += a.peso*planPct(a); sv += a.peso*(tieneEvidencia(a.id) ? p : 0);
+    c[GRUPO[estadoKey(a)]]++;
   });
+  const real = sr/w, plan = sp/w;
+  return {real, plan, verif: sv/w, spi: plan > 0 ? real/plan : null, c, total: phase.activities.length, peso: w};
+}
+function metricasGlobal(){
+  let w = 0, sr = 0, sp = 0, sv = 0, total = 0;
+  const c = {completada:0,en_curso:0,rezago:0,atrasada:0,bloqueada:0,programada:0};
+  phasesData.forEach(ph => {
+    const m = metricasFase(ph); w += ph.peso; sr += ph.peso*m.real; sp += ph.peso*m.plan; sv += ph.peso*m.verif; total += m.total;
+    Object.keys(c).forEach(k => c[k] += m.c[k]);
+  });
+  const real = sr/w, plan = sp/w;
+  return {real, plan, verif: sv/w, spi: plan > 0 ? real/plan : null, c, total};
+}
+const depOk = (a,p,t) => t === 'FS' ? a.i >= p.f : (t === 'SS' ? a.i >= p.i : a.f >= p.f);
+const DEP_TXT = {FS:'Fin→Inicio: no inicia antes de que termine la predecesora',SS:'Inicio→Inicio: no inicia antes que la predecesora',FF:'Fin→Fin: no termina antes que la predecesora'};
 
-  window.togglePhase = togglePhase;
-  window.toggleAllPhases = toggleAllPhases;
-  window.resetAll = resetAll;
-  window.exportData = exportData;
-  window.forceLocalData = forceLocalData;
-  window.handleSliderChange = handleSliderChange;
-  window.handleNumberChange = handleNumberChange;
-  window.handleObservacionChange = handleObservacionChange;
-  window.asignarTecnicos = asignarTecnicos;
-  window.quitarTodosTecnicos = quitarTodosTecnicos;
-  window.changeUser = changeUser;
-  window.clampValue = clampValue;
-  window.cambiarMes = cambiarMes;
-  window.abrirDia = abrirDia;
-  window.cerrarModal = cerrarModal;
-  window.guardarNotaDia = guardarNotaDia;
-  window.eliminarNotaDia = eliminarNotaDia;
-  window.toggleAuditoria = toggleAuditoria;
+function rutaCritica(){
+  let cur = allActs().reduce((m,a) => a.f > m.f ? a : m);
+  const chain = [{id:cur.id,holgura:null}];
+  const seen = new Set([cur.id]);
+  while (cur.pred.length){
+    let best = null;
+    cur.pred.forEach(([pid,t]) => {
+      const p = ACT[pid]; if (!p) return;
+      const h = t === 'FS' ? cur.i - p.f : (t === 'SS' ? cur.i - p.i : cur.f - p.f);
+      if (!best || h < best.h) best = {p,h};
+    });
+    if (!best || seen.has(best.p.id)) break;
+    chain[chain.length-1].holgura = best.h;
+    chain.push({id:best.p.id,holgura:null}); seen.add(best.p.id); cur = best.p;
+  }
+  return chain.reverse();
+}
+function cargaPersonas(){
+  const m = {};
+  allActs().forEach(a => {
+    if (progress[a.id].porcentaje >= 100) return;
+    const vent = a.i <= HOY + 14 && a.f >= HOY;
+    progress[a.id].responsables.forEach(n => {
+      const r = m[n] || (m[n] = {asig:[],sim:[]});
+      r.asig.push(a.id); if (vent) r.sim.push(a.id);
+    });
+  });
+  return m;
+}
+function generarAlertas(){
+  const out = [], add = (sev,tipo,ids,msg) => out.push({sev,tipo,ids,msg});
+  const acts = allActs();
+  acts.forEach(a => a.pred.forEach(([pid,t]) => {
+    const p = ACT[pid];
+    if (!p) return add('critica','dep',[a.id],'Predecesora inexistente: '+pid);
+    if (!depOk(a,p,t)) add('critica','dep',[a.id,pid],a.id+' viola la dependencia '+t+' con '+pid+' en el plan');
+  }));
+  acts.forEach(a => {
+    const id = a.id, p = progress[id].porcentaje, ek = estadoKey(a), plan = planPct(a);
+    if (ek === 'bloqueada'){
+      const u = ultimaEntrada(id);
+      add('critica','bloqueo',[id],id+' bloqueada: «'+(u.nota||'').slice(0,140)+'» ('+fmtC(u.fecha)+(u.tipo ? '' : ', detectado por texto — confirmar si sigue vigente')+')');
+    } else if (ek === 'atrasada'){
+      add('alta','atraso',[id],id+' venció hace '+(HOY - a.f)+' d (fin plan '+fmtC(a.fin)+') y está en '+p+'%');
+    } else if (ek === 'sin_iniciar'){
+      add('alta','atraso',[id],id+' debía iniciar el '+fmtC(a.ini)+' y sigue en 0%');
+    } else if (ek === 'rezago'){
+      add('media','rezago',[id],id+' con rezago de '+Math.round(plan - p)+' pts (real '+p+'% vs plan '+Math.round(plan)+'%)');
+    }
+  });
+  const idsDonde = f => acts.filter(f).map(a => a.id);
+  let l = idsDonde(a => progress[a.id].porcentaje > 0 && !tieneEvidencia(a.id));
+  if (l.length) add('alta','evidencia',l,'Avance reportado SIN respaldo en bitácora ('+l.length+' actividades): '+l.join(', '));
+  l = idsDonde(a => progress[a.id].porcentaje === 0 && progress[a.id].bitacora.some(e => tipoEntrada(e) === 'avance'));
+  if (l.length) add('media','incoherencia',l,'0% pero con registros de avance en bitácora: '+l.join(', '));
+  l = idsDonde(a => progress[a.id].porcentaje < 100 && a.i <= HOY && a.f >= HOY - 14 && tieneEvidencia(a.id) && diasSinBitacora(a.id) > CONFIG.DIAS_SIN_ACTUALIZAR);
+  if (l.length) add('media','obsoleta',l,'Sin bitácora hace más de '+CONFIG.DIAS_SIN_ACTUALIZAR+' días ('+l.length+'): '+l.join(', '));
+  l = idsDonde(a => progress[a.id].porcentaje < 100 && a.i <= HOY + 14 && a.f >= HOY && !progress[a.id].responsables.length);
+  if (l.length) add('media','responsable',l,'Sin responsable asignado en ventana activa/próxima ('+l.length+'): '+l.join(', '));
+  const pares = [];
+  acts.forEach(a => a.pred.forEach(([pid,t]) => { const p = ACT[pid]; if (p && t === 'FS' && progress[a.id].porcentaje > 0 && progress[pid].porcentaje < 100) pares.push(pid+'→'+a.id); }));
+  if (pares.length) add('media','dep_real',pares,'Avance registrado en actividades cuya predecesora FS no está cerrada: '+pares.join(', '));
+  phasesData.forEach((ph,i) => { if (!ph.lider) add('media','lider',[],'Fase '+(i+1)+' sin responsable de fase asignado'); });
+  const maxF = acts.reduce((m,a) => a.f > m.f ? a : m);
+  const hol = toDay(CONFIG.FIN_PROYECTO) - maxF.f;
+  if (hol < 7) add('alta','holgura',[maxF.id],'Holgura al cierre de sólo '+hol+' días (último entregable '+maxF.id+'); feriados 25-dic y 1-ene');
+  const ord = {critica:0,alta:1,media:2};
+  return out.sort((x,y) => ord[x.sev] - ord[y.sev]);
+}
+
+/* ================= GUARDADO ================= */
+function showSaveStatus(text,type){
+  setText('save-text',text);
+  const el = $('save-status'); el.className = 'save-status' + (type === 'saving' ? ' saving' : (type === 'error' ? ' error' : ''));
+}
+function showError(msg){
+  const el = $('error-message');
+  if (!msg){ el.style.display = 'none'; el.textContent = ''; return; }
+  el.style.display = 'block'; el.textContent = '⚠️ ' + msg;
+}
+function scheduleSave(id){
+  if (!canEdit()) return;
+  pending.add(id); showSaveStatus('⏳ Guardando...','saving');
+  clearTimeout(timers[id]); timers[id] = setTimeout(() => saveActivity(id), 800);
+}
+function flushAll(){ Array.from(pending).forEach(id => { clearTimeout(timers[id]); saveActivity(id); }); }
+async function saveActivity(id){
+  if (!canEdit()) return;
+  if (inflight.has(id)){ rerun.add(id); return; }
+  inflight.add(id);
+  const d = progress[id], a = ACT[id];
+  const payload = {porcentaje:d.porcentaje,responsables:d.responsables,observaciones:d.observaciones,bitacora:d.bitacora,updated_at:new Date().toISOString()};
+  try {
+    if (d._ver){
+      const r = await sb.from(TABLE).update(payload).eq('id',a.dbId).eq('updated_at',d._ver).select('updated_at');
+      if (r.error) throw r.error;
+      if (!r.data || !r.data.length){ await resolverConflicto(id); return; }
+      d._ver = r.data[0].updated_at;
+    } else {
+      const r = await sb.from(TABLE).insert(Object.assign({id:a.dbId},payload)).select('updated_at');
+      if (r.error){ if (r.error.code === '23505'){ await resolverConflicto(id); return; } throw r.error; }
+      d._ver = (r.data && r.data[0] && r.data[0].updated_at) || payload.updated_at;
+    }
+    pending.delete(id);
+    showSaveStatus('💾 Guardado','ok');
+  } catch (err){
+    console.error('Error al guardar '+id, err);
+    showSaveStatus('❌ Error al guardar '+id+': '+(err.message || 'desconocido'),'error');
+  } finally {
+    inflight.delete(id);
+    if (rerun.delete(id)) saveActivity(id);
+  }
+}
+async function resolverConflicto(id){
+  const a = ACT[id], d = progress[id];
+  const r = await sb.from(TABLE).select('*').eq('id',a.dbId).maybeSingle();
+  if (r.error) throw r.error;
+  if (r.data && r.data.updated_at === d._ver){
+    showSaveStatus('❌ Sin permisos de escritura en '+id,'error');
+    showError('El servidor rechazó el guardado de '+id+' (permisos/RLS). Tus cambios locales NO se guardaron.');
+    return;
+  }
+  aplicarFila(r.data);
+  pending.delete(id);
+  render(); applyFilters();
+  showSaveStatus('⚠️ Conflicto en '+id,'error');
+  showError('La actividad '+id+' fue modificada por otro usuario. Se cargó la versión del servidor; vuelve a aplicar tu cambio.');
+}
+function aplicarFila(row){
+  if (!row) return;
+  const id = DB2ID[row.id]; if (!id) return;
+  progress[id] = {porcentaje:clamp(row.porcentaje),responsables:Array.isArray(row.responsables)?row.responsables:[],observaciones:row.observaciones||'',bitacora:Array.isArray(row.bitacora)?row.bitacora:[],_ver:row.updated_at||null};
+}
+async function loadFromSupabase(){
+  showSaveStatus('⏳ Cargando desde Supabase...','saving');
+  initProgress();
+  try {
+    const r = await sb.from(TABLE).select('*');
+    if (r.error) throw r.error;
+    (r.data || []).forEach(row => { if (!DB2ID[row.id]) console.warn('Fila sin actividad en el plan:', row.id); aplicarFila(row); });
+    offline = false; pending.clear();
+    showSaveStatus('✅ Datos cargados','ok'); showError(null);
+  } catch (err){
+    console.error('Error Supabase', err);
+    offline = true;
+    showSaveStatus('❌ Sin conexión: solo lectura','error');
+    showError('No se pudo cargar desde Supabase. El tablero queda en SOLO LECTURA para no sobrescribir datos con valores vacíos. Usa «Sincronizar» para reintentar.');
+  }
+  render(); applyFilters(); updateModeUI();
+}
+
+/* ================= UI: CABECERA / MODO ================= */
+function updateModeUI(){
+  const badge = $('user-badge'), notice = $('mode-notice');
+  $('btn-login').style.display = CONFIG.AUTH_OBLIGATORIA ? '' : 'none';
+  $('user-selector-box').style.display = CONFIG.AUTH_OBLIGATORIA ? 'none' : '';
+  if (CONFIG.AUTH_OBLIGATORIA) $('btn-login').textContent = session ? '🔓 Cerrar sesión ('+getActor()+')' : '🔐 Iniciar sesión';
+  const ed = canEdit();
+  badge.textContent = offline ? '⛔ Sin conexión' : (ed ? '✏️ Editor' : '👁️ Lector');
+  badge.className = 'user-badge' + (ed ? '' : ' readonly');
+  $('btn-reset').disabled = !ed;
+  if (offline){ notice.className = 'mode-notice bad'; notice.textContent = '⛔ Sin conexión con Supabase: edición deshabilitada.'; }
+  else if (!ed){ notice.className = 'mode-notice warn'; notice.textContent = CONFIG.AUTH_OBLIGATORIA ? '👁️ Modo solo lectura. Inicia sesión para editar.' : '👁️ Modo solo lectura. Selecciona un usuario autorizado para editar.'; }
+  else if (!CONFIG.AUTH_OBLIGATORIA){ notice.className = 'mode-notice warn'; notice.textContent = '⚠️ Modo sin autenticación: cualquiera puede elegir un usuario editor. Activa AUTH_OBLIGATORIA tras ejecutar supabase_seguridad.sql.'; }
+  else { notice.className = 'mode-notice'; notice.textContent = ''; }
+  allActs().forEach(a => updateEditableState(a.id));
+}
+function updateEditableState(id){
+  const ed = canEdit();
+  const sl = $('slider-'+id); if (sl) sl.disabled = !ed;
+  const nu = $('num-'+id); if (nu) nu.disabled = !ed;
+  const ob = $('obs-'+id); if (ob) ob.disabled = !ed;
+  const q = $('btn-quitar-'+id); if (q) q.disabled = !ed;
+  const pk = $('picker-'+id); if (pk){ pk.setAttribute('data-off', ed ? '0' : '1'); if (!ed) pk.open = false; }
+  ['guardar','eliminar'].forEach(k => { const b = $('cal-'+k+'-'+id); if (b) b.disabled = !ed; });
+  const ta = $('modal-text-'+id); if (ta) ta.disabled = !ed;
+}
+
+/* ================= UI: ACTIVIDADES ================= */
+function pickerHtml(a){
+  const d = progress[a.id];
+  return '<details class="resp-picker" id="picker-'+esc(a.id)+'"><summary>✏️ Asignar técnicos</summary><div class="resp-list">' +
+    usuarios.map(u => '<label><input type="checkbox" class="resp-chk" data-act="'+esc(a.id)+'" value="'+esc(u.nombre)+'" '+(d.responsables.includes(u.nombre)?'checked':'')+'> '+esc(u.nombre)+' <small>('+esc(u.rol)+')</small></label>').join('') +
+    '</div></details>';
+}
+function badgesHtml(id){
+  const r = progress[id].responsables;
+  return r.length ? r.map(n => '<span class="badge-tecnico">'+esc(n)+'</span>').join('') : '<span class="muted" style="font-size:12px">Sin técnicos asignados</span>';
+}
+function ultimaNotaHtml(id){
+  const u = ultimaEntrada(id);
+  if (!u) return '<span class="muted">Sin registros en bitácora</span>';
+  const dias = HOY - toDay(u.fecha), t = tipoEntrada(u), txt = (u.nota||'');
+  return '<span class="tipo-chip t-'+esc(t)+'">'+esc(t)+'</span> <b>'+esc(fmtC(u.fecha))+'</b> (hace '+dias+' d) — '+esc(txt.length>170 ? txt.slice(0,170)+'…' : txt);
+}
+function actRowHtml(a){
+  const d = progress[a.id], ek = estadoKey(a), e = ESTADOS[ek], id = esc(a.id);
+  const preds = a.pred.length ? a.pred.map(([p,t]) => '<span class="dep-tag" title="'+esc(DEP_TXT[t])+'">'+esc(t)+' ← '+esc(p)+'</span>').join('') : '<span class="dep-none">sin predecesoras</span>';
+  return '<div class="activity-main">' +
+    '<span class="activity-id">'+id+'</span>' +
+    '<div class="activity-desc-wrap"><div class="activity-desc">'+esc(a.desc)+'</div>' +
+      '<div class="activity-dates"><span><b>Plan v2:</b> '+esc(fmtC(a.ini))+' → '+esc(fmtC(a.fin))+' ('+(a.f-a.i+1)+' d)</span><span class="v1">v1: '+esc(fmtC(dayStr(a.v1i)))+' → '+esc(fmtC(dayStr(a.v1f)))+'</span>'+preds+'</div></div>' +
+    '<div class="activity-control">' +
+      '<input type="range" class="slider" min="0" max="100" value="'+d.porcentaje+'" id="slider-'+id+'" data-act="'+id+'" />' +
+      '<input type="number" class="num-input" min="0" max="100" value="'+d.porcentaje+'" id="num-'+id+'" data-act="'+id+'" />' +
+      '<span class="pct-sym">%</span><span class="plan-badge" id="plan-'+id+'">Plan '+Math.round(planPct(a))+'%</span>' +
+      '<span class="activity-status '+e.cls+'" id="status-'+id+'">'+esc(e.label)+'</span>' +
+    '</div></div>' +
+    '<div class="activity-meta">' +
+      '<div class="meta-row"><label>🎯 Entregable</label><div class="meta-text">'+esc(a.entregable)+'</div></div>' +
+      '<div class="meta-row"><label>✔️ Criterio de 100%</label><div class="meta-text">'+esc(a.criterio)+'</div></div>' +
+      '<div class="meta-row"><label>👥 Técnicos</label><div class="asignacion-group"><div class="badges-container" id="badges-'+id+'">'+badgesHtml(a.id)+'</div>'+pickerHtml(a)+'<button class="btn-quitar" id="btn-quitar-'+id+'" data-action="quitar" data-act="'+id+'">🗑️ Quitar todos</button></div></div>' +
+      '<div class="meta-row"><label>📝 Tareas específicas</label><textarea id="obs-'+id+'" class="obs" data-act="'+id+'" placeholder="Tareas específicas...">'+esc(d.observaciones)+'</textarea></div>' +
+      '<div class="meta-row"><label>🕘 Última nota</label><div class="meta-text" id="last-'+id+'">'+ultimaNotaHtml(a.id)+'</div></div>' +
+    '</div>' +
+    '<div class="calendario-section"><label>📅 Calendario (ventana plan v2) + bitácora diaria</label><div id="calendario-'+id+'"></div></div>';
+}
+function sliderBg(pct,color){ return 'linear-gradient(to right,'+color+' 0%,'+color+' '+pct+'%,#0f172a '+pct+'%,#0f172a 100%)'; }
+function updateActivityUI(id,skip){
+  const a = ACT[id], d = progress[id]; if (!d) return;
+  const ek = estadoKey(a), e = ESTADOS[ek];
+  const sl = $('slider-'+id); if (sl && skip !== 'slider'){ sl.value = d.porcentaje; }
+  if (sl) sl.style.background = sliderBg(d.porcentaje,e.color);
+  const nu = $('num-'+id); if (nu && skip !== 'num') nu.value = d.porcentaje;
+  const st = $('status-'+id); if (st){ st.className = 'activity-status '+e.cls; st.textContent = e.label; }
+  const pl = $('plan-'+id); if (pl) pl.textContent = 'Plan '+Math.round(planPct(a))+'%';
+  const bd = $('badges-'+id); if (bd) bd.innerHTML = badgesHtml(id);
+  const ls = $('last-'+id); if (ls) ls.innerHTML = ultimaNotaHtml(id);
+  const row = document.querySelector('.activity-row[data-act="'+id+'"]');
+  if (row) row.className = 'activity-row e-'+ek+(row.classList.contains('hidden') ? ' hidden' : '');
+  updateEditableState(id);
+}
+function updatePhaseUI(pi){
+  const ph = phasesData[pi], m = metricasFase(ph);
+  const color = m.spi == null ? '#3b82f6' : (m.spi >= 0.95 ? '#10b981' : (m.spi >= 0.85 ? '#f59e0b' : '#f43f5e'));
+  const f = $('phase-fill-'+pi); if (f){ f.style.width = m.real+'%'; f.style.background = color; }
+  const mk = $('phase-plan-'+pi); if (mk) mk.style.left = Math.min(99,m.plan)+'%';
+  const t = $('phase-text-'+pi);
+  if (t){ t.textContent = Math.round(m.real)+'%'; t.style.color = color; t.title = 'Real '+m.real.toFixed(1)+'% · Plan '+m.plan.toFixed(1)+'% · Verificado '+m.verif.toFixed(1)+'%'; }
+  const sp = $('phase-spi-'+pi); if (sp){ sp.className = 'spi '+spiClass(m.spi); sp.textContent = 'SPI '+spiTxt(m.spi); }
+}
+function updateGlobalUI(){
+  const g = metricasGlobal();
+  setText('kpi-total',g.total); Object.keys(g.c).forEach(k => setText('kpi-'+k,g.c[k]));
+  $('global-bar').style.width = g.real+'%';
+  $('global-plan-mark').style.left = Math.min(99,g.plan)+'%';
+  setText('global-percent',g.real.toFixed(1)+'%');
+  setText('global-sub','plan '+g.plan.toFixed(1)+'% · verificado '+g.verif.toFixed(1)+'%');
+  const s = $('global-spi'); s.className = 'spi '+spiClass(g.spi); s.textContent = 'SPI '+spiTxt(g.spi);
+}
+function updateSummaryUI(){
+  const grid = $('summary-grid'); grid.innerHTML = '';
+  phasesData.forEach((ph,pi) => {
+    const m = metricasFase(ph), color = PHASE_COLORS[pi], r = 20, circ = 2*Math.PI*r, off = circ - (m.real/100)*circ;
+    const it = document.createElement('div'); it.className = 'summary-item';
+    it.innerHTML = '<div class="summary-ring"><svg width="48" height="48" viewBox="0 0 48 48"><circle class="summary-ring-bg" cx="24" cy="24" r="'+r+'"/><circle class="summary-ring-fill" cx="24" cy="24" r="'+r+'" stroke="'+color+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"/></svg><span class="summary-ring-text" style="color:'+color+'">'+Math.round(m.real)+'%</span></div>' +
+      '<div><div class="summary-name">'+esc(ph.name)+'</div><div class="summary-detail">'+m.c.completada+'/'+m.total+' completadas · plan '+Math.round(m.plan)+'% · <span class="spi '+spiClass(m.spi)+'">SPI '+spiTxt(m.spi)+'</span> · peso '+ph.peso+'%</div></div>';
+    grid.appendChild(it);
+  });
+}
+function render(){
+  const cont = $('phases-container'); cont.innerHTML = '';
+  phasesData.forEach((ph,pi) => {
+    const c = PHASE_COLORS[pi], el = document.createElement('div');
+    el.className = 'phase-card'+(expanded.has(pi) ? '' : ' collapsed'); el.id = 'phase-'+pi;
+    el.innerHTML = '<div class="phase-header" data-action="toggle-phase" data-phase="'+pi+'">' +
+      '<div class="phase-title-group"><div class="phase-number" style="background:'+c+'">'+(pi+1)+'</div><div><div class="phase-name">'+esc(ph.name)+'</div><div class="phase-lider">Responsable de fase: '+esc(ph.lider || 'POR ASIGNAR')+'</div></div></div>' +
+      '<div class="phase-meta"><span style="font-size:12px;color:var(--text-muted)">'+ph.activities.length+' act. · peso '+ph.peso+'%</span>' +
+        '<div class="phase-progress-bar"><div class="phase-progress-fill" id="phase-fill-'+pi+'" style="width:0%"></div><div class="plan-mark" id="phase-plan-'+pi+'" title="Avance planificado"></div></div>' +
+        '<span class="phase-progress-text" id="phase-text-'+pi+'">0%</span><span class="spi spi-na" id="phase-spi-'+pi+'">SPI —</span><span class="phase-toggle">▼</span></div></div>' +
+      '<div class="phase-description">'+esc(ph.description)+'</div>';
+    const ac = document.createElement('div'); ac.className = 'phase-activities';
+    ph.activities.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'activity-row e-'+estadoKey(a); row.dataset.act = a.id;
+      row.innerHTML = actRowHtml(a); ac.appendChild(row);
+    });
+    el.appendChild(ac); cont.appendChild(el);
+  });
+  phasesData.forEach((ph,pi) => { ph.activities.forEach(a => updateActivityUI(a.id)); updatePhaseUI(pi); if (expanded.has(pi)) ensureCalendars(pi); });
+  updateGlobalUI(); updateSummaryUI();
+}
+function ensureCalendars(pi){ phasesData[pi].activities.forEach(a => renderCalendario(a.id)); }
+function togglePhase(pi){
+  const was = !$('phase-'+pi).classList.contains('collapsed');
+  phasesData.forEach((_,i) => $('phase-'+i).classList.add('collapsed'));
+  expanded = new Set();
+  if (!was){ $('phase-'+pi).classList.remove('collapsed'); expanded.add(pi); ensureCalendars(pi); }
+}
+function toggleAllPhases(){
+  const algunaAbierta = phasesData.some((_,i) => !$('phase-'+i).classList.contains('collapsed'));
+  expanded = new Set();
+  phasesData.forEach((_,i) => {
+    if (algunaAbierta) $('phase-'+i).classList.add('collapsed');
+    else { $('phase-'+i).classList.remove('collapsed'); expanded.add(i); ensureCalendars(i); }
+  });
+}
+function applyFilters(){
+  const search = $('search-input').value.toLowerCase(), sf = $('status-filter').value, pf = $('period-filter').value;
+  let ms = 0, me = 0;
+  if (pf !== 'all'){ const m = Number(pf); ms = toDay('2026-'+pad(m+1)+'-01'); me = Math.floor(Date.UTC(2026,m+1,0)/DAY); }
+  document.querySelectorAll('.activity-row').forEach(row => {
+    const a = ACT[row.dataset.act];
+    const okS = !search || a.id.indexOf(search) >= 0 || a.desc.toLowerCase().indexOf(search) >= 0;
+    const okE = sf === 'all' || GRUPO[estadoKey(a)] === sf;
+    const okP = pf === 'all' || (a.i <= me && a.f >= ms);
+    row.classList.toggle('hidden', !(okS && okE && okP));
+  });
+  document.querySelectorAll('.phase-card').forEach(card => { card.style.display = card.querySelector('.activity-row:not(.hidden)') ? '' : 'none'; });
+}
+
+/* ================= CALENDARIO ================= */
+function initCal(a){
+  const ref = (HOY >= a.i && HOY <= a.f) ? HOY : (HOY > a.f ? a.f : a.i);
+  const d = new Date(ref*DAY);
+  return (calState[a.id] = {year:d.getUTCFullYear(),month:d.getUTCMonth(),sel:null});
+}
+function renderCalendario(id){
+  const box = $('calendario-'+id); if (!box) return;
+  const a = ACT[id], st = calState[id] || initCal(a);
+  const first = new Date(Date.UTC(st.year,st.month,1)), dim = new Date(Date.UTC(st.year,st.month+1,0)).getUTCDate(), dow = first.getUTCDay();
+  const notes = {}; progress[id].bitacora.forEach(e => { notes[e.fecha] = e; });
+  let h = '<div class="calendario-nav"><button data-action="cal-nav" data-delta="-1" data-act="'+esc(id)+'">◀</button><span>'+MESES_L[st.month]+' '+st.year+'</span><button data-action="cal-nav" data-delta="1" data-act="'+esc(id)+'">▶</button></div><div class="calendario-grid">';
+  ['Do','Lu','Ma','Mi','Ju','Vi','Sa'].forEach(n => { h += '<div class="dia-nombre">'+n+'</div>'; });
+  for (let i = 0; i < dow; i++) h += '<div class="dia vacio"></div>';
+  for (let d = 1; d <= dim; d++){
+    const key = st.year+'-'+pad(st.month+1)+'-'+pad(d), n = toDay(key), e = notes[key];
+    const cls = 'dia'+(n === HOY ? ' hoy' : '')+((n >= a.i && n <= a.f) ? ' con-actividad' : '');
+    h += '<button type="button" class="'+cls+'" data-action="cal-day" data-act="'+esc(id)+'" data-fecha="'+key+'"'+(e ? ' title="'+esc(e.nota)+'"' : '')+'><span>'+d+'</span>'+(e ? '<span class="punto p-'+esc(tipoEntrada(e))+'"></span>' : '')+'</button>';
+  }
+  h += '</div><div class="calendario-legend"><div class="item"><span class="swatch actividad"></span> Ventana plan v2</div><div class="item"><span class="swatch dot p-avance"></span> Avance</div><div class="item"><span class="swatch dot p-bloqueo"></span> Bloqueo</div><div class="item"><span class="swatch dot p-riesgo"></span> Riesgo</div><div class="item"><span class="swatch dot p-hito"></span> Hito</div><div class="item"><span class="swatch hoy"></span> Hoy</div></div>';
+  h += '<div class="calendario-dia-modal" id="modal-'+esc(id)+'"><div class="modal-head"><b id="modal-fecha-'+esc(id)+'"></b><select id="modal-tipo-'+esc(id)+'"><option value="avance">Avance</option><option value="bloqueo">Bloqueo</option><option value="riesgo">Riesgo</option><option value="hito">Hito</option></select></div>' +
+       '<textarea id="modal-text-'+esc(id)+'" placeholder="Escribe la novedad de este día (cantidad producida, bloqueo, decisión)..."></textarea>' +
+       '<div class="modal-actions"><button id="cal-guardar-'+esc(id)+'" data-action="cal-save" data-act="'+esc(id)+'">💾 Guardar</button><button class="btn-eliminar" id="cal-eliminar-'+esc(id)+'" data-action="cal-del" data-act="'+esc(id)+'">🗑️ Eliminar</button><button data-action="cal-close" data-act="'+esc(id)+'">✖ Cerrar</button></div></div>';
+  box.innerHTML = h; updateEditableState(id);
+}
+function abrirDia(id,fecha){
+  const st = calState[id]; st.sel = fecha;
+  const e = progress[id].bitacora.find(x => x.fecha === fecha);
+  $('modal-fecha-'+id).textContent = fmtL(fecha);
+  $('modal-text-'+id).value = e ? e.nota : '';
+  $('modal-tipo-'+id).value = e ? tipoEntrada(e) : 'avance';
+  $('modal-'+id).classList.add('visible');
+}
+function guardarNotaDia(id){
+  if (!canEdit()) return;
+  const st = calState[id]; if (!st || !st.sel) return;
+  const nota = $('modal-text-'+id).value.trim(); if (!nota) return;
+  const tipo = $('modal-tipo-'+id).value, b = progress[id].bitacora, i = b.findIndex(x => x.fecha === st.sel);
+  const entry = {fecha:st.sel,nota:nota,tipo:tipo,autor:getActor()};
+  if (i >= 0) b[i] = entry; else b.push(entry);
+  b.sort((x,y) => x.fecha.localeCompare(y.fecha));
+  renderCalendario(id); updateActivityUI(id); refreshAggregates(ACT[id].pi); scheduleSave(id);
+}
+function eliminarNotaDia(id){
+  if (!canEdit()) return;
+  const st = calState[id]; if (!st || !st.sel) return;
+  if (!confirm('¿Eliminar la nota del '+st.sel+'?')) return;
+  const b = progress[id].bitacora, i = b.findIndex(x => x.fecha === st.sel);
+  if (i >= 0){ b.splice(i,1); renderCalendario(id); updateActivityUI(id); refreshAggregates(ACT[id].pi); scheduleSave(id); }
+}
+function refreshAggregates(pi){ updatePhaseUI(pi); updateGlobalUI(); updateSummaryUI(); }
+
+/* ================= GANTT ================= */
+function renderGantt(){
+  const gi = toDay(CONFIG.INICIO_PROYECTO), gf = toDay(CONFIG.FIN_PROYECTO), span = gf - gi + 1;
+  const L = n => ((n - gi)/span*100).toFixed(3);
+  const mes = [[6,'Jul'],[7,'Ago'],[8,'Sep'],[9,'Oct'],[10,'Nov'],[11,'Dic']];
+  let h = '<div class="gantt-wrap"><div class="gantt" style="--tf:'+((HOY-gi+.5)/span).toFixed(5)+'">';
+  h += '<div class="g-head"><div>Actividad</div><div class="g-months">' + mes.map(([m,n]) => '<span style="left:'+L(toDay('2026-'+pad(m+1)+'-01'))+'%">'+n+'</span>').join('') + '</div></div>';
+  phasesData.forEach((ph,pi) => {
+    const m = metricasFase(ph);
+    h += '<div class="g-phase"><div style="color:'+PHASE_COLORS[pi]+'">'+esc(ph.name.split('—')[0].trim())+'</div><div><span class="spi '+spiClass(m.spi)+'">real '+Math.round(m.real)+'% · plan '+Math.round(m.plan)+'% · SPI '+spiTxt(m.spi)+'</span></div></div>';
+    ph.activities.forEach(a => {
+      const ek = estadoKey(a), e = ESTADOS[ek], p = progress[a.id].porcentaje;
+      const w = ((a.f - a.i + 1)/span*100).toFixed(3);
+      const tip = a.id+' · '+a.desc+' | Plan v2 '+a.ini+' → '+a.fin+' | v1 '+dayStr(a.v1i)+' → '+dayStr(a.v1f)+' | Real '+p+'% · Plan '+Math.round(planPct(a))+'% · '+e.label;
+      let grid = ''; mes.forEach(([mm]) => { grid += '<div class="g-grid" style="left:'+L(toDay('2026-'+pad(mm+1)+'-01'))+'%"></div>'; });
+      h += '<div class="g-row" title="'+esc(tip)+'"><div class="g-label"><b>'+esc(a.id)+'</b>'+esc(a.desc)+'</div><div class="g-track">'+grid +
+        '<div class="g-v1" style="left:'+L(a.v1i)+'%;width:'+((a.v1f-a.v1i+1)/span*100).toFixed(3)+'%"></div>' +
+        '<div class="g-bar" style="left:'+L(a.i)+'%;width:'+w+'%;border-color:'+e.color+'"><div class="g-fill" style="width:'+p+'%;background:'+e.color+'"></div></div></div></div>';
+    });
+  });
+  if (HOY >= gi && HOY <= gf) h += '<div class="g-today" title="Hoy '+HOY_STR+'"></div>';
+  h += '</div><div class="g-legend"><div class="item"><span class="swatch" style="background:#10b981"></span>Completada</div><div class="item"><span class="swatch" style="background:#3b82f6"></span>En curso</div><div class="item"><span class="swatch" style="background:#f59e0b"></span>Rezago</div><div class="item"><span class="swatch" style="background:#f43f5e"></span>Atrasada / bloqueada</div><div class="item"><span class="swatch" style="background:#64748b"></span>Programada</div><div class="item"><span class="swatch" style="background:rgba(148,163,184,.45);height:4px;margin-top:5px"></span>Línea base v1 (referencia)</div><div class="item"><span class="swatch" style="background:var(--accent-cyan);width:3px"></span>Hoy ('+esc(fmtL(HOY_STR))+')</div></div></div>';
+  $('view-gantt').innerHTML = h;
+}
+
+/* ================= TABLERO GERENCIAL ================= */
+function renderGerencial(){
+  const g = metricasGlobal(), alertas = generarAlertas(), carga = cargaPersonas(), ruta = rutaCritica();
+  let h = '<div class="g-section"><h3>🚦 Salud del cronograma — corte '+esc(fmtL(HOY_STR))+'</h3><table class="tbl"><thead><tr><th>Fase</th><th>Responsable</th><th>Peso</th><th>Real</th><th>Plan</th><th>SPI</th><th>Verificado*</th><th>Compl.</th><th>Rezago</th><th>Atras.</th><th>Bloq.</th><th>Aporte real</th></tr></thead><tbody>';
+  phasesData.forEach((ph,pi) => {
+    const m = metricasFase(ph);
+    h += '<tr><td>F'+(pi+1)+' · '+esc(ph.name.split('—')[0].split(':')[1].trim())+'</td><td class="l">'+esc(ph.lider || 'POR ASIGNAR')+'</td><td>'+ph.peso+'%</td><td>'+m.real.toFixed(1)+'%</td><td>'+m.plan.toFixed(1)+'%</td><td><span class="spi '+spiClass(m.spi)+'">'+spiTxt(m.spi)+'</span></td><td>'+m.verif.toFixed(1)+'%</td><td>'+m.c.completada+'/'+m.total+'</td><td>'+m.c.rezago+'</td><td>'+m.c.atrasada+'</td><td>'+m.c.bloqueada+'</td><td>'+(ph.peso/100*m.real).toFixed(1)+'%</td></tr>';
+  });
+  h += '</tbody><tfoot><tr><td>GLOBAL</td><td></td><td>100%</td><td>'+g.real.toFixed(1)+'%</td><td>'+g.plan.toFixed(1)+'%</td><td><span class="spi '+spiClass(g.spi)+'">'+spiTxt(g.spi)+'</span></td><td>'+g.verif.toFixed(1)+'%</td><td>'+g.c.completada+'/'+g.total+'</td><td>'+g.c.rezago+'</td><td>'+g.c.atrasada+'</td><td>'+g.c.bloqueada+'</td><td>'+g.real.toFixed(1)+'%</td></tr></tfoot></table>' +
+    '<p class="note">Plan = interpolación lineal por fechas de la línea base '+esc(CONFIG.LINEA_BASE)+'. SPI = real/plan (verde ≥0,95; ámbar ≥0,85; rojo &lt;0,85). *Verificado = sólo cuenta actividades con al menos una nota de bitácora; la diferencia con «Real» es avance sin respaldo.</p></div>';
+
+  h += '<div class="g-section"><h3>⚠️ Alertas automáticas ('+alertas.length+')</h3>';
+  if (!alertas.length) h += '<p class="muted">Sin alertas.</p>';
+  alertas.forEach(a => { h += '<div class="alert al-'+a.sev+'"><span class="sev">'+a.sev+'</span><span>'+esc(a.msg)+'</span></div>'; });
+  h += '</div>';
+
+  h += '<div class="g-section"><h3>🔗 Ruta crítica (aproximada: cadena de menor holgura hasta el último entregable)</h3><div class="chain">' +
+    ruta.map(n => '<span class="node">'+esc(n.id)+'</span>'+(n.holgura != null ? '<span class="ar">→ (holgura '+n.holgura+' d)</span>' : '')).join('') +
+    '</div><p class="note">Holgura calculada con el tipo de dependencia (FS/SS/FF) entre la actividad y su predecesora más ajustada.</p></div>';
+
+  h += '<div class="g-section"><h3>👥 Carga por persona (actividades abiertas en los próximos 14 días)</h3><table class="tbl"><thead><tr><th>Persona</th><th>Rol</th><th>Asignadas abiertas</th><th>Simultáneas 14 d</th><th>Actividades</th></tr></thead><tbody>';
+  const nombres = Object.keys(carga).sort((x,y) => carga[y].sim.length - carga[x].sim.length);
+  if (!nombres.length) h += '<tr><td colspan="5" class="l muted">Sin técnicos asignados.</td></tr>';
+  nombres.forEach(n => {
+    const c = carga[n], u = usuarios.find(x => x.nombre === n), exc = c.sim.length > CONFIG.MAX_SIMULTANEAS;
+    h += '<tr><td>'+esc(n)+'</td><td class="l">'+esc(u ? u.rol : '')+'</td><td>'+c.asig.length+'</td><td><span class="spi '+(exc ? 'spi-bad' : 'spi-ok')+'">'+c.sim.length+'</span></td><td class="l">'+esc(c.sim.join(', '))+'</td></tr>';
+  });
+  const sinAsig = usuarios.filter(u => !carga[u.nombre]).map(u => u.nombre);
+  h += '</tbody></table><p class="note">Umbral de alerta: más de '+CONFIG.MAX_SIMULTANEAS+' actividades simultáneas. Sin asignación abierta: '+esc(sinAsig.join(', ') || 'ninguno')+'.</p></div>';
+
+  h += '<div class="g-section"><h3>🛡️ Registro de riesgos (inicial, 12-oct-2026)</h3><table class="tbl"><thead><tr><th>ID</th><th>Riesgo</th><th>Afecta</th><th>Prob.</th><th>Impacto</th><th>Mitigación propuesta</th><th>Responsable</th></tr></thead><tbody>' +
+    RIESGOS.map(r => '<tr><td class="l">'+esc(r.id)+'</td><td class="l">'+esc(r.desc)+'</td><td class="l">'+esc(r.afecta)+'</td><td>'+esc(r.prob)+'</td><td>'+esc(r.imp)+'</td><td class="l">'+esc(r.mit)+'</td><td class="l">Por asignar</td></tr>').join('') +
+    '</tbody></table><p class="note">Registro inicial redactado a partir de las bitácoras; requiere validación y asignación de responsables por la gerencia.</p></div>';
+
+  h += '<div class="g-section"><h3>🔧 Mejoras técnicas sugeridas (requieren aprobación; no modifican el plan)</h3><ul class="sug">'+SUGERENCIAS.map(s => '<li>'+esc(s)+'</li>').join('')+'</ul></div>';
+  $('view-gerencial').innerHTML = h;
+}
+function showView(v){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === v));
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'view-'+v));
+  if (v === 'gantt') renderGantt();
+  if (v === 'gerencial') renderGerencial();
+}
+
+/* ================= EXPORTAR ================= */
+function descargar(nombre,contenido,tipo){
+  const blob = new Blob([contenido],{type:tipo}), url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function filaActividad(a){
+  const p = progress[a.id], pl = planPct(a), ek = estadoKey(a), u = ultimaEntrada(a.id);
+  return {id:a.id,id_supabase:a.dbId,fase:'F'+(a.pi+1),actividad:a.desc,inicio_v2:a.ini,fin_v2:a.fin,inicio_v1:dayStr(a.v1i),fin_v1:dayStr(a.v1f),peso:a.peso,
+    predecesoras:a.pred.map(x => x[1]+':'+x[0]).join(' '),avance_reportado:p.porcentaje,avance_planificado:Math.round(pl*10)/10,
+    spi:pl > 0 ? Math.round(p.porcentaje/pl*100)/100 : null,estado:ESTADOS[ek].label,con_evidencia:tieneEvidencia(a.id) ? 'si' : 'no',
+    ultima_bitacora:u ? u.fecha : '',dias_sin_bitacora:u ? HOY - toDay(u.fecha) : '',responsables:p.responsables.join(' | ')};
+}
+function exportJSON(silencioso){
+  const g = metricasGlobal();
+  const data = {fecha_exportacion:new Date().toISOString(),fecha_corte:HOY_STR,proyecto:'Cronograma SITEC 2026 - 5 Fases',linea_base:CONFIG.LINEA_BASE,
+    metodo_calculo:'Fase: ponderado por peso de actividad. Global: ponderado por peso de fase {F1:10,F2:20,F3:20,F4:30,F5:20}. Plan: interpolación lineal por fechas.',
+    avance_global:{real:+g.real.toFixed(2),plan:+g.plan.toFixed(2),verificado:+g.verif.toFixed(2),spi:g.spi == null ? null : +g.spi.toFixed(3)},
+    actividades:allActs().map(filaActividad),avances:{}};
+  allActs().forEach(a => { const p = progress[a.id]; data.avances[a.dbId] = {porcentaje:p.porcentaje,responsables:p.responsables,observaciones:p.observaciones,bitacora:p.bitacora}; });
+  descargar('sitec2026_avances_'+HOY_STR+'.json',JSON.stringify(data,null,2),'application/json');
+  if (!silencioso) showSaveStatus('📥 JSON exportado','ok');
+}
+function exportCSV(){
+  const rows = allActs().map(filaActividad), cols = Object.keys(rows[0]);
+  const cel = v => { const s = v == null ? '' : String(v); return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const csv = '﻿'+[cols.join(';')].concat(rows.map(r => cols.map(c => cel(r[c])).join(';'))).join('\n');
+  descargar('sitec2026_cronograma_'+HOY_STR+'.csv',csv,'text/csv;charset=utf-8');
+  showSaveStatus('📊 CSV exportado','ok');
+}
+function resetAll(){
+  if (!canEdit()) return alert('No tienes permisos.');
+  const t = prompt('Se descargará un respaldo y TODOS los avances volverán a 0%.\nEscribe REINICIAR para confirmar:');
+  if (t !== 'REINICIAR') return;
+  exportJSON(true);
+  allActs().forEach(a => { progress[a.id].porcentaje = 0; scheduleSave(a.id); });
+  render(); applyFilters();
+}
+
+/* ================= EVENTOS ================= */
+function setPct(id,val,from){
+  if (!canEdit()) return;
+  progress[id].porcentaje = clamp(val);
+  updateActivityUI(id,from); refreshAggregates(ACT[id].pi); scheduleSave(id);
+}
+function bindEvents(){
+  const pc = $('phases-container');
+  pc.addEventListener('input', e => {
+    const t = e.target, id = t.dataset && t.dataset.act; if (!id) return;
+    if (t.classList.contains('slider')) setPct(id,t.value,'slider');
+    else if (t.classList.contains('num-input')) setPct(id,t.value,'num');
+  });
+  pc.addEventListener('change', e => {
+    const t = e.target, id = t.dataset && t.dataset.act; if (!id) return;
+    if (t.classList.contains('num-input')) t.value = clamp(t.value);
+    else if (t.classList.contains('obs')){ if (!canEdit()) return; progress[id].observaciones = t.value; scheduleSave(id); }
+    else if (t.classList.contains('resp-chk')){
+      if (!canEdit()) { t.checked = !t.checked; return; }
+      const pk = $('picker-'+id);
+      progress[id].responsables = Array.from(pk.querySelectorAll('input:checked')).map(i => i.value);
+      updateActivityUI(id); scheduleSave(id);
+    }
+  });
+  pc.addEventListener('click', e => {
+    const t = e.target.closest('[data-action]'); if (!t) return;
+    const id = t.dataset.act;
+    switch (t.dataset.action){
+      case 'toggle-phase': togglePhase(Number(t.dataset.phase)); break;
+      case 'quitar':
+        if (!canEdit()) return;
+        if (!confirm('¿Quitar todos los técnicos de la actividad '+id+'?')) return;
+        progress[id].responsables = [];
+        $('picker-'+id).querySelectorAll('input').forEach(i => { i.checked = false; });
+        updateActivityUI(id); scheduleSave(id); break;
+      case 'cal-nav': {
+        const s = calState[id] || initCal(ACT[id]); s.month += Number(t.dataset.delta);
+        if (s.month < 0){ s.month = 11; s.year--; } else if (s.month > 11){ s.month = 0; s.year++; }
+        renderCalendario(id); break; }
+      case 'cal-day': abrirDia(id,t.dataset.fecha); break;
+      case 'cal-save': guardarNotaDia(id); break;
+      case 'cal-del': eliminarNotaDia(id); break;
+      case 'cal-close': $('modal-'+id).classList.remove('visible'); break;
+    }
+  });
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.view)));
+  $('search-input').addEventListener('input',applyFilters);
+  $('status-filter').addEventListener('change',applyFilters);
+  $('period-filter').addEventListener('change',applyFilters);
+  $('btn-toggle-all').addEventListener('click',toggleAllPhases);
+  $('btn-export-json').addEventListener('click',() => exportJSON(false));
+  $('btn-export-csv').addEventListener('click',exportCSV);
+  $('btn-reset').addEventListener('click',resetAll);
+  $('btn-sync').addEventListener('click',async () => {
+    if (pending.size || inflight.size){ showSaveStatus('⏳ Hay cambios sin guardar; espera un momento','saving'); flushAll(); return; }
+    await loadFromSupabase();
+  });
+  $('user-select').addEventListener('change', e => {
+    currentUser = e.target.value || null;
+    try { if (currentUser) localStorage.setItem('catastro_user',currentUser); else localStorage.removeItem('catastro_user'); } catch(_) {}
+    updateModeUI();
+  });
+  $('btn-login').addEventListener('click', async () => {
+    if (session){ await sb.auth.signOut(); return; }
+    $('login-msg').textContent = ''; $('login-dlg').showModal();
+  });
+  $('login-cancel').addEventListener('click',() => $('login-dlg').close());
+  $('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const r = await sb.auth.signInWithPassword({email:$('login-email').value.trim(),password:$('login-pass').value});
+    if (r.error){ $('login-msg').textContent = 'No se pudo iniciar sesión: '+r.error.message; return; }
+    $('login-pass').value = ''; $('login-dlg').close();
+  });
+  document.addEventListener('visibilitychange',() => { if (document.visibilityState === 'hidden') flushAll(); });
+  window.addEventListener('pagehide',flushAll);
+}
+
+/* ================= INICIO ================= */
+async function init(){
+  setText('header-subtitle','5 fases | Julio — Diciembre 2026 | Línea base '+CONFIG.LINEA_BASE);
+  setText('date-badge','📅 Corte: '+fmtL(HOY_STR));
+  let saved = null; try { saved = localStorage.getItem('catastro_user'); } catch(_) {}
+  currentUser = usuarios.some(u => u.nombre === saved) ? saved : null;
+  $('user-select').innerHTML = '<option value="">— Seleccionar usuario —</option>' + usuarios.map(u => '<option value="'+esc(u.nombre)+'"'+(u.nombre === currentUser ? ' selected' : '')+'>'+esc(u.nombre)+' ('+esc(u.rol)+')</option>').join('');
+  initProgress(); bindEvents();
+  if (CONFIG.AUTH_OBLIGATORIA){
+    try {
+      const r = await sb.auth.getSession(); session = r.data && r.data.session;
+      sb.auth.onAuthStateChange((_ev,s) => { session = s; updateModeUI(); });
+    } catch(err){ console.error(err); }
+  }
+  await loadFromSupabase();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',init); else init();
+window.__SITEC__ = {metricasGlobal,metricasFase,generarAlertas,rutaCritica,cargaPersonas,estadoKey,planPct,progress,ACT,phasesData,depOk}; // diagnóstico (consola)
+})();
 </script>
 </body>
 </html>
